@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"bibliotheque/constants"
 	"bytes"
 	"html/template"
 	"io/ioutil"
@@ -8,7 +9,7 @@ import (
 
 // helper pour parser/exécuter un fragment template (dans content/)
 func RenderContentTemplate(filename string, ctx interface{}) (string, error) {
-	b, err := ioutil.ReadFile("content/" + filename)
+	b, err := ioutil.ReadFile(constants.ContentDir + filename)
 	if err != nil {
 		return "", err
 	}

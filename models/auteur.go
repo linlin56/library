@@ -1,4 +1,4 @@
-package classes
+package models
 
 type Auteur struct {
 	Id     int

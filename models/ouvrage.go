@@ -1,4 +1,4 @@
-package classes
+package models
 
 type Ouvrage struct {
 	Id          int

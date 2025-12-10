@@ -1,3 +1,3 @@
 package constants
 
-const ContentDir = "content/"
+const ContentDir = "./views/content/"

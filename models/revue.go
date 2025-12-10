@@ -1,4 +1,4 @@
-package classes
+package models
 
 type Revue struct {
 	Ouvrage
