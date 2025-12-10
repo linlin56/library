@@ -1,0 +1,28 @@
+<h1>Résultat de votre recherche</h1>
+{{if .Ouvrages}}
+<table>
+    <thead>
+        <tr>
+            <th>Titre</th>
+            <th>Auteur</th>
+            <th>Type</th>
+            <th>Exemplaires</th>
+            <th>ISBN / Numéro</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{range .Ouvrages}}
+        <tr>
+            <td>{{.Titre}}</td>
+            <td>{{if .Auteur}}{{if .Auteur.Prenom}}{{.Auteur.Prenom}} {{end}}{{if
+                .Auteur.Nom}}{{.Auteur.Nom}}{{end}}{{else}}-{{end}}</td>
+            <td>{{if .Isbn}}Livre{{else if .Numero}}Revue{{else}}Ouvrage{{end}}</td>
+            <td>{{.Exemplaires}}</td>
+            <td>{{if .Isbn}}{{.Isbn}}{{else if .Numero}}{{.Numero}}{{else}}-{{end}}</td>
+        </tr>
+        {{end}}
+    </tbody>
+</table>
+{{else}}
+<p>Aucun ouvrage trouvé correspondant à votre recherche.</p>
+{{end}}

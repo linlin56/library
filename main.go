@@ -1,9 +1,9 @@
 package main
 
 import (
-	"bibliotheque/constants"
+	"bibliotheque/classes"
+	"bibliotheque/utils"
 	"html/template"
-	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -15,49 +15,73 @@ type PageData struct {
 	Content string
 }
 
-func readHTMLContent(filename string) (string, error) {
-	// Lire le fichier HTML
-	content, err := ioutil.ReadFile(constants.ContentDir + filename)
-	if err != nil {
-		return "", err
-	}
-	return string(content), nil
-}
 func main() {
-	// Create a Gin router with default middleware (logger and recovery)
+	// Le gestionnaire de routes Gin
 	r := gin.Default()
 
-	// Set custom template function
+	// Set custom template function pour les templates chargés par Gin
 	r.SetFuncMap(template.FuncMap{
 		"safe": func(s string) template.HTML {
 			return template.HTML(s)
 		},
 	})
 
-	// Load HTML templates from the templates directory
+	// Load HTML templates from the templates directory (template "defaut" doit utiliser {{.Content | safe}})
 	r.LoadHTMLGlob("templates/**/*.html")
 
 	r.Static("/static", "./static")
 
-	// Accueil route
+	// Accueil
 	r.GET("/", func(c *gin.Context) {
-		content, err := readHTMLContent("accueil.html")
-
+		contentHTML, err := utils.RenderContentTemplate("accueil.html", nil)
 		if err != nil {
-			log.Printf("Couldn't read markdown : %v", err)
-			c.String(http.StatusInternalServerError, "Couldn't read content")
+			log.Printf("Erreur à la lecture du HTML : %v", err)
+			c.String(http.StatusInternalServerError, "Impossible de charger la page.")
 			return
 		}
 
 		data := PageData{
 			Title:   "Accueil - Bibliothèque",
-			Content: content,
+			Content: contentHTML,
 		}
-		log.Printf("DATA: Title='%s', Content='%s'", data.Title, data.Content)
-		c.HTML(http.StatusOK, "accueil", data)
+		c.HTML(http.StatusOK, "defaut", data)
 	})
 
-	// Start server on port 8080 (default)
-	// Server will listen on 0.0.0.0:8080 (localhost:8080 on Windows)
+	// Recherche d'ouvrages
+	r.GET("/recherche", func(c *gin.Context) {
+		contentHTML, err := utils.RenderContentTemplate("recherche.html", nil)
+		if err != nil {
+			log.Printf("Erreur à la lecture du HTML : %v", err)
+			c.String(http.StatusInternalServerError, "Impossible de charger la page.")
+			return
+		}
+		data := PageData{
+			Title:   "Recherche - Bibliothèque",
+			Content: contentHTML,
+		}
+		c.HTML(http.StatusOK, "defaut", data)
+	})
+
+	// Résultats d'ouvrages (POST)
+	r.POST("/ouvrages", func(c *gin.Context) {
+		auteurTest := classes.NewAuteur(1, "Saint-Exupéry", "Antoine de")
+		livreTest := classes.NewLivre(1, 10.0, "Le Petit Prince", 3, *auteurTest, "978-0156013987")
+
+		ctx := map[string]interface{}{
+			"Ouvrages": []*classes.Livre{livreTest},
+		}
+		contentHTML, err := utils.RenderContentTemplate("ouvrages.html", ctx)
+		if err != nil {
+			log.Printf("Erreur à la lecture du HTML : %v", err)
+			c.String(http.StatusInternalServerError, "Impossible de charger la page.")
+			return
+		}
+		data := PageData{
+			Title:   "Résultat de la recherche - Bibliothèque",
+			Content: contentHTML,
+		}
+		c.HTML(http.StatusOK, "defaut", data)
+	})
+
 	r.Run()
 }
