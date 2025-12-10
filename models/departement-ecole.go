@@ -1,7 +1,7 @@
 package models
 
 type DepartementEcole struct {
-	Id  int
+	Id  int `gorm:"primaryKey;autoIncrement"`
 	Nom string
 }
 

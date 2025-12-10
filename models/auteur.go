@@ -1,7 +1,7 @@
 package models
 
 type Auteur struct {
-	Id     int
+	Id     int `gorm:"primaryKey;autoIncrement"`
 	Nom    string
 	Prenom string
 }

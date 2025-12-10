@@ -2,8 +2,9 @@ package models
 
 type Livre struct {
 	Ouvrage
-	Auteur *Auteur
-	Isbn   string
+	AuteurId int `gorm:"foreignKey"`
+	Auteur   *Auteur
+	Isbn     string
 }
 
 func NewLivre(id int, caution float64, titre string, exemplaires int, auteur Auteur, isbn string) *Livre {

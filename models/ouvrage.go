@@ -1,7 +1,7 @@
 package models
 
 type Ouvrage struct {
-	Id          int
+	Id          int `gorm:"primaryKey;autoIncrement"`
 	Caution     float64
 	Titre       string
 	Exemplaires int // TODO créer la classe Exemplaire

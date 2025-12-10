@@ -1,7 +1,7 @@
 package models
 
 type Bibliothecaire struct {
-	Id         int
+	Id         int `gorm:"primaryKey;autoIncrement"`
 	Nom        string
 	Prenom     string
 	Login      string

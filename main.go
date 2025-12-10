@@ -2,12 +2,14 @@ package main
 
 import (
 	"bibliotheque/controllers"
+	"bibliotheque/db"
 	"html/template"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
+	db.Init()
 
 	r := gin.Default()
 
