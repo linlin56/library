@@ -2,7 +2,7 @@ package models
 
 type Livre struct {
 	Ouvrage
-	Auteur Auteur
+	Auteur *Auteur
 	Isbn   string
 }
 
@@ -14,7 +14,7 @@ func NewLivre(id int, caution float64, titre string, exemplaires int, auteur Aut
 			Titre:       titre,
 			Exemplaires: exemplaires,
 		},
-		Auteur: auteur,
+		Auteur: &auteur,
 		Isbn:   isbn,
 	}
 }
