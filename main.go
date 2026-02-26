@@ -9,7 +9,9 @@ import (
 )
 
 func main() {
+	// Initialise le DBO global depuis db/db.env
 	db.Init()
+	defer db.GlobalDBO.Close()
 
 	r := gin.Default()
 

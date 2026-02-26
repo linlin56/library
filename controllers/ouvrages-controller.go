@@ -12,7 +12,7 @@ import (
 
 func RechercheOuvrages(c *gin.Context) {
 
-	// Exemple statique — remplacé plus tard par un service + GORM
+	// Exemple statique — remplacé plus tard par un service
 	auteurTest := models.NewAuteur(1, "Saint-Exupéry", "Antoine de")
 	livreTest := models.NewLivre(1, 10.0, "Le Petit Prince", 3, *auteurTest, "978-0156013987")
 

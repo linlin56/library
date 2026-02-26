@@ -1,54 +1,39 @@
 package db
 
 import (
-	"fmt"
 	"log"
-	"os"
-
-	"bibliotheque/models"
+	"strconv"
 
 	"github.com/joho/godotenv"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
 
-var DB *gorm.DB
+// DBO global accessible depuis tout le projet
+var GlobalDBO *DBO
 
+// Init charge le fichier db.env et initialise le DBO global
 func Init() {
-	// Récupère les variables d'environnement depuis le fichier db.env
-	godotenv.Load("db/db.env")
+	if err := godotenv.Load("db/db.env"); err != nil {
+		log.Println("⚠️  Fichier db/db.env non trouvé, utilisation des variables d'environnement système")
+	}
 
-	host := os.Getenv("DB_HOST")
-	user := os.Getenv("DB_USER")
-	password := os.Getenv("DB_PASSWORD")
-	dbname := os.Getenv("DB_NAME")
-	port := os.Getenv("DB_PORT")
-
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=UTC", host, user, password, dbname, port)
-
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	port, err := strconv.Atoi(getEnv("DB_PORT", "5432"))
 	if err != nil {
-		log.Fatalf("failed to connect database: %v", err)
+		log.Fatalf("DB_PORT invalide: %v", err)
 	}
-	DB = db
 
-	if err := DB.AutoMigrate(getModels()...); err != nil {
-		log.Fatalf("auto migrate failed: %v", err)
+	cfg := Config{
+		Host:     getEnv("DB_HOST", "localhost"),
+		Port:     port,
+		User:     getEnv("DB_USER", "postgres"),
+		Password: getEnv("DB_PASSWORD", ""),
+		DBName:   getEnv("DB_NAME", "bibliotheque"),
+		SSLMode:  getEnv("DB_SSLMODE", "disable"),
 	}
-}
 
-// Retourne la liste des modèles à migrer pour créer toutes les tables SQL
-func getModels() []interface{} {
-	return []interface{}{
-		&models.Auteur{},
-		&models.Bibliothecaire{},
-		&models.DepartementEcole{},
-		&models.Enseignant{},
-		&models.Etudiant{},
-		&models.Exemplaire{},
-		&models.Livre{},
-		&models.Ouvrage{},
-		&models.Revue{},
-		&models.Utilisateur{},
+	dbo, err := NewDBO(cfg)
+	if err != nil {
+		log.Fatalf("❌ Impossible de se connecter à la base de données: %v", err)
 	}
+
+	GlobalDBO = dbo
 }
