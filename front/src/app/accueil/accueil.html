@@ -1,0 +1,61 @@
+<section class="hero-section text-white py-5 mb-5">
+  <div class="container text-center">
+    <h1 class="display-4 fw-bold">Bienvenue à la Bibliothèque</h1>
+    <p class="lead mt-2">Explorez notre catalogue, gérez vos emprunts et retrouvez vos lectures.</p>
+    <a routerLink="/recherche" class="btn btn-light btn-lg mt-3 fw-semibold">
+      Rechercher un ouvrage
+    </a>
+  </div>
+</section>
+
+<section class="container mb-5">
+  <div *ngIf="erreur" class="alert alert-warning text-center">
+    Impossible de charger les statistiques. Vérifiez que le serveur est démarré.
+  </div>
+
+  <div class="row g-4" *ngIf="stats">
+    <div class="col-sm-6 col-lg-3">
+      <div class="card stat-card h-100 border-0 shadow-sm text-center p-4">
+        <h2 class="fw-bold display-6 text-primary">{{ stats.nb_livres }}</h2>
+        <p class="text-muted mb-0">Livres</p>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="card stat-card h-100 border-0 shadow-sm text-center p-4">
+        <h2 class="fw-bold display-6 text-success">{{ stats.nb_revues }}</h2>
+        <p class="text-muted mb-0">Revues</p>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="card stat-card h-100 border-0 shadow-sm text-center p-4">
+        <h2 class="fw-bold display-6 text-warning">{{ stats.nb_exemplaires_disponibles }}</h2>
+        <p class="text-muted mb-0">Exemplaires disponibles</p>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="card stat-card h-100 border-0 shadow-sm text-center p-4">
+        <h2 class="fw-bold display-6 text-danger">{{ stats.nb_utilisateurs }}</h2>
+        <p class="text-muted mb-0">Utilisateurs inscrits</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4" *ngIf="!stats && !erreur">
+    <div class="col-sm-6 col-lg-3" *ngFor="let _ of [1, 2, 3, 4]">
+      <div class="card h-100 border-0 shadow-sm p-4 placeholder-glow">
+        <span class="placeholder col-6 d-block mb-2 mx-auto" style="height: 40px"></span>
+        <span class="placeholder col-8 d-block mx-auto" style="height: 16px"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="container mb-5 text-center">
+  <div class="card border-0 shadow-sm p-5 cta-card">
+    <h2 class="fw-bold mb-2">Gérez vos emprunts</h2>
+    <p class="text-muted mb-4">
+      Connectez-vous pour consulter vos emprunts en cours et renouveler vos ressources.
+    </p>
+    <a routerLink="/connexion" class="btn btn-primary btn-lg">Se connecter</a>
+  </div>
+</section>

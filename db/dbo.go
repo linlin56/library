@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	_ "github.com/lib/pq"
 )
@@ -126,6 +127,98 @@ func (d *DBO) WithTx(fn func(tx *TxDBO) error) error {
 		return fmt.Errorf("transaction annulée: %w", err)
 	}
 	return tx.Commit()
+}
+
+// SeedIfEmpty exécute le script SQL si la base est vide (table auteurs absente ou vide)
+func (d *DBO) SeedIfEmpty(scriptPath string) error {
+	var tableCount int
+	err := d.conn.QueryRow(`
+		SELECT COUNT(*) FROM information_schema.tables
+		WHERE table_schema = 'public' AND table_name = 'auteurs'
+	`).Scan(&tableCount)
+	if err != nil {
+		return fmt.Errorf("erreur vérification tables: %w", err)
+	}
+
+	if tableCount > 0 {
+		var rowCount int
+		if err := d.conn.QueryRow("SELECT COUNT(*) FROM auteurs").Scan(&rowCount); err != nil {
+			return fmt.Errorf("erreur vérification données: %w", err)
+		}
+		if rowCount > 0 {
+			log.Println("ℹ️  Base de données déjà peuplée, aucun chargement nécessaire")
+			return nil
+		}
+	}
+
+	script, err := os.ReadFile(scriptPath)
+	if err != nil {
+		return fmt.Errorf("erreur lecture script SQL %s: %w", scriptPath, err)
+	}
+
+	stmts := splitSQLStatements(string(script))
+	for i, stmt := range stmts {
+		if _, err := d.conn.Exec(stmt); err != nil {
+			preview := stmt
+			if len(preview) > 80 {
+				preview = preview[:80] + "..."
+			}
+			return fmt.Errorf("erreur instruction #%d (%s): %w", i+1, preview, err)
+		}
+	}
+
+	log.Println("✅ Base de données peuplée avec succès")
+	return nil
+}
+
+// splitSQLStatements découpe un script SQL en instructions individuelles.
+// Gère les chaînes entre guillemets simples (y compris les '' échappés) et les commentaires --.
+func splitSQLStatements(script string) []string {
+	var stmts []string
+	var cur strings.Builder
+	inString := false
+	n := len(script)
+
+	for i := 0; i < n; i++ {
+		ch := script[i]
+
+		if inString {
+			cur.WriteByte(ch)
+			if ch == '\'' {
+				if i+1 < n && script[i+1] == '\'' {
+					cur.WriteByte(script[i+1])
+					i++
+				} else {
+					inString = false
+				}
+			}
+			continue
+		}
+
+		switch {
+		case ch == '\'':
+			inString = true
+			cur.WriteByte(ch)
+		case ch == '-' && i+1 < n && script[i+1] == '-':
+			// commentaire ligne : sauter jusqu'à la fin de ligne
+			for i < n && script[i] != '\n' {
+				i++
+			}
+		case ch == ';':
+			if stmt := strings.TrimSpace(cur.String()); stmt != "" {
+				stmts = append(stmts, stmt)
+			}
+			cur.Reset()
+		default:
+			cur.WriteByte(ch)
+		}
+	}
+
+	if stmt := strings.TrimSpace(cur.String()); stmt != "" {
+		stmts = append(stmts, stmt)
+	}
+
+	return stmts
 }
 
 // --- Helper ---

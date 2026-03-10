@@ -1,10 +1,15 @@
-.PHONY: run mg sql-start sql-stop
-run: 
-	echo "Le site est servi ici : http://localhost:8080"
-	go run main.go
+.PHONY: run-back run-front mg sql-start sql-stop
 
-mg: 
-	go mod tidy
+run-back:
+	@echo "API REST dispo sur http://localhost:8080"
+	cd back && go run main.go
+
+run-front:
+	@echo "App Angular dispo sur http://localhost:4200"
+	cd front && npm start
+
+mg:
+	cd back && go mod tidy
 
 sql-start:
 	docker run --name psql-container -e POSTGRES_PASSWORD=admin_bibli -e POSTGRES_USER=postgres -e POSTGRES_DB=bibliotheque -p 5435:5432 -d postgres

@@ -56,9 +56,20 @@ func (r *UtilisateurRepository) FindByID(id int) (*models.Utilisateur, error) {
 }
 
 func (r *UtilisateurRepository) FindByLogin(login string) (*models.Utilisateur, error) {
+	// UNION ALL sur toutes les tables héritées.
+	// "FROM ONLY utilisateurs" exclut les enfants, on les ajoute explicitement
+	// pour éviter que les colonnes supplémentaires (annee_etude, departement_id…)
+	// ne fassent échouer le Scan.
 	row := r.dbo.QueryRow(`
 		SELECT id, nom, prenom, numero_telephone, solde_caution, login, mot_de_passe, date_de_naissance, email
-		FROM utilisateurs WHERE login = $1`, login)
+		FROM ONLY utilisateurs WHERE login = $1
+		UNION ALL
+		SELECT id, nom, prenom, numero_telephone, solde_caution, login, mot_de_passe, date_de_naissance, email
+		FROM etudiants WHERE login = $1
+		UNION ALL
+		SELECT id, nom, prenom, numero_telephone, solde_caution, login, mot_de_passe, date_de_naissance, email
+		FROM enseignants WHERE login = $1
+		LIMIT 1`, login, login, login)
 
 	u := &models.Utilisateur{}
 	err := row.Scan(&u.Id, &u.Nom, &u.Prenom, &u.NumeroTelephone,

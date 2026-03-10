@@ -36,4 +36,8 @@ func Init() {
 	}
 
 	GlobalDBO = dbo
+
+	if err := GlobalDBO.SeedIfEmpty("db/scripts/insert.sql"); err != nil {
+		log.Fatalf("❌ Erreur peuplement base de données: %v", err)
+	}
 }
