@@ -69,7 +69,7 @@ func (r *UtilisateurRepository) FindByLogin(login string) (*models.Utilisateur, 
 		UNION ALL
 		SELECT id, nom, prenom, numero_telephone, solde_caution, login, mot_de_passe, date_de_naissance, email
 		FROM enseignants WHERE login = $1
-		LIMIT 1`, login, login, login)
+		LIMIT 1`, login)
 
 	u := &models.Utilisateur{}
 	err := row.Scan(&u.Id, &u.Nom, &u.Prenom, &u.NumeroTelephone,

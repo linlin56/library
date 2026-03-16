@@ -26,9 +26,23 @@
         <li class="nav-item">
           <a class="nav-link" routerLink="/recherche" routerLinkActive="active">Rechercher</a>
         </li>
-        <li class="nav-item ms-2">
-          <a class="btn btn-outline-light btn-sm px-3" routerLink="/connexion">Se connecter</a>
-        </li>
+
+        <ng-container *ngIf="utilisateurConnecte$ | async as utilisateur; else nonConnecte">
+          <li class="nav-item d-flex align-items-center ms-2 text-white fw-semibold">
+            Bonjour {{ utilisateur.prenom }} {{ utilisateur.nom }}
+          </li>
+          <li class="nav-item ms-2">
+            <button type="button" class="btn btn-outline-light btn-sm px-3" (click)="deconnecter()">
+              Se déconnecter
+            </button>
+          </li>
+        </ng-container>
+
+        <ng-template #nonConnecte>
+          <li class="nav-item ms-2">
+            <a class="btn btn-outline-light btn-sm px-3" routerLink="/connexion">Se connecter</a>
+          </li>
+        </ng-template>
       </ul>
     </div>
   </div>

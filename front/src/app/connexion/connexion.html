@@ -1,0 +1,73 @@
+<section class="connexion-shell py-5">
+  <div class="container">
+    <div class="row justify-content-center align-items-center g-4">
+      <div class="col-lg-5">
+        <div class="connexion-intro text-white">
+          <span class="badge rounded-pill text-bg-light text-primary fw-semibold mb-3"
+            >Authentification</span
+          >
+          <h1 class="display-5 fw-bold mb-3">Connectez-vous à votre espace bibliothèque</h1>
+          <p class="lead mb-0">
+            Saisissez votre identifiant puis votre mot de passe. Le système vérifie les identifiants
+            et vous renvoie soit la connexion, soit un message d'erreur.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        <div class="card border-0 shadow-lg connexion-card">
+          <div class="card-body p-4 p-md-5">
+            <h2 class="h3 fw-bold mb-2">Connexion</h2>
+            <p class="text-muted mb-4">Accès utilisateurs et bibliothécaires</p>
+
+            <div *ngIf="erreur" class="alert alert-danger" role="alert">
+              {{ erreur }}
+            </div>
+
+            <div *ngIf="succes" class="alert alert-success" role="alert">
+              {{ succes }}
+            </div>
+
+            <form [formGroup]="formulaire" (ngSubmit)="soumettre()" novalidate>
+              <div class="mb-3">
+                <label for="login" class="form-label fw-semibold">Identifiant</label>
+                <input
+                  id="login"
+                  type="text"
+                  class="form-control form-control-lg"
+                  formControlName="login"
+                  placeholder="amartin"
+                  [class.is-invalid]="
+                    formulaire.controls.login.touched && formulaire.controls.login.invalid
+                  "
+                />
+                <div class="invalid-feedback">L'identifiant est requis.</div>
+              </div>
+
+              <div class="mb-4">
+                <label for="mot_de_passe" class="form-label fw-semibold">Mot de passe</label>
+                <input
+                  id="mot_de_passe"
+                  type="password"
+                  class="form-control form-control-lg"
+                  formControlName="mot_de_passe"
+                  placeholder="Votre mot de passe"
+                  [class.is-invalid]="
+                    formulaire.controls.mot_de_passe.touched &&
+                    formulaire.controls.mot_de_passe.invalid
+                  "
+                />
+                <div class="invalid-feedback">Le mot de passe est requis.</div>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-lg w-100" [disabled]="soumission">
+                <span *ngIf="!soumission">Se connecter</span>
+                <span *ngIf="soumission">Vérification...</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

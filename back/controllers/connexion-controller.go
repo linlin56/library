@@ -4,6 +4,7 @@ import (
 	"bibliotheque/db"
 	"bibliotheque/repositories"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,12 +18,20 @@ type ConnexionResponse struct {
 	Nom    string `json:"nom"`
 	Prenom string `json:"prenom"`
 	Role   string `json:"role"`
+	Message string `json:"message"`
 }
 
 func Connexion(c *gin.Context) {
 	var req ConnexionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"erreur": "Champs requis manquants."})
+		return
+	}
+
+	req.Login = strings.TrimSpace(req.Login)
+	req.MotDePasse = strings.TrimSpace(req.MotDePasse)
+	if req.Login == "" || req.MotDePasse == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"erreur": "Identifiant et mot de passe requis."})
 		return
 	}
 
@@ -33,7 +42,12 @@ func Connexion(c *gin.Context) {
 			c.JSON(http.StatusUnauthorized, gin.H{"erreur": "Login ou mot de passe incorrect."})
 			return
 		}
-		c.JSON(http.StatusOK, ConnexionResponse{Nom: utilisateur.Nom, Prenom: utilisateur.Prenom, Role: "utilisateur"})
+		c.JSON(http.StatusOK, ConnexionResponse{
+			Nom: utilisateur.Nom,
+			Prenom: utilisateur.Prenom,
+			Role: "utilisateur",
+			Message: "OK, l'utilisateur est connecté.",
+		})
 		return
 	}
 
@@ -47,5 +61,10 @@ func Connexion(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"erreur": "Login ou mot de passe incorrect."})
 		return
 	}
-	c.JSON(http.StatusOK, ConnexionResponse{Nom: bibliothecaire.Nom, Prenom: bibliothecaire.Prenom, Role: "bibliothecaire"})
+	c.JSON(http.StatusOK, ConnexionResponse{
+		Nom: bibliothecaire.Nom,
+		Prenom: bibliothecaire.Prenom,
+		Role: "bibliothecaire",
+		Message: "OK, l'utilisateur est connecté.",
+	})
 }

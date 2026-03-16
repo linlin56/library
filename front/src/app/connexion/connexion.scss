@@ -1,0 +1,26 @@
+.connexion-shell {
+  min-height: calc(100vh - 72px);
+  display: flex;
+  align-items: center;
+  background:
+    radial-gradient(circle at top left, rgba(13, 110, 253, 0.22), transparent 34%),
+    linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%);
+}
+
+.connexion-intro {
+  padding: 1rem;
+}
+
+.connexion-card {
+  border-radius: 1.5rem;
+}
+
+.form-control {
+  border-radius: 0.9rem;
+  padding-top: 0.9rem;
+  padding-bottom: 0.9rem;
+}
+
+.btn {
+  border-radius: 0.9rem;
+}
