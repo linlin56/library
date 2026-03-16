@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { Observable } from 'rxjs';
 import { ConnexionService, UtilisateurConnecte } from '../../services/connexion.service';
 
@@ -9,7 +8,7 @@ import { ConnexionService, UtilisateurConnecte } from '../../services/connexion.
   selector: 'app-navbar',
   standalone: true,
   imports: [CommonModule, RouterLink, RouterLinkActive],
-  templateUrl: './navbar.html'
+  templateUrl: './navbar.html',
 })
 export class NavbarComponent {
   readonly utilisateurConnecte$: Observable<UtilisateurConnecte | null>;
