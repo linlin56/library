@@ -20,6 +20,10 @@ export class NavbarComponent {
     this.utilisateurConnecte$ = this.connexionService.utilisateurConnecte$;
   }
 
+  formatRole(role: string): string {
+    return role === 'bibliothecaire' ? 'Bibliothécaire' : 'Utilisateur';
+  }
+
   deconnecter(): void {
     this.connexionService.deconnecter();
     void this.router.navigateByUrl('/connexion');
