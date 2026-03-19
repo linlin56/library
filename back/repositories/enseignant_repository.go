@@ -96,21 +96,12 @@ func (r *EnseignantRepository) FindByDepartement(departementID int) ([]*models.E
 
 func (r *EnseignantRepository) Create(en *models.Enseignant) (int, error) {
 	var newID int
-	err := r.dbo.WithTx(func(tx *db.TxDBO) error {
-		if err := tx.ExecReturning(`
-			INSERT INTO utilisateurs (nom, prenom, numero_telephone, solde_caution, login, mot_de_passe, date_de_naissance, email)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
-			en.Nom, en.Prenom, en.NumeroTelephone, en.SoldeCaution,
-			en.Login, en.MotDePasse, en.DateDeNaissance, en.Email,
-		).Scan(&newID); err != nil {
-			return fmt.Errorf("insert utilisateur: %w", err)
-		}
-		_, err := tx.Exec(
-			`INSERT INTO enseignants (id, departement_id) VALUES ($1, $2)`,
-			newID, en.DepartementId,
-		)
-		return err
-	})
+	err := r.dbo.ExecReturning(`
+		INSERT INTO enseignants (nom, prenom, numero_telephone, solde_caution, login, mot_de_passe, date_de_naissance, email, adresse_id, departement_id)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`,
+		en.Nom, en.Prenom, en.NumeroTelephone, en.SoldeCaution,
+		en.Login, en.MotDePasse, en.DateDeNaissance, en.Email, en.AdresseId, en.DepartementId,
+	).Scan(&newID)
 	if err != nil {
 		return 0, fmt.Errorf("Create enseignant: %w", err)
 	}

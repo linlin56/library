@@ -62,21 +62,12 @@ func (r *EtudiantRepository) FindByID(id int) (*models.Etudiant, error) {
 
 func (r *EtudiantRepository) Create(et *models.Etudiant) (int, error) {
 	var newID int
-	err := r.dbo.WithTx(func(tx *db.TxDBO) error {
-		if err := tx.ExecReturning(`
-			INSERT INTO utilisateurs (nom, prenom, numero_telephone, solde_caution, login, mot_de_passe, date_de_naissance, email)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
-			et.Nom, et.Prenom, et.NumeroTelephone, et.SoldeCaution,
-			et.Login, et.MotDePasse, et.DateDeNaissance, et.Email,
-		).Scan(&newID); err != nil {
-			return fmt.Errorf("insert utilisateur: %w", err)
-		}
-		_, err := tx.Exec(
-			`INSERT INTO etudiants (id, annee_etude) VALUES ($1, $2)`,
-			newID, et.AnneeEtude,
-		)
-		return err
-	})
+	err := r.dbo.ExecReturning(`
+		INSERT INTO etudiants (nom, prenom, numero_telephone, solde_caution, login, mot_de_passe, date_de_naissance, email, adresse_id, annee_etude)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`,
+		et.Nom, et.Prenom, et.NumeroTelephone, et.SoldeCaution,
+		et.Login, et.MotDePasse, et.DateDeNaissance, et.Email, et.AdresseId, et.AnneeEtude,
+	).Scan(&newID)
 	if err != nil {
 		return 0, fmt.Errorf("Create etudiant: %w", err)
 	}

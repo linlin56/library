@@ -12,6 +12,7 @@ type Utilisateur struct {
 	MotDePasse      string
 	DateDeNaissance time.Time
 	Email           string
+	AdresseId       *int
 	Emprunts        []*Exemplaire `gorm:"foreignKey:EmprunteurId"`
 }
 

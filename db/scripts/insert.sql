@@ -220,26 +220,26 @@ INSERT INTO departements_ecole (nom) VALUES
 -- Bibliothécaires
 -- -----------------------------------------------------------------------------
 INSERT INTO bibliothecaires (nom, prenom, login, mot_de_passe) VALUES
-    ('Dupont',  'Marie',   'mdupont',  'mdp_marie'),
-    ('Lambert', 'Jacques', 'jlambert', 'mdp_jacques');
+    ('Dupont',  'Marie',   'mdupont',  'mdp'),
+    ('Lambert', 'Jacques', 'jlambert', 'mdp');
 
 -- -----------------------------------------------------------------------------
 -- Utilisateurs — Etudiants (INSERT direct dans etudiants)
 -- -----------------------------------------------------------------------------
 INSERT INTO etudiants (nom, prenom, numero_telephone, solde_caution, login, mot_de_passe, date_de_naissance, email, adresse_id, annee_etude) VALUES
-    ('Martin',   'Alice',   '0601020304', 0.00, 'amartin',   'mdp_alice',   '2002-03-15', 'alice.martin@etud.fr',   1, 'L3'),
-    ('Bernard',  'Lucas',   '0605060708', 0.00, 'lbernard',  'mdp_lucas',   '2001-07-22', 'lucas.bernard@etud.fr',  2, 'M1'),
-    ('Petit',    'Emma',    '0609101112', 5.00, 'epetit',    'mdp_emma',    '2003-01-10', 'emma.petit@etud.fr',     3, 'L2'),
-    ('Robert',   'Noah',    '0613141516', 0.00, 'nrobert',   'mdp_noah',    '2000-11-05', 'noah.robert@etud.fr',    4, 'M2'),
-    ('Leroy',    'Chloé',   '0617181920', 2.50, 'cleroy',    'mdp_chloe',   '2002-09-30', 'chloe.leroy@etud.fr',    5, 'L1');
+    ('Martin',   'Alice',   '0601020304', 0.00, 'amartin',   'mdp', '2002-03-15', 'alice.martin@etud.fr',   1, 'L3'),
+    ('Bernard',  'Lucas',   '0605060708', 0.00, 'lbernard',  'mdp', '2001-07-22', 'lucas.bernard@etud.fr',  2, 'M1'),
+    ('Petit',    'Emma',    '0609101112', 5.00, 'epetit',    'mdp', '2003-01-10', 'emma.petit@etud.fr',     3, 'L2'),
+    ('Robert',   'Noah',    '0613141516', 0.00, 'nrobert',   'mdp', '2000-11-05', 'noah.robert@etud.fr',    4, 'M2'),
+    ('Leroy',    'Chloé',   '0617181920', 2.50, 'cleroy',    'mdp', '2002-09-30', 'chloe.leroy@etud.fr',    5, 'L1');
 
 -- -----------------------------------------------------------------------------
 -- Utilisateurs — Enseignants (INSERT direct dans enseignants)
 -- -----------------------------------------------------------------------------
 INSERT INTO enseignants (nom, prenom, numero_telephone, solde_caution, login, mot_de_passe, date_de_naissance, email, adresse_id, departement_id) VALUES
-    ('Moreau',   'Julien',  '0621222324', 0.00, 'jmoreau',   'mdp_julien',  '1978-04-12', 'julien.moreau@univ.fr',  6, 1),
-    ('Simon',    'Claire',  '0625262728', 0.00, 'csimon',    'mdp_claire',  '1985-08-19', 'claire.simon@univ.fr',   1, 2),
-    ('Girard',   'Pierre',  '0629303132', 0.00, 'pgirard',   'mdp_pierre',  '1972-12-03', 'pierre.girard@univ.fr',  2, 3);
+    ('Moreau',   'Julien',  '0621222324', 0.00, 'jmoreau',   'mdp', '1978-04-12', 'julien.moreau@univ.fr',  6, 1),
+    ('Simon',    'Claire',  '0625262728', 0.00, 'csimon',    'mdp', '1985-08-19', 'claire.simon@univ.fr',   1, 2),
+    ('Girard',   'Pierre',  '0629303132', 0.00, 'pgirard',   'mdp', '1972-12-03', 'pierre.girard@univ.fr',  2, 3);
 
 -- -----------------------------------------------------------------------------
 -- Exemplaires

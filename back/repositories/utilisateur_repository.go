@@ -146,6 +146,24 @@ func (r *UtilisateurRepository) FindEmpruntsActifs(utilisateurID int) ([]*models
 	return exemplaires, rows.Err()
 }
 
+func (r *UtilisateurRepository) LoginExists(login string) (bool, error) {
+	var count int
+	err := r.dbo.QueryRow(`
+		SELECT COUNT(*) FROM (
+			SELECT id FROM ONLY utilisateurs WHERE login = $1
+			UNION ALL
+			SELECT id FROM etudiants WHERE login = $1
+			UNION ALL
+			SELECT id FROM enseignants WHERE login = $1
+			UNION ALL
+			SELECT id FROM bibliothecaires WHERE login = $1
+		) AS t`, login).Scan(&count)
+	if err != nil {
+		return false, fmt.Errorf("LoginExists: %w", err)
+	}
+	return count > 0, nil
+}
+
 // --- helper interne ---
 
 func scanUtilisateur(rows interface {

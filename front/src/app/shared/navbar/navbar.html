@@ -28,6 +28,11 @@
         </li>
 
         <ng-container *ngIf="utilisateurConnecte$ | async as utilisateur; else nonConnecte">
+          <li *ngIf="utilisateur.role === 'bibliothecaire'" class="nav-item">
+            <a class="nav-link" routerLink="/creer-utilisateur" routerLinkActive="active"
+              >Créer un utilisateur</a
+            >
+          </li>
           <li class="nav-item d-flex align-items-center ms-2 text-white fw-semibold">
             Bonjour {{ utilisateur.prenom }} {{ utilisateur.nom }}
           </li>

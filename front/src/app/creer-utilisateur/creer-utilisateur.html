@@ -1,0 +1,294 @@
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <!-- Titre -->
+      <h1 class="fw-bold mb-1">Créer un utilisateur</h1>
+      <p class="text-muted mb-4">Renseignez les informations du nouvel utilisateur.</p>
+
+      <!-- Compte déjà existant -->
+      <div *ngIf="compteExistant" class="alert alert-warning d-flex align-items-center gap-2">
+        <span
+          >Un compte existe déjà avec le login <strong>{{ compteExistant }}</strong
+          >.</span
+        >
+        <button
+          type="button"
+          class="btn-close ms-auto"
+          (click)="compteExistant = null"
+          aria-label="Fermer"
+        ></button>
+      </div>
+
+      <!-- Erreur générique -->
+      <div *ngIf="erreur" class="alert alert-danger d-flex align-items-center gap-2">
+        <span>{{ erreur }}</span>
+        <button
+          type="button"
+          class="btn-close ms-auto"
+          (click)="erreur = null"
+          aria-label="Fermer"
+        ></button>
+      </div>
+
+      <!-- Résultat de création -->
+      <div *ngIf="resultat" class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+          <h5 class="card-title text-success fw-bold mb-3">✓ Utilisateur créé avec succès</h5>
+          <p class="text-muted mb-3">
+            L'utilisateur va recevoir un email avec ses identifiants temporaires.
+          </p>
+          <dl class="row mb-0">
+            <dt class="col-sm-4">Login</dt>
+            <dd class="col-sm-8">
+              <code>{{ resultat.login }}</code>
+            </dd>
+            <dt class="col-sm-4">Mot de passe temporaire</dt>
+            <dd class="col-sm-8">
+              <code>{{ resultat.mot_de_passe }}</code>
+            </dd>
+          </dl>
+          <button type="button" class="btn btn-primary mt-3" (click)="nouveauFormulaire()">
+            Créer un autre utilisateur
+          </button>
+        </div>
+      </div>
+
+      <!-- Formulaire -->
+      <div *ngIf="!resultat" class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+          <form [formGroup]="formulaire" (ngSubmit)="soumettre()" novalidate>
+            <!-- Nom / Prénom -->
+            <div class="row g-3 mb-3">
+              <div class="col-sm-6">
+                <label for="nom" class="form-label fw-semibold"
+                  >Nom <span class="text-danger">*</span></label
+                >
+                <input
+                  id="nom"
+                  type="text"
+                  class="form-control"
+                  [class.is-invalid]="
+                    formulaire.get('nom')?.invalid && formulaire.get('nom')?.touched
+                  "
+                  formControlName="nom"
+                  placeholder="Ex : Martin"
+                />
+                <div class="invalid-feedback">Le nom est requis.</div>
+              </div>
+              <div class="col-sm-6">
+                <label for="prenom" class="form-label fw-semibold"
+                  >Prénom <span class="text-danger">*</span></label
+                >
+                <input
+                  id="prenom"
+                  type="text"
+                  class="form-control"
+                  [class.is-invalid]="
+                    formulaire.get('prenom')?.invalid && formulaire.get('prenom')?.touched
+                  "
+                  formControlName="prenom"
+                  placeholder="Ex : Alice"
+                />
+                <div class="invalid-feedback">Le prénom est requis.</div>
+              </div>
+            </div>
+
+            <!-- Téléphone -->
+            <div class="mb-3">
+              <label for="telephone" class="form-label fw-semibold"
+                >Numéro de téléphone <span class="text-danger">*</span></label
+              >
+              <input
+                id="telephone"
+                type="tel"
+                class="form-control"
+                [class.is-invalid]="
+                  formulaire.get('numero_telephone')?.invalid &&
+                  formulaire.get('numero_telephone')?.touched
+                "
+                formControlName="numero_telephone"
+                placeholder="Ex : 0601020304"
+              />
+              <div class="invalid-feedback">
+                <span *ngIf="formulaire.get('numero_telephone')?.errors?.['required']"
+                  >Le numéro de téléphone est requis.</span
+                >
+                <span *ngIf="formulaire.get('numero_telephone')?.errors?.['pattern']"
+                  >Format invalide (10 chiffres commençant par 0).</span
+                >
+              </div>
+            </div>
+
+            <!-- Date de naissance -->
+            <div class="mb-3">
+              <label for="dateNaissance" class="form-label fw-semibold"
+                >Date de naissance <span class="text-danger">*</span></label
+              >
+              <input
+                id="dateNaissance"
+                type="date"
+                class="form-control"
+                [class.is-invalid]="
+                  formulaire.get('date_naissance')?.invalid &&
+                  formulaire.get('date_naissance')?.touched
+                "
+                formControlName="date_naissance"
+              />
+              <div class="invalid-feedback">La date de naissance est requise.</div>
+            </div>
+
+            <!-- Email -->
+            <div class="mb-3">
+              <label for="email" class="form-label fw-semibold"
+                >Email <span class="text-danger">*</span></label
+              >
+              <input
+                id="email"
+                type="email"
+                class="form-control"
+                [class.is-invalid]="
+                  formulaire.get('email')?.invalid && formulaire.get('email')?.touched
+                "
+                formControlName="email"
+                placeholder="Ex : alice.martin@etud.fr"
+              />
+              <div class="invalid-feedback">Un email valide est requis.</div>
+            </div>
+
+            <!-- Statut -->
+            <div class="mb-3">
+              <label for="statut" class="form-label fw-semibold"
+                >Statut <span class="text-danger">*</span></label
+              >
+              <select id="statut" class="form-select" formControlName="statut">
+                <option value="etudiant">Étudiant</option>
+                <option value="enseignant">Enseignant</option>
+              </select>
+            </div>
+
+            <!-- Champ conditionnel : étudiant -->
+            <div *ngIf="statut === 'etudiant'" class="mb-3">
+              <label for="anneeEtude" class="form-label fw-semibold"
+                >Année d'étude <span class="text-danger">*</span></label
+              >
+              <select
+                id="anneeEtude"
+                class="form-select"
+                [class.is-invalid]="
+                  formulaire.get('annee_etude')?.invalid && formulaire.get('annee_etude')?.touched
+                "
+                formControlName="annee_etude"
+              >
+                <option *ngFor="let a of anneesEtude" [value]="a">{{ a }}</option>
+              </select>
+              <div class="invalid-feedback">L'année d'étude est requise.</div>
+            </div>
+
+            <!-- Champ conditionnel : enseignant -->
+            <div *ngIf="statut === 'enseignant'" class="mb-3">
+              <label for="departement" class="form-label fw-semibold"
+                >Département <span class="text-danger">*</span></label
+              >
+              <select
+                id="departement"
+                class="form-select"
+                [class.is-invalid]="
+                  formulaire.get('departement_id')?.invalid &&
+                  formulaire.get('departement_id')?.touched
+                "
+                formControlName="departement_id"
+              >
+                <option [ngValue]="null" disabled>Sélectionnez un département</option>
+                <option *ngFor="let d of departements" [value]="d.Id">{{ d.Nom }}</option>
+              </select>
+              <div class="invalid-feedback">Le département est requis.</div>
+            </div>
+
+            <!-- Adresse -->
+            <p class="fw-semibold mt-4 mb-2">Adresse</p>
+            <div class="row g-3 mb-3">
+              <div class="col-sm-3">
+                <label for="numeroRue" class="form-label"
+                  >N° <span class="text-danger">*</span></label
+                >
+                <input
+                  id="numeroRue"
+                  type="text"
+                  class="form-control"
+                  [class.is-invalid]="
+                    formulaire.get('numero_rue')?.invalid && formulaire.get('numero_rue')?.touched
+                  "
+                  formControlName="numero_rue"
+                  placeholder="Ex : 10"
+                />
+                <div class="invalid-feedback">Requis.</div>
+              </div>
+              <div class="col-sm-9">
+                <label for="nomRue" class="form-label"
+                  >Rue <span class="text-danger">*</span></label
+                >
+                <input
+                  id="nomRue"
+                  type="text"
+                  class="form-control"
+                  [class.is-invalid]="
+                    formulaire.get('nom_rue')?.invalid && formulaire.get('nom_rue')?.touched
+                  "
+                  formControlName="nom_rue"
+                  placeholder="Ex : Rue de Rivoli"
+                />
+                <div class="invalid-feedback">La rue est requise.</div>
+              </div>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-sm-4">
+                <label for="codePostal" class="form-label"
+                  >Code postal <span class="text-danger">*</span></label
+                >
+                <input
+                  id="codePostal"
+                  type="text"
+                  class="form-control"
+                  [class.is-invalid]="
+                    formulaire.get('code_postal')?.invalid && formulaire.get('code_postal')?.touched
+                  "
+                  formControlName="code_postal"
+                  placeholder="Ex : 75001"
+                />
+                <div class="invalid-feedback">Requis.</div>
+              </div>
+              <div class="col-sm-8">
+                <label for="ville" class="form-label"
+                  >Ville <span class="text-danger">*</span></label
+                >
+                <input
+                  id="ville"
+                  type="text"
+                  class="form-control"
+                  [class.is-invalid]="
+                    formulaire.get('ville')?.invalid && formulaire.get('ville')?.touched
+                  "
+                  formControlName="ville"
+                  placeholder="Ex : Paris"
+                />
+                <div class="invalid-feedback">La ville est requise.</div>
+              </div>
+            </div>
+
+            <!-- Bouton -->
+            <div class="d-grid mt-4">
+              <button type="submit" class="btn btn-primary btn-lg" [disabled]="enCours">
+                <span
+                  *ngIf="enCours"
+                  class="spinner-border spinner-border-sm me-2"
+                  role="status"
+                ></span>
+                {{ enCours ? 'Création en cours…' : "Créer l'utilisateur" }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

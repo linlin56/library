@@ -26,6 +26,8 @@ AllowCredentials: true,
 		api.GET("/accueil", controllers.Accueil)
 		api.POST("/connexion", controllers.Connexion)
 		api.GET("/ouvrages", controllers.GetOuvrages)
+		api.GET("/departements", controllers.GetDepartements)
+		api.POST("/utilisateurs", controllers.CreerUtilisateur)
 	}
 
 	r.Run(":8080")
