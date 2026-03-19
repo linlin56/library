@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
@@ -6,9 +6,19 @@ export interface Ouvrage {
   id: number;
   titre: string;
   caution: number;
+  type: string; // 'livre' | 'revue'
   isbn?: string;
-  auteur_id?: number;
+  auteur?: string;
   numero?: number;
+}
+
+export interface FiltresRecherche {
+  titre?: string;
+  auteur?: string;
+  isbn?: string;
+  codeBarre?: string;
+  codeRevue?: string;
+  disponible?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -17,11 +27,14 @@ export class RechercheService {
 
   constructor(private http: HttpClient) {}
 
-  rechercher(titre?: string): Observable<Ouvrage[]> {
-    let url = this.apiUrl;
-    if (titre && titre.trim()) {
-      url += `?titre=${encodeURIComponent(titre.trim())}`;
-    }
-    return this.http.get<Ouvrage[]>(url);
+  rechercher(filtres: FiltresRecherche = {}): Observable<Ouvrage[]> {
+    let params = new HttpParams();
+    if (filtres.titre?.trim()) params = params.set('titre', filtres.titre.trim());
+    if (filtres.auteur?.trim()) params = params.set('auteur', filtres.auteur.trim());
+    if (filtres.isbn?.trim()) params = params.set('isbn', filtres.isbn.trim());
+    if (filtres.codeBarre?.trim()) params = params.set('code_barre', filtres.codeBarre.trim());
+    if (filtres.codeRevue?.trim()) params = params.set('code_revue', filtres.codeRevue.trim());
+    if (filtres.disponible) params = params.set('disponible', 'true');
+    return this.http.get<Ouvrage[]>(this.apiUrl, { params });
   }
 }

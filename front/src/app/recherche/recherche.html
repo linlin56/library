@@ -1,11 +1,12 @@
 <div class="container py-5">
   <div class="row">
-    <!-- Barre de recherche : 4 colonnes sur bureau, pleine largeur sur mobile -->
+    <!-- Panneau de recherche -->
     <div class="col-lg-4 mb-4">
-      <div class="card border-0 shadow-sm sticky-top">
+      <div class="card border-0 shadow-sm sticky-top" style="top: 1rem">
         <div class="card-body p-4">
           <h4 class="card-title fw-bold mb-3">Rechercher un ouvrage</h4>
 
+          <!-- Titre (commun simple + avancee) -->
           <div class="mb-3">
             <label for="titre" class="form-label fw-semibold">Titre</label>
             <input
@@ -18,19 +19,100 @@
             />
           </div>
 
-          <div class="d-grid gap-2">
+          <!-- Bouton toggle recherche avancee -->
+          <div class="mb-3">
+            <button
+              type="button"
+              class="btn btn-link p-0 text-decoration-none text-secondary fw-semibold small"
+              (click)="rechercheAvanceeOuverte = !rechercheAvanceeOuverte"
+            >
+              {{ rechercheAvanceeOuverte ? '&#9650;' : '&#9660;' }}
+              Recherche avancee
+            </button>
+          </div>
+
+          <!-- criteres avances (collapse) -->
+          @if (rechercheAvanceeOuverte) {
+            <div class="border-top pt-3">
+              <p class="text-muted small mb-3">
+                Tous les criteres sont optionnels. Renseignez au moins un champ
+                (hors &laquo;&nbsp;Disponibles uniquement&nbsp;&raquo;).
+              </p>
+
+              <div class="mb-3">
+                <label for="auteur" class="form-label">Nom de l'auteur</label>
+                <input
+                  id="auteur"
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="auteur"
+                  (keyup.enter)="rechercher()"
+                  placeholder="Ex : Zola"
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="isbn" class="form-label">ISBN (livre)</label>
+                <input
+                  id="isbn"
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="isbn"
+                  (keyup.enter)="rechercher()"
+                  placeholder="Ex : 978-0131103627"
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="codeRevue" class="form-label">Code revue (numero)</label>
+                <input
+                  id="codeRevue"
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="codeRevue"
+                  (keyup.enter)="rechercher()"
+                  placeholder="Ex : 258"
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="codeBarre" class="form-label">Code barre</label>
+                <input
+                  id="codeBarre"
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="codeBarre"
+                  (keyup.enter)="rechercher()"
+                  placeholder="Ex : CB001234"
+                />
+              </div>
+
+              <div class="mb-3 form-check">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="disponible"
+                  [(ngModel)]="disponible"
+                />
+                <label class="form-check-label" for="disponible">
+                  Disponibles uniquement
+                </label>
+              </div>
+            </div>
+          }
+
+          <!-- Boutons -->
+          <div class="d-grid gap-2 mt-3">
             <button
               type="button"
               class="btn btn-primary"
               (click)="rechercher()"
               [disabled]="enCours"
             >
-              <span
-                *ngIf="enCours"
-                class="spinner-border spinner-border-sm me-2"
-                role="status"
-              ></span>
-              {{ enCours ? 'Recherche…' : 'Rechercher' }}
+              @if (enCours) {
+                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+              }
+              {{ enCours ? 'Recherche...' : 'Rechercher' }}
             </button>
             <button
               type="button"
@@ -45,60 +127,82 @@
       </div>
     </div>
 
-    <!-- Résultats : 8 colonnes sur bureau, pleine largeur sur mobile -->
+    <!-- Zone de resultats -->
     <div class="col-lg-8">
-      <!-- Erreur -->
-      <div *ngIf="erreur" class="alert alert-danger d-flex align-items-center gap-2 mb-4">
-        <span>{{ erreur }}</span>
-        <button type="button" class="btn-close ms-auto" (click)="erreur = null"></button>
-      </div>
+      <!-- Message d'erreur -->
+      @if (erreur) {
+        <div class="alert alert-danger d-flex align-items-center gap-2 mb-4">
+          <span>{{ erreur }}</span>
+          <button type="button" class="btn-close ms-auto" (click)="erreur = null"></button>
+        </div>
+      }
 
-      <!-- Pas de recherche effectuée -->
-      <div *ngIf="!aRecherche" class="alert alert-info text-center">
-        <p class="mb-0">Utilisez la barre de recherche pour trouver des ouvrages.</p>
-      </div>
+      <!-- Invite initiale -->
+      @if (!aRecherche && !erreur) {
+        <div class="alert alert-info text-center">
+          <p class="mb-0">Utilisez la barre de recherche pour trouver des ouvrages.</p>
+        </div>
+      }
 
-      <!-- Recherche effectuée, pas de résultats -->
-      <div *ngIf="aRecherche && resultats.length === 0" class="alert alert-warning text-center">
-        <p class="mb-0">Aucun ouvrage ne correspond à votre recherche.</p>
-      </div>
+      <!-- Aucun resultat -->
+      @if (aRecherche && resultats.length === 0) {
+        <div class="alert alert-warning text-center">
+          <p class="mb-0">Aucun resultat trouve pour cette recherche.</p>
+        </div>
+      }
 
-      <!-- Résultats -->
-      <div *ngIf="resultats.length > 0" class="row g-3">
-        <div *ngFor="let ouvrage of resultats" class="col-12">
-          <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-start mb-2">
-                <h5 class="card-title fw-bold mb-0">{{ ouvrage.titre }}</h5>
-                <span [class]="'badge ' + getTypeBadgeClass(ouvrage)">
-                  {{ getTypeBadge(ouvrage) }}
-                </span>
-              </div>
+      <!-- Resultats -->
+      @if (resultats.length > 0) {
+        <p class="text-muted small mb-3">{{ resultats.length }} ouvrage(s) trouve(s)</p>
+        <div class="row g-3">
+          @for (ouvrage of resultats; track ouvrage.id) {
+            <div class="col-12">
+              <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="card-title fw-bold mb-0">{{ ouvrage.titre }}</h5>
+                    <span [class]="'badge ms-2 ' + getTypeBadgeClass(ouvrage)">
+                      {{ getTypeBadge(ouvrage) }}
+                    </span>
+                  </div>
 
-              <p class="text-muted mb-2">
-                <span *ngIf="ouvrage.isbn">ISBN : {{ ouvrage.isbn }}</span>
-                <span *ngIf="ouvrage.numero">Numéro : {{ ouvrage.numero }}</span>
-              </p>
+                  @if (ouvrage.auteur) {
+                    <p class="text-muted small mb-1">
+                      <span class="fw-semibold">Auteur :</span> {{ ouvrage.auteur }}
+                    </p>
+                  }
+                  @if (ouvrage.isbn) {
+                    <p class="text-muted small mb-1">
+                      <span class="fw-semibold">ISBN :</span> {{ ouvrage.isbn }}
+                    </p>
+                  }
+                  @if (ouvrage.numero) {
+                    <p class="text-muted small mb-1">
+                      <span class="fw-semibold">Numero :</span> {{ ouvrage.numero }}
+                    </p>
+                  }
 
-              <div class="d-flex justify-content-between align-items-center">
-                <span class="text-primary fw-bold"
-                  >Caution : {{ ouvrage.caution | number: '1.2-2' }} €</span
-                >
-                <button
-                  type="button"
-                  class="btn btn-sm"
-                  [class.btn-primary]="estConnecte"
-                  [class.btn-outline-secondary]="!estConnecte"
-                  [disabled]="!estConnecte"
-                  [title]="estConnecte ? 'Emprunter cet ouvrage' : 'Connectez-vous pour emprunter'"
-                >
-                  {{ estConnecte ? 'Emprunter' : 'Connectez-vous' }}
-                </button>
+                  <div class="d-flex justify-content-between align-items-center mt-3">
+                    <span class="text-primary fw-bold">
+                      Caution : {{ ouvrage.caution | number: '1.2-2' }} &euro;
+                    </span>
+                    <button
+                      type="button"
+                      class="btn btn-sm"
+                      [class.btn-primary]="estConnecte"
+                      [class.btn-outline-secondary]="!estConnecte"
+                      [disabled]="!estConnecte"
+                      [title]="estConnecte ? 'Emprunter cet ouvrage' : 'Connectez-vous pour emprunter'"
+                    >
+                      {{ estConnecte ? 'Emprunter' : 'Connectez-vous' }}
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          }
         </div>
-      </div>
+      }
     </div>
   </div>
 </div>
