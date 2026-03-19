@@ -4,6 +4,7 @@ import { ConnexionComponent } from './connexion/connexion';
 import { CreerUtilisateurComponent } from './creer-utilisateur/creer-utilisateur';
 import { bibliothecaireGuard } from './guards/bibliothecaire.guard';
 import { connexionGuard } from './guards/connexion.guard';
+import { RechercheComponent } from './recherche/recherche';
 
 export const routes: Routes = [
   { path: '', component: AccueilComponent },
@@ -13,5 +14,6 @@ export const routes: Routes = [
     component: CreerUtilisateurComponent,
     canActivate: [bibliothecaireGuard],
   },
+  { path: 'recherche', component: RechercheComponent },
   { path: '**', redirectTo: '' },
 ];

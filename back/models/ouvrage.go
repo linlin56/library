@@ -9,10 +9,10 @@ type IOuvrage interface {
 }
 
 type Ouvrage struct {
-	Id          int `gorm:"primaryKey;autoIncrement"`
-	Caution     float64
-	Titre       string
-	Exemplaires int
+	Id          int     `gorm:"primaryKey;autoIncrement" json:"id"`
+	Caution     float64 `json:"caution"`
+	Titre       string  `json:"titre"`
+	Exemplaires int     `json:"exemplaires,omitempty"`
 }
 
 func (o *Ouvrage) GetId() int          { return o.Id }

@@ -1,0 +1,104 @@
+<div class="container py-5">
+  <div class="row">
+    <!-- Barre de recherche : 4 colonnes sur bureau, pleine largeur sur mobile -->
+    <div class="col-lg-4 mb-4">
+      <div class="card border-0 shadow-sm sticky-top">
+        <div class="card-body p-4">
+          <h4 class="card-title fw-bold mb-3">Rechercher un ouvrage</h4>
+
+          <div class="mb-3">
+            <label for="titre" class="form-label fw-semibold">Titre</label>
+            <input
+              id="titre"
+              type="text"
+              class="form-control"
+              [(ngModel)]="titre"
+              (keyup.enter)="rechercher()"
+              placeholder="Ex : Clean Code"
+            />
+          </div>
+
+          <div class="d-grid gap-2">
+            <button
+              type="button"
+              class="btn btn-primary"
+              (click)="rechercher()"
+              [disabled]="enCours"
+            >
+              <span
+                *ngIf="enCours"
+                class="spinner-border spinner-border-sm me-2"
+                role="status"
+              ></span>
+              {{ enCours ? 'Recherche…' : 'Rechercher' }}
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              (click)="effacer()"
+              [disabled]="enCours"
+            >
+              Effacer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Résultats : 8 colonnes sur bureau, pleine largeur sur mobile -->
+    <div class="col-lg-8">
+      <!-- Erreur -->
+      <div *ngIf="erreur" class="alert alert-danger d-flex align-items-center gap-2 mb-4">
+        <span>{{ erreur }}</span>
+        <button type="button" class="btn-close ms-auto" (click)="erreur = null"></button>
+      </div>
+
+      <!-- Pas de recherche effectuée -->
+      <div *ngIf="!aRecherche" class="alert alert-info text-center">
+        <p class="mb-0">Utilisez la barre de recherche pour trouver des ouvrages.</p>
+      </div>
+
+      <!-- Recherche effectuée, pas de résultats -->
+      <div *ngIf="aRecherche && resultats.length === 0" class="alert alert-warning text-center">
+        <p class="mb-0">Aucun ouvrage ne correspond à votre recherche.</p>
+      </div>
+
+      <!-- Résultats -->
+      <div *ngIf="resultats.length > 0" class="row g-3">
+        <div *ngFor="let ouvrage of resultats" class="col-12">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <h5 class="card-title fw-bold mb-0">{{ ouvrage.titre }}</h5>
+                <span [class]="'badge ' + getTypeBadgeClass(ouvrage)">
+                  {{ getTypeBadge(ouvrage) }}
+                </span>
+              </div>
+
+              <p class="text-muted mb-2">
+                <span *ngIf="ouvrage.isbn">ISBN : {{ ouvrage.isbn }}</span>
+                <span *ngIf="ouvrage.numero">Numéro : {{ ouvrage.numero }}</span>
+              </p>
+
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="text-primary fw-bold"
+                  >Caution : {{ ouvrage.caution | number: '1.2-2' }} €</span
+                >
+                <button
+                  type="button"
+                  class="btn btn-sm"
+                  [class.btn-primary]="estConnecte"
+                  [class.btn-outline-secondary]="!estConnecte"
+                  [disabled]="!estConnecte"
+                  [title]="estConnecte ? 'Emprunter cet ouvrage' : 'Connectez-vous pour emprunter'"
+                >
+                  {{ estConnecte ? 'Emprunter' : 'Connectez-vous' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

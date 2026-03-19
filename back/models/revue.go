@@ -2,7 +2,7 @@ package models
 
 type Revue struct {
 	Ouvrage
-	Numero int
+	Numero int `json:"numero,omitempty"`
 }
 
 func NewRevue(id int, caution float64, titre string, exemplaires int, numero int) *Revue {

@@ -18,16 +18,16 @@ func NewOuvrageRepository(dbo *db.DBO) *OuvrageRepository {
 }
 
 func (r *OuvrageRepository) FindAll() ([]*models.Ouvrage, error) {
-	rows, err := r.dbo.QueryRows(`SELECT id, caution, titre, exemplaires FROM ouvrages ORDER BY titre`)
+	rows, err := r.dbo.QueryRows(`SELECT id, caution, titre FROM ouvrages ORDER BY titre`)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var ouvrages []*models.Ouvrage
+	ouvrages := make([]*models.Ouvrage, 0)
 	for rows.Next() {
 		o := &models.Ouvrage{}
-		if err := rows.Scan(&o.Id, &o.Caution, &o.Titre, &o.Exemplaires); err != nil {
+		if err := rows.Scan(&o.Id, &o.Caution, &o.Titre); err != nil {
 			return nil, fmt.Errorf("FindAll ouvrage scan: %w", err)
 		}
 		ouvrages = append(ouvrages, o)
@@ -37,8 +37,8 @@ func (r *OuvrageRepository) FindAll() ([]*models.Ouvrage, error) {
 
 func (r *OuvrageRepository) FindByID(id int) (*models.Ouvrage, error) {
 	o := &models.Ouvrage{}
-	err := r.dbo.QueryRow(`SELECT id, caution, titre, exemplaires FROM ouvrages WHERE id = $1`, id).
-		Scan(&o.Id, &o.Caution, &o.Titre, &o.Exemplaires)
+	err := r.dbo.QueryRow(`SELECT id, caution, titre FROM ouvrages WHERE id = $1`, id).
+		Scan(&o.Id, &o.Caution, &o.Titre)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, fmt.Errorf("ouvrage %d introuvable", id)
 	}
@@ -50,7 +50,7 @@ func (r *OuvrageRepository) FindByID(id int) (*models.Ouvrage, error) {
 
 func (r *OuvrageRepository) FindByTitre(titre string) ([]*models.Ouvrage, error) {
 	rows, err := r.dbo.QueryRows(
-		`SELECT id, caution, titre, exemplaires FROM ouvrages WHERE titre ILIKE $1 ORDER BY titre`,
+		`SELECT id, caution, titre FROM ouvrages WHERE titre ILIKE $1 ORDER BY titre`,
 		"%"+titre+"%",
 	)
 	if err != nil {
@@ -58,10 +58,10 @@ func (r *OuvrageRepository) FindByTitre(titre string) ([]*models.Ouvrage, error)
 	}
 	defer rows.Close()
 
-	var ouvrages []*models.Ouvrage
+	ouvrages := make([]*models.Ouvrage, 0)
 	for rows.Next() {
 		o := &models.Ouvrage{}
-		if err := rows.Scan(&o.Id, &o.Caution, &o.Titre, &o.Exemplaires); err != nil {
+		if err := rows.Scan(&o.Id, &o.Caution, &o.Titre); err != nil {
 			return nil, fmt.Errorf("FindByTitre scan: %w", err)
 		}
 		ouvrages = append(ouvrages, o)
@@ -71,10 +71,7 @@ func (r *OuvrageRepository) FindByTitre(titre string) ([]*models.Ouvrage, error)
 
 func (r *OuvrageRepository) Create(o *models.Ouvrage) (int, error) {
 	var newID int
-	err := r.dbo.ExecReturning(
-		`INSERT INTO ouvrages (caution, titre, exemplaires) VALUES ($1, $2, $3) RETURNING id`,
-		o.Caution, o.Titre, o.Exemplaires,
-	).Scan(&newID)
+	err := r.dbo.ExecReturning(`INSERT INTO ouvrages (caution, titre) VALUES ($1, $2) RETURNING id`, o.Caution, o.Titre).Scan(&newID)
 	if err != nil {
 		return 0, fmt.Errorf("Create ouvrage: %w", err)
 	}
@@ -83,8 +80,8 @@ func (r *OuvrageRepository) Create(o *models.Ouvrage) (int, error) {
 
 func (r *OuvrageRepository) Update(o *models.Ouvrage) error {
 	n, err := r.dbo.Exec(
-		`UPDATE ouvrages SET caution=$1, titre=$2, exemplaires=$3 WHERE id=$4`,
-		o.Caution, o.Titre, o.Exemplaires, o.Id,
+		`UPDATE ouvrages SET caution=$1, titre=$2 WHERE id=$3`,
+		o.Caution, o.Titre, o.Id,
 	)
 	if err != nil {
 		return fmt.Errorf("Update ouvrage: %w", err)
