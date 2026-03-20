@@ -6,120 +6,59 @@
         <div class="card-body p-4">
           <h4 class="card-title fw-bold mb-3">Rechercher un ouvrage</h4>
 
-          <!-- Titre (commun simple + avancee) -->
           <div class="mb-3">
             <label for="titre" class="form-label fw-semibold">Titre</label>
-            <input
-              id="titre"
-              type="text"
-              class="form-control"
-              [(ngModel)]="titre"
-              (keyup.enter)="rechercher()"
-              placeholder="Ex : Clean Code"
-            />
+            <input id="titre" type="text" class="form-control"
+              [(ngModel)]="titre" (keyup.enter)="rechercher()" placeholder="Ex : Clean Code" />
           </div>
 
-          <!-- Bouton toggle recherche avancee -->
           <div class="mb-3">
-            <button
-              type="button"
+            <button type="button"
               class="btn btn-link p-0 text-decoration-none text-secondary fw-semibold small"
-              (click)="rechercheAvanceeOuverte = !rechercheAvanceeOuverte"
-            >
-              {{ rechercheAvanceeOuverte ? '&#9650;' : '&#9660;' }}
-              Recherche avancee
+              (click)="rechercheAvanceeOuverte = !rechercheAvanceeOuverte">
+              {{ rechercheAvanceeOuverte ? '▲' : '▼' }} Recherche avancee
             </button>
           </div>
 
-          <!-- criteres avances (collapse) -->
           @if (rechercheAvanceeOuverte) {
             <div class="border-top pt-3">
               <p class="text-muted small mb-3">
                 Tous les criteres sont optionnels. Renseignez au moins un champ
                 (hors &laquo;&nbsp;Disponibles uniquement&nbsp;&raquo;).
               </p>
-
               <div class="mb-3">
                 <label for="auteur" class="form-label">Nom de l'auteur</label>
-                <input
-                  id="auteur"
-                  type="text"
-                  class="form-control"
-                  [(ngModel)]="auteur"
-                  (keyup.enter)="rechercher()"
-                  placeholder="Ex : Zola"
-                />
+                <input id="auteur" type="text" class="form-control"
+                  [(ngModel)]="auteur" (keyup.enter)="rechercher()" placeholder="Ex : Zola" />
               </div>
-
               <div class="mb-3">
                 <label for="isbn" class="form-label">ISBN (livre)</label>
-                <input
-                  id="isbn"
-                  type="text"
-                  class="form-control"
-                  [(ngModel)]="isbn"
-                  (keyup.enter)="rechercher()"
-                  placeholder="Ex : 978-0131103627"
-                />
+                <input id="isbn" type="text" class="form-control"
+                  [(ngModel)]="isbn" (keyup.enter)="rechercher()" placeholder="Ex : 978-0131103627" />
               </div>
-
               <div class="mb-3">
                 <label for="codeRevue" class="form-label">Code revue (numero)</label>
-                <input
-                  id="codeRevue"
-                  type="text"
-                  class="form-control"
-                  [(ngModel)]="codeRevue"
-                  (keyup.enter)="rechercher()"
-                  placeholder="Ex : 258"
-                />
+                <input id="codeRevue" type="text" class="form-control"
+                  [(ngModel)]="codeRevue" (keyup.enter)="rechercher()" placeholder="Ex : 258" />
               </div>
-
               <div class="mb-3">
                 <label for="codeBarre" class="form-label">Code barre</label>
-                <input
-                  id="codeBarre"
-                  type="text"
-                  class="form-control"
-                  [(ngModel)]="codeBarre"
-                  (keyup.enter)="rechercher()"
-                  placeholder="Ex : CB001234"
-                />
+                <input id="codeBarre" type="text" class="form-control"
+                  [(ngModel)]="codeBarre" (keyup.enter)="rechercher()" placeholder="Ex : CB001234" />
               </div>
-
               <div class="mb-3 form-check">
-                <input
-                  type="checkbox"
-                  class="form-check-input"
-                  id="disponible"
-                  [(ngModel)]="disponible"
-                />
-                <label class="form-check-label" for="disponible">
-                  Disponibles uniquement
-                </label>
+                <input type="checkbox" class="form-check-input" id="disponible" [(ngModel)]="disponible" />
+                <label class="form-check-label" for="disponible">Disponibles uniquement</label>
               </div>
             </div>
           }
 
-          <!-- Boutons -->
           <div class="d-grid gap-2 mt-3">
-            <button
-              type="button"
-              class="btn btn-primary"
-              (click)="rechercher()"
-              [disabled]="enCours"
-            >
-              @if (enCours) {
-                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
-              }
+            <button type="button" class="btn btn-primary" (click)="rechercher()" [disabled]="enCours">
+              @if (enCours) { <span class="spinner-border spinner-border-sm me-2" role="status"></span> }
               {{ enCours ? 'Recherche...' : 'Rechercher' }}
             </button>
-            <button
-              type="button"
-              class="btn btn-outline-secondary"
-              (click)="effacer()"
-              [disabled]="enCours"
-            >
+            <button type="button" class="btn btn-outline-secondary" (click)="effacer()" [disabled]="enCours">
               Effacer
             </button>
           </div>
@@ -127,31 +66,24 @@
       </div>
     </div>
 
-    <!-- Zone de resultats -->
+    <!-- Zone resultats -->
     <div class="col-lg-8">
-      <!-- Message d'erreur -->
       @if (erreur) {
         <div class="alert alert-danger d-flex align-items-center gap-2 mb-4">
           <span>{{ erreur }}</span>
           <button type="button" class="btn-close ms-auto" (click)="erreur = null"></button>
         </div>
       }
-
-      <!-- Invite initiale -->
       @if (!aRecherche && !erreur) {
         <div class="alert alert-info text-center">
           <p class="mb-0">Utilisez la barre de recherche pour trouver des ouvrages.</p>
         </div>
       }
-
-      <!-- Aucun resultat -->
       @if (aRecherche && resultats.length === 0) {
         <div class="alert alert-warning text-center">
           <p class="mb-0">Aucun resultat trouve pour cette recherche.</p>
         </div>
       }
-
-      <!-- Resultats -->
       @if (resultats.length > 0) {
         <p class="text-muted small mb-3">{{ resultats.length }} ouvrage(s) trouve(s)</p>
         <div class="row g-3">
@@ -161,39 +93,25 @@
                 <div class="card-body">
                   <div class="d-flex justify-content-between align-items-start mb-2">
                     <h5 class="card-title fw-bold mb-0">{{ ouvrage.titre }}</h5>
-                    <span [class]="'badge ms-2 ' + getTypeBadgeClass(ouvrage)">
-                      {{ getTypeBadge(ouvrage) }}
-                    </span>
+                    <span [class]="'badge ms-2 ' + getTypeBadgeClass(ouvrage)">{{ getTypeBadge(ouvrage) }}</span>
                   </div>
-
                   @if (ouvrage.auteur) {
-                    <p class="text-muted small mb-1">
-                      <span class="fw-semibold">Auteur :</span> {{ ouvrage.auteur }}
-                    </p>
+                    <p class="text-muted small mb-1"><span class="fw-semibold">Auteur :</span> {{ ouvrage.auteur }}</p>
                   }
                   @if (ouvrage.isbn) {
-                    <p class="text-muted small mb-1">
-                      <span class="fw-semibold">ISBN :</span> {{ ouvrage.isbn }}
-                    </p>
+                    <p class="text-muted small mb-1"><span class="fw-semibold">ISBN :</span> {{ ouvrage.isbn }}</p>
                   }
                   @if (ouvrage.numero) {
-                    <p class="text-muted small mb-1">
-                      <span class="fw-semibold">Numero :</span> {{ ouvrage.numero }}
-                    </p>
+                    <p class="text-muted small mb-1"><span class="fw-semibold">Numero :</span> {{ ouvrage.numero }}</p>
                   }
-
                   <div class="d-flex justify-content-between align-items-center mt-3">
-                    <span class="text-primary fw-bold">
-                      Caution : {{ ouvrage.caution | number: '1.2-2' }} &euro;
-                    </span>
-                    <button
-                      type="button"
-                      class="btn btn-sm"
+                    <span class="text-primary fw-bold">Caution : {{ ouvrage.caution | number:'1.2-2' }} &euro;</span>
+                    <button type="button" class="btn btn-sm"
                       [class.btn-primary]="estConnecte"
                       [class.btn-outline-secondary]="!estConnecte"
                       [disabled]="!estConnecte"
                       [title]="estConnecte ? 'Emprunter cet ouvrage' : 'Connectez-vous pour emprunter'"
-                    >
+                      (click)="estConnecte && ouvrirModal(ouvrage)">
                       {{ estConnecte ? 'Emprunter' : 'Connectez-vous' }}
                     </button>
                   </div>
@@ -206,3 +124,120 @@
     </div>
   </div>
 </div>
+
+<!-- ===== MODAL EMPRUNT ===== -->
+@if (modalVisible) {
+  <div class="modal-backdrop fade show"></div>
+  <div class="modal d-block" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold">
+            @if (etapeModal === 'saisie') { Emprunter un ouvrage }
+            @if (etapeModal === 'preview') { Confirmer l'emprunt }
+            @if (etapeModal === 'succes') { Emprunt enregistre ! }
+            @if (etapeModal === 'echec') { Emprunt refuse }
+          </h5>
+          <button type="button" class="btn-close" (click)="fermerModal()"></button>
+        </div>
+        <div class="modal-body">
+
+          <!-- ETAPE 1 : saisie du code-barre -->
+          @if (etapeModal === 'saisie') {
+            <p class="text-muted small mb-3">
+              Saisissez le code-barre de l'exemplaire que vous souhaitez emprunter.
+            </p>
+            @if (ouvrageSelectionne) {
+              <div class="alert alert-light border mb-3">
+                <span class="fw-semibold">{{ ouvrageSelectionne.titre }}</span>
+              </div>
+            }
+            <div class="mb-3">
+              <label for="codeBareModal" class="form-label">Code-barre de l'exemplaire</label>
+              <input id="codeBareModal" type="text" class="form-control"
+                [(ngModel)]="codeBareModal"
+                (keyup.enter)="verifierEmprunt()"
+                placeholder="Ex : CB001234"
+                [class.is-invalid]="erreurModal" />
+              @if (erreurModal) {
+                <div class="invalid-feedback">{{ erreurModal }}</div>
+              }
+            </div>
+          }
+
+          <!-- ETAPE 2 : apercu avant confirmation -->
+          @if (etapeModal === 'preview' && preview) {
+            <div class="alert alert-info mb-3">
+              <p class="mb-1 fw-semibold">{{ preview.titre }}</p>
+              <p class="mb-1">Code-barre : <code>{{ preview.code_barre }}</code></p>
+            </div>
+            <table class="table table-sm table-borderless">
+              <tbody>
+                <tr>
+                  <td class="text-muted">Montant de la caution</td>
+                  <td class="fw-bold text-danger">- {{ preview.caution | number:'1.2-2' }} &euro;</td>
+                </tr>
+                <tr>
+                  <td class="text-muted">Votre solde actuel</td>
+                  <td>{{ preview.solde_actuel | number:'1.2-2' }} &euro;</td>
+                </tr>
+                <tr class="border-top">
+                  <td class="fw-semibold">Nouveau solde</td>
+                  <td class="fw-bold text-primary">{{ preview.nouveau_solde | number:'1.2-2' }} &euro;</td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="text-muted small">La caution vous sera restituee a la restitution de l'ouvrage.</p>
+          }
+
+          <!-- ETAPE 3 : succes -->
+          @if (etapeModal === 'succes') {
+            <div class="text-center py-3">
+              <div class="display-4 mb-3">✅</div>
+              <p class="fw-semibold">Votre emprunt a ete enregistre avec succes.</p>
+              <p class="text-muted small">Pensez a retourner l'ouvrage dans les delais impartis.</p>
+            </div>
+          }
+
+          <!-- ETAPE 4 : echec / refus -->
+          @if (etapeModal === 'echec') {
+            <div class="text-center py-3">
+              <div class="display-4 mb-3">❌</div>
+              @if (erreurModal) {
+                <div class="alert alert-danger text-start">{{ erreurModal }}</div>
+              } @else {
+                <p class="fw-semibold">Emprunt annule.</p>
+              }
+              <p class="text-muted small">Souhaitez-vous consulter votre liste d'emprunts ?</p>
+            </div>
+          }
+
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          @if (etapeModal === 'saisie') {
+            <button type="button" class="btn btn-outline-secondary" (click)="fermerModal()">Annuler</button>
+            <button type="button" class="btn btn-primary" (click)="verifierEmprunt()" [disabled]="enCoursModal || !codeBareModal.trim()">
+              @if (enCoursModal) { <span class="spinner-border spinner-border-sm me-1"></span> }
+              Verifier
+            </button>
+          }
+          @if (etapeModal === 'preview') {
+            <button type="button" class="btn btn-outline-danger" (click)="refuserEmprunt()">Refuser</button>
+            <button type="button" class="btn btn-success" (click)="confirmerEmprunt()" [disabled]="enCoursModal">
+              @if (enCoursModal) { <span class="spinner-border spinner-border-sm me-1"></span> }
+              Valider l'emprunt
+            </button>
+          }
+          @if (etapeModal === 'succes') {
+            <button type="button" class="btn btn-outline-secondary" (click)="fermerModal()">Fermer</button>
+            <button type="button" class="btn btn-primary" (click)="voirMesEmprunts()">Voir mes emprunts</button>
+          }
+          @if (etapeModal === 'echec') {
+            <button type="button" class="btn btn-outline-secondary" (click)="fermerModal()">Non, fermer</button>
+            <button type="button" class="btn btn-primary" (click)="voirMesEmprunts()">Oui, voir mes emprunts</button>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+}

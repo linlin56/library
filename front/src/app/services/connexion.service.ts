@@ -8,6 +8,7 @@ export interface ConnexionPayload {
 }
 
 export interface UtilisateurConnecte {
+  id: number;
   nom: string;
   prenom: string;
   role: string;
@@ -50,10 +51,7 @@ export class ConnexionService {
 
   private readUtilisateurFromStorage(): UtilisateurConnecte | null {
     const raw = sessionStorage.getItem(this.storageKey);
-    if (!raw) {
-      return null;
-    }
-
+    if (!raw) return null;
     try {
       return JSON.parse(raw) as UtilisateurConnecte;
     } catch {
