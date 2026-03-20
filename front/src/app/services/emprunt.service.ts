@@ -10,6 +10,15 @@ export interface PreviewEmprunt {
   nouveau_solde: number;
 }
 
+export interface EmpruntItem {
+  id: number;
+  code_barre: string;
+  titre: string;
+  date_debut: string;
+  date_fin: string;
+  en_retard: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class EmpruntService {
   private readonly apiUrl = 'http://localhost:8080/api/emprunts';
@@ -28,5 +37,10 @@ export class EmpruntService {
       utilisateur_id: utilisateurId,
       code_barre: codeBarre,
     });
+  }
+
+  listerEmprunts(utilisateurId: number): Observable<EmpruntItem[]> {
+    const params = new HttpParams().set('utilisateur_id', utilisateurId.toString());
+    return this.http.get<EmpruntItem[]>(this.apiUrl, { params });
   }
 }

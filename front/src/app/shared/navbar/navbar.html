@@ -44,6 +44,24 @@
               >Créer un utilisateur</a
             >
           </li>
+          <li *ngIf="utilisateur.role === 'bibliothecaire'" class="nav-item">
+            <a
+              class="nav-link"
+              routerLink="/emprunts-bibliothecaire"
+              routerLinkActive="active"
+              data-bs-dismiss="collapse"
+              >Liste des emprunts</a
+            >
+          </li>
+          <li *ngIf="utilisateur.role !== 'bibliothecaire'" class="nav-item">
+            <a
+              class="nav-link"
+              routerLink="/mes-emprunts"
+              routerLinkActive="active"
+              data-bs-dismiss="collapse"
+              >Mes emprunts</a
+            >
+          </li>
           <li class="nav-item d-flex align-items-center ms-2 text-white fw-semibold">
             Bonjour {{ utilisateur.prenom }} {{ utilisateur.nom }}
             <span class="ms-1">({{ formatRole(utilisateur.role) }})</span>

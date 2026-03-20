@@ -29,7 +29,9 @@ AllowCredentials: true,
 		api.GET("/departements", controllers.GetDepartements)
 		api.POST("/utilisateurs", controllers.CreerUtilisateur)
 		api.GET("/emprunts/verifier", controllers.VerifierEmprunt)
+		api.GET("/emprunts", controllers.ListerEmprunts)
 		api.POST("/emprunts", controllers.Emprunter)
+		api.GET("/utilisateurs/rechercher", controllers.RechercherUtilisateurs)
 	}
 
 	r.Run(":8080")

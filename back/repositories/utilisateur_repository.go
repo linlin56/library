@@ -146,6 +146,57 @@ func (r *UtilisateurRepository) FindEmpruntsActifs(utilisateurID int) ([]*models
 	return exemplaires, rows.Err()
 }
 
+// UtilisateurResume est utilisé dans la recherche d'utilisateurs par les bibliothécaires.
+type UtilisateurResume struct {
+	Id              int    `json:"id"`
+	Nom             string `json:"nom"`
+	Prenom          string `json:"prenom"`
+	DateDeNaissance string `json:"date_de_naissance"`
+	Role            string `json:"role"`
+}
+
+// RechercherUtilisateurs cherche des utilisateurs par nom, prénom et/ou date de naissance.
+// Au moins un critère non vide est attendu (validé dans le controller).
+func (r *UtilisateurRepository) RechercherUtilisateurs(nom, prenom, dateNaissance string) ([]*UtilisateurResume, error) {
+	// NULLIF($3, '') convertit la chaîne vide en NULL côté PostgreSQL,
+	// ce qui évite tout problème de type lors du cast ::date.
+	const q = `
+		SELECT id, nom, prenom, COALESCE(to_char(date_de_naissance, 'YYYY-MM-DD'), ''), 'etudiant'
+		FROM etudiants
+		WHERE ($1 = '' OR nom ILIKE '%' || $1 || '%')
+		  AND ($2 = '' OR prenom ILIKE '%' || $2 || '%')
+		  AND (NULLIF($3, '')::date IS NULL OR date_de_naissance = NULLIF($3, '')::date)
+		UNION ALL
+		SELECT id, nom, prenom, COALESCE(to_char(date_de_naissance, 'YYYY-MM-DD'), ''), 'enseignant'
+		FROM enseignants
+		WHERE ($1 = '' OR nom ILIKE '%' || $1 || '%')
+		  AND ($2 = '' OR prenom ILIKE '%' || $2 || '%')
+		  AND (NULLIF($3, '')::date IS NULL OR date_de_naissance = NULLIF($3, '')::date)
+		UNION ALL
+		SELECT id, nom, prenom, COALESCE(to_char(date_de_naissance, 'YYYY-MM-DD'), ''), 'utilisateur'
+		FROM ONLY utilisateurs
+		WHERE ($1 = '' OR nom ILIKE '%' || $1 || '%')
+		  AND ($2 = '' OR prenom ILIKE '%' || $2 || '%')
+		  AND (NULLIF($3, '')::date IS NULL OR date_de_naissance = NULLIF($3, '')::date)
+		ORDER BY nom, prenom`
+
+	rows, err := r.dbo.QueryRows(q, nom, prenom, dateNaissance)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	results := make([]*UtilisateurResume, 0)
+	for rows.Next() {
+		u := &UtilisateurResume{}
+		if err := rows.Scan(&u.Id, &u.Nom, &u.Prenom, &u.DateDeNaissance, &u.Role); err != nil {
+			return nil, fmt.Errorf("RechercherUtilisateurs scan: %w", err)
+		}
+		results = append(results, u)
+	}
+	return results, rows.Err()
+}
+
 func (r *UtilisateurRepository) LoginExists(login string) (bool, error) {
 	var count int
 	err := r.dbo.QueryRow(`

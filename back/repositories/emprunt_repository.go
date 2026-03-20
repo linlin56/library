@@ -1,12 +1,12 @@
 package repositories
 
 import (
-"database/sql"
-"errors"
-"fmt"
-"time"
+	"database/sql"
+	"errors"
+	"fmt"
+	"time"
 
-"bibliotheque/db"
+	"bibliotheque/db"
 )
 
 // PreviewEmprunt contient les informations affichees avant confirmation.
@@ -72,15 +72,9 @@ utilisateurId, ouvrageId).Scan(&existant)
 if err != nil {
 return nil, fmt.Errorf("Erreur lors de la verification des emprunts existants: %w", err)
 }
-	SELECT COUNT(*) FROM exemplaires
-	WHERE emprunteur_id = $1 AND ouvrage_id = $2 AND est_emprunte = TRUE`,
-	utilisateurId, ouvrageId).Scan(&existant)
-	if err != nil {
-	return nil, fmt.Errorf("Erreur lors de la verification des emprunts existants: %w", err)
-	}
-	if existant > 0 {
-	return nil, fmt.Errorf("Vous empruntez deja un exemplaire de cet ouvrage.")
-	}
+if existant > 0 {
+return nil, fmt.Errorf("Vous empruntez deja un exemplaire de cet ouvrage.")
+}
 
 // 1.3 - Verifier le solde caution suffisant
 var solde float64
@@ -106,7 +100,43 @@ SoldeActuel:  solde,
 	NouveauSolde: solde - caution,
 }, nil
 }
+// EmpruntItem est retourné dans la liste des emprunts actifs d'un utilisateur.
+type EmpruntItem struct {
+	Id        int    `json:"id"`
+	CodeBarre string `json:"code_barre"`
+	Titre     string `json:"titre"`
+	DateDebut string `json:"date_debut"`
+	DateFin   string `json:"date_fin"`
+	EnRetard  bool   `json:"en_retard"`
+}
 
+// GetEmprunts retourne les emprunts actifs d'un utilisateur avec les informations de l'ouvrage.
+func (r *EmpruntRepository) GetEmprunts(utilisateurId int) ([]*EmpruntItem, error) {
+	rows, err := r.dbo.QueryRows(`
+		SELECT e.id, e.code_barre, o.titre,
+		       to_char(e.date_debut_emprunt, 'YYYY-MM-DD'),
+		       to_char(e.date_fin_emprunt,   'YYYY-MM-DD'),
+		       e.date_fin_emprunt < NOW()
+		FROM exemplaires e
+		JOIN ouvrages o ON o.id = e.ouvrage_id
+		WHERE e.emprunteur_id = $1 AND e.est_emprunte = TRUE
+		ORDER BY e.date_fin_emprunt ASC`, utilisateurId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	items := make([]*EmpruntItem, 0)
+	for rows.Next() {
+		item := &EmpruntItem{}
+		if err := rows.Scan(&item.Id, &item.CodeBarre, &item.Titre,
+			&item.DateDebut, &item.DateFin, &item.EnRetard); err != nil {
+			return nil, fmt.Errorf("GetEmprunts scan: %w", err)
+		}
+		items = append(items, item)
+	}
+	return items, rows.Err()
+}
 // Emprunter enregistre l'emprunt apres validation de l'utilisateur.
 func (r *EmpruntRepository) Emprunter(utilisateurId int, codeBarre string) error {
 	// Re-verifier avant d'enregistrer
@@ -138,54 +168,13 @@ if err != nil || n == 0 {
 return fmt.Errorf("Impossible d'enregistrer l'emprunt.")
 }
 
-// Deduire la caution du solde utilisateur
-var (
-	success bool
-	lastErr error
-)
-
-// Tenter sur la table utilisateurs
-res, err := r.dbo.Exec(`
-		UPDATE utilisateurs SET solde_caution = solde_caution - $1 WHERE id = $2`, preview.Caution, utilisateurId)
-if err != nil {
-	lastErr = err
-} else {
-	if n, errRA := res.RowsAffected(); errRA == nil && n > 0 {
-		success = true
-	}
-}
-
-// Tenter etudiants/enseignants (heritage natif : UPDATE ONLY utilisateurs ne touche pas les enfants)
-if !success {
-	res, err = r.dbo.Exec(`
-			UPDATE etudiants SET solde_caution = solde_caution - $1 WHERE id = $2`, preview.Caution, utilisateurId)
-	if err != nil {
-		lastErr = err
-	} else {
-		if n, errRA := res.RowsAffected(); errRA == nil && n > 0 {
-			success = true
+// Deduire la caution - essaie les 3 tables (heritage natif PostgreSQL)
+	for _, table := range []string{"utilisateurs", "etudiants", "enseignants"} {
+		q := fmt.Sprintf(`UPDATE %s SET solde_caution = solde_caution - $1 WHERE id = $2`, table)
+		n, err = r.dbo.Exec(q, preview.Caution, utilisateurId)
+		if err == nil && n > 0 {
+			return nil
 		}
 	}
-}
-
-if !success {
-	res, err = r.dbo.Exec(`
-				UPDATE enseignants SET solde_caution = solde_caution - $1 WHERE id = $2`, preview.Caution, utilisateurId)
-	if err != nil {
-		lastErr = err
-	} else {
-		if n, errRA := res.RowsAffected(); errRA == nil && n > 0 {
-			success = true
-		}
-	}
-}
-
-if !success {
-	if lastErr != nil {
-		return fmt.Errorf("Impossible de deduire la caution: %w", lastErr)
-	}
-	return fmt.Errorf("Impossible de deduire la caution: aucun compte mis à jour")
-}
-
-return nil
+	return fmt.Errorf("Impossible de deduire la caution du solde.")
 }

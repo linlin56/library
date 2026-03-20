@@ -1,0 +1,147 @@
+<div class="container py-5">
+  <div class="d-flex align-items-center gap-3 mb-4">
+    @if (etape !== 'recherche') {
+      <button type="button" class="btn btn-outline-secondary btn-sm" (click)="retourRecherche()">
+        ← Retour
+      </button>
+    }
+    <h2 class="fw-bold mb-0">
+      @if (etape === 'recherche') {
+        Liste des emprunts
+      }
+      @if (etape === 'selection') {
+        Choisir un utilisateur ({{ utilisateurs.length }} résultats)
+      }
+      @if (etape === 'emprunts' && utilisateurSelectionne) {
+        Emprunts de {{ utilisateurSelectionne.prenom }} {{ utilisateurSelectionne.nom }}
+      }
+    </h2>
+  </div>
+
+  @if (erreur) {
+    <div class="alert alert-danger d-flex align-items-center gap-2 mb-4">
+      <span>{{ erreur }}</span>
+      <button type="button" class="btn-close ms-auto" (click)="erreur = null"></button>
+    </div>
+  }
+
+  <!-- ETAPE 1 : formulaire de recherche -->
+  @if (etape === 'recherche') {
+    <div class="card border-0 shadow-sm" style="max-width: 520px">
+      <div class="card-body p-4">
+        <p class="text-muted small mb-4">
+          Renseignez au moins un critère pour trouver l'utilisateur dont vous souhaitez consulter
+          les emprunts.
+        </p>
+        <div class="mb-3">
+          <label for="nom" class="form-label fw-semibold">Nom</label>
+          <input
+            id="nom"
+            type="text"
+            class="form-control"
+            [(ngModel)]="nom"
+            (keyup.enter)="rechercherUtilisateur()"
+            placeholder="Ex : Martin"
+          />
+        </div>
+        <div class="mb-3">
+          <label for="prenom" class="form-label fw-semibold">Prénom</label>
+          <input
+            id="prenom"
+            type="text"
+            class="form-control"
+            [(ngModel)]="prenom"
+            (keyup.enter)="rechercherUtilisateur()"
+            placeholder="Ex : Alice"
+          />
+        </div>
+        <div class="mb-4">
+          <label for="dateNaissance" class="form-label fw-semibold">Date de naissance</label>
+          <input
+            id="dateNaissance"
+            type="date"
+            class="form-control"
+            [(ngModel)]="dateNaissance"
+            (keyup.enter)="rechercherUtilisateur()"
+          />
+        </div>
+        <button
+          type="button"
+          class="btn btn-primary w-100"
+          (click)="rechercherUtilisateur()"
+          [disabled]="enCours || !peutRechercher()"
+        >
+          @if (enCours) {
+            <span class="spinner-border spinner-border-sm me-2"></span>
+          }
+          Rechercher
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ETAPE 2 : liste de sélection si plusieurs résultats -->
+  @if (etape === 'selection') {
+    <div class="list-group" style="max-width: 600px">
+      @for (utilisateur of utilisateurs; track utilisateur.id) {
+        <button
+          type="button"
+          class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+          (click)="selectionnerUtilisateur(utilisateur)"
+        >
+          <div>
+            <span class="fw-semibold">{{ utilisateur.nom }} {{ utilisateur.prenom }}</span>
+            <br />
+            <small class="text-muted">Né(e) le {{ utilisateur.date_de_naissance }}</small>
+          </div>
+          <span class="badge bg-secondary">{{ formatRole(utilisateur.role) }}</span>
+        </button>
+      }
+    </div>
+  }
+
+  <!-- ETAPE 3 : liste des emprunts -->
+  @if (etape === 'emprunts') {
+    @if (enCours) {
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+      </div>
+    } @else if (emprunts.length === 0) {
+      <div class="alert alert-info">Cet utilisateur n'a aucun emprunt en cours.</div>
+    } @else {
+      <p class="text-muted small mb-3">{{ emprunts.length }} emprunt(s) en cours</p>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Ouvrage</th>
+              <th>Code-barre</th>
+              <th>Emprunté le</th>
+              <th>A retourner avant le</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (emprunt of emprunts; track emprunt.id) {
+              <tr [class.table-danger]="emprunt.en_retard">
+                <td class="fw-semibold">{{ emprunt.titre }}</td>
+                <td>
+                  <code>{{ emprunt.code_barre }}</code>
+                </td>
+                <td>{{ emprunt.date_debut }}</td>
+                <td>{{ emprunt.date_fin }}</td>
+                <td>
+                  @if (emprunt.en_retard) {
+                    <span class="badge bg-danger">En retard</span>
+                  } @else {
+                    <span class="badge bg-success">En cours</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+</div>
