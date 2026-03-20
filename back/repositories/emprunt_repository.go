@@ -50,25 +50,37 @@ if estEmprunte {
 return nil, fmt.Errorf("Cet exemplaire est deja emprunte.")
 }
 
-// 1.1 - Verifier aucun emprunt en retard
-var nbRetard int
-_ = r.dbo.QueryRow(`
+	// 1.1 - Verifier aucun emprunt en retard
+	var nbRetard int
+err = r.dbo.QueryRow(`
 SELECT COUNT(*) FROM exemplaires
 WHERE emprunteur_id = $1 AND est_emprunte = TRUE AND date_fin_emprunt < $2`,
 utilisateurId, time.Now()).Scan(&nbRetard)
+if err != nil {
+return nil, fmt.Errorf("Erreur lors de la verification des emprunts en retard: %w", err)
+}
 if nbRetard > 0 {
 return nil, fmt.Errorf("Vous avez %d emprunt(s) en retard. Veuillez les retourner avant d'emprunter.", nbRetard)
 }
 
 // 1.2 - Verifier qu'il n'emprunte pas deja un exemplaire du meme ouvrage
 var existant int
-_ = r.dbo.QueryRow(`
+err = r.dbo.QueryRow(`
 		SELECT COUNT(*) FROM exemplaires
 		WHERE emprunteur_id = $1 AND ouvrage_id = $2 AND est_emprunte = TRUE`,
 utilisateurId, ouvrageId).Scan(&existant)
-if existant > 0 {
-return nil, fmt.Errorf("Vous empruntez deja un exemplaire de cet ouvrage.")
+if err != nil {
+return nil, fmt.Errorf("Erreur lors de la verification des emprunts existants: %w", err)
 }
+	SELECT COUNT(*) FROM exemplaires
+	WHERE emprunteur_id = $1 AND ouvrage_id = $2 AND est_emprunte = TRUE`,
+	utilisateurId, ouvrageId).Scan(&existant)
+	if err != nil {
+	return nil, fmt.Errorf("Erreur lors de la verification des emprunts existants: %w", err)
+	}
+	if existant > 0 {
+	return nil, fmt.Errorf("Vous empruntez deja un exemplaire de cet ouvrage.")
+	}
 
 // 1.3 - Verifier le solde caution suffisant
 var solde float64
@@ -91,13 +103,13 @@ Titre:        titre,
 CodeBarre:    codeBarre,
 Caution:      caution,
 SoldeActuel:  solde,
-NouveauSolde: solde - caution,
+	NouveauSolde: solde - caution,
 }, nil
 }
 
-// Emprunter enregistre l'emprunt apres validation del'utilisateur.
+// Emprunter enregistre l'emprunt apres validation de l'utilisateur.
 func (r *EmpruntRepository) Emprunter(utilisateurId int, codeBarre string) error {
-// Re-verifier avant d'enregistrer
+	// Re-verifier avant d'enregistrer
 preview, err := r.Verifier(utilisateurId, codeBarre)
 if err != nil {
 return err
@@ -127,16 +139,53 @@ return fmt.Errorf("Impossible d'enregistrer l'emprunt.")
 }
 
 // Deduire la caution du solde utilisateur
-_, err = r.dbo.Exec(`
+var (
+	success bool
+	lastErr error
+)
+
+// Tenter sur la table utilisateurs
+res, err := r.dbo.Exec(`
 		UPDATE utilisateurs SET solde_caution = solde_caution - $1 WHERE id = $2`, preview.Caution, utilisateurId)
 if err != nil {
+	lastErr = err
+} else {
+	if n, errRA := res.RowsAffected(); errRA == nil && n > 0 {
+		success = true
+	}
+}
+
 // Tenter etudiants/enseignants (heritage natif : UPDATE ONLY utilisateurs ne touche pas les enfants)
-_, err = r.dbo.Exec(`
+if !success {
+	res, err = r.dbo.Exec(`
 			UPDATE etudiants SET solde_caution = solde_caution - $1 WHERE id = $2`, preview.Caution, utilisateurId)
-if err != nil {
-_, err = r.dbo.Exec(`
+	if err != nil {
+		lastErr = err
+	} else {
+		if n, errRA := res.RowsAffected(); errRA == nil && n > 0 {
+			success = true
+		}
+	}
+}
+
+if !success {
+	res, err = r.dbo.Exec(`
 				UPDATE enseignants SET solde_caution = solde_caution - $1 WHERE id = $2`, preview.Caution, utilisateurId)
+	if err != nil {
+		lastErr = err
+	} else {
+		if n, errRA := res.RowsAffected(); errRA == nil && n > 0 {
+			success = true
+		}
+	}
 }
+
+if !success {
+	if lastErr != nil {
+		return fmt.Errorf("Impossible de deduire la caution: %w", lastErr)
+	}
+	return fmt.Errorf("Impossible de deduire la caution: aucun compte mis à jour")
 }
-return err
+
+return nil
 }
