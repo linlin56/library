@@ -35,32 +35,55 @@
         </li>
 
         <ng-container *ngIf="utilisateurConnecte$ | async as utilisateur; else nonConnecte">
-          <li *ngIf="utilisateur.role === 'bibliothecaire'" class="nav-item">
+          <!-- Sous-menu Gestion pour la bibliothécaire -->
+          <li *ngIf="utilisateur.role === 'bibliothecaire'" class="nav-item dropdown">
             <a
-              class="nav-link"
-              routerLink="/creer-utilisateur"
-              routerLinkActive="active"
-              data-bs-dismiss="collapse"
-              >Créer un utilisateur</a
+              class="nav-link dropdown-toggle"
+              href="#"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+              >Gestion</a
             >
-          </li>
-          <li *ngIf="utilisateur.role === 'bibliothecaire'" class="nav-item">
-            <a
-              class="nav-link"
-              routerLink="/emprunts-bibliothecaire"
-              routerLinkActive="active"
-              data-bs-dismiss="collapse"
-              >Recherche utilisateur</a
-            >
-          </li>
-          <li *ngIf="utilisateur.role === 'bibliothecaire'" class="nav-item">
-            <a
-              class="nav-link"
-              routerLink="/emprunts-retard"
-              routerLinkActive="active"
-              data-bs-dismiss="collapse"
-              >Emprunts en retard</a
-            >
+            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
+              <li>
+                <a
+                  class="dropdown-item"
+                  routerLink="/creer-utilisateur"
+                  routerLinkActive="active"
+                  data-bs-dismiss="collapse"
+                  >Créer un utilisateur</a
+                >
+              </li>
+              <li>
+                <a
+                  class="dropdown-item"
+                  routerLink="/creer-ouvrage"
+                  routerLinkActive="active"
+                  data-bs-dismiss="collapse"
+                  >Créer un ouvrage</a
+                >
+              </li>
+              <li><hr class="dropdown-divider" /></li>
+              <li>
+                <a
+                  class="dropdown-item"
+                  routerLink="/emprunts-bibliothecaire"
+                  routerLinkActive="active"
+                  data-bs-dismiss="collapse"
+                  >Recherche utilisateur</a
+                >
+              </li>
+              <li>
+                <a
+                  class="dropdown-item"
+                  routerLink="/emprunts-retard"
+                  routerLinkActive="active"
+                  data-bs-dismiss="collapse"
+                  >Emprunts en retard</a
+                >
+              </li>
+            </ul>
           </li>
           <li *ngIf="utilisateur.role !== 'bibliothecaire'" class="nav-item">
             <a

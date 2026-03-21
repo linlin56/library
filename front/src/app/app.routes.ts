@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { AccueilComponent } from './accueil/accueil';
 import { ConnexionComponent } from './connexion/connexion';
+import { CreerOuvrageComponent } from './creer-ouvrage/creer-ouvrage';
 import { CreerUtilisateurComponent } from './creer-utilisateur/creer-utilisateur';
 import { EmpruntsBibliothecaireComponent } from './emprunts-bibliothecaire/emprunts-bibliothecaire';
 import { EmpruntsRetardComponent } from './emprunts-retard/emprunts-retard';
@@ -16,6 +17,11 @@ export const routes: Routes = [
   {
     path: 'creer-utilisateur',
     component: CreerUtilisateurComponent,
+    canActivate: [bibliothecaireGuard],
+  },
+  {
+    path: 'creer-ouvrage',
+    component: CreerOuvrageComponent,
     canActivate: [bibliothecaireGuard],
   },
   { path: 'recherche', component: RechercheComponent },

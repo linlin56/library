@@ -167,3 +167,27 @@ return fmt.Errorf("ouvrage %d introuvable", id)
 }
 return nil
 }
+
+func (r *OuvrageRepository) CreateLivre(titre string, caution float64, isbn string, auteurId int) (int, error) {
+	var newID int
+	err := r.dbo.ExecReturning(
+		`INSERT INTO livres (titre, caution, isbn, auteur_id) VALUES ($1, $2, $3, $4) RETURNING id`,
+		titre, caution, isbn, auteurId,
+	).Scan(&newID)
+	if err != nil {
+		return 0, fmt.Errorf("CreateLivre: %w", err)
+	}
+	return newID, nil
+}
+
+func (r *OuvrageRepository) CreateRevue(titre string, caution float64, numero int) (int, error) {
+	var newID int
+	err := r.dbo.ExecReturning(
+		`INSERT INTO revues (titre, caution, numero) VALUES ($1, $2, $3) RETURNING id`,
+		titre, caution, numero,
+	).Scan(&newID)
+	if err != nil {
+		return 0, fmt.Errorf("CreateRevue: %w", err)
+	}
+	return newID, nil
+}

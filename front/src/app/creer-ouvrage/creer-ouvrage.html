@@ -1,0 +1,205 @@
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+      <h1 class="fw-bold mb-1">Créer un ouvrage</h1>
+      <p class="text-muted mb-4">Ajoutez un livre ou une revue au catalogue.</p>
+
+      @if (succes) {
+        <div class="alert alert-success d-flex align-items-center gap-2 mb-4">
+          <span>✅ {{ succes }}</span>
+          <button type="button" class="btn-close ms-auto" (click)="succes = null"></button>
+        </div>
+      }
+
+      @if (erreur) {
+        <div class="alert alert-danger d-flex align-items-center gap-2 mb-4">
+          <span>{{ erreur }}</span>
+          <button type="button" class="btn-close ms-auto" (click)="erreur = null"></button>
+        </div>
+      }
+
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+          <!-- Type -->
+          <div class="mb-4">
+            <label class="form-label fw-semibold"
+              >Type d'ouvrage <span class="text-danger">*</span></label
+            >
+            <div class="d-flex gap-4">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  id="typeLivre"
+                  name="type"
+                  [(ngModel)]="type"
+                  value="livre"
+                  (change)="changerType()"
+                />
+                <label class="form-check-label" for="typeLivre">Livre</label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  id="typeRevue"
+                  name="type"
+                  [(ngModel)]="type"
+                  value="revue"
+                  (change)="changerType()"
+                />
+                <label class="form-check-label" for="typeRevue">Revue</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Titre -->
+          <div class="mb-3">
+            <label for="titre" class="form-label fw-semibold"
+              >Titre <span class="text-danger">*</span></label
+            >
+            <input
+              id="titre"
+              type="text"
+              class="form-control"
+              [(ngModel)]="titre"
+              placeholder="Ex : Clean Code"
+            />
+          </div>
+
+          <!-- Caution -->
+          <div class="mb-3">
+            <label for="caution" class="form-label fw-semibold"
+              >Caution (€) <span class="text-danger">*</span></label
+            >
+            <input
+              id="caution"
+              type="number"
+              class="form-control"
+              min="0"
+              step="0.01"
+              [(ngModel)]="caution"
+              placeholder="Ex : 5.00"
+            />
+          </div>
+
+          <!-- Champs LIVRE -->
+          @if (type === 'livre') {
+            <div class="mb-3">
+              <label for="isbn" class="form-label fw-semibold"
+                >ISBN <span class="text-danger">*</span></label
+              >
+              <input
+                id="isbn"
+                type="text"
+                class="form-control"
+                [(ngModel)]="isbn"
+                placeholder="Ex : 978-0132350884"
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="auteurRecherche" class="form-label fw-semibold"
+                >Auteur <span class="text-danger">*</span></label
+              >
+
+              <!-- Champ autocomplete -->
+              @if (!auteurNouveauVisible) {
+                <div class="position-relative">
+                  <input
+                    id="auteurRecherche"
+                    type="text"
+                    class="form-control"
+                    [(ngModel)]="auteurQuery"
+                    (input)="filtrerAuteurs()"
+                    (blur)="fermerSuggestions()"
+                    placeholder="Tapez un nom ou prénom…"
+                    autocomplete="off"
+                  />
+                  @if (auteurSelectionne) {
+                    <span class="position-absolute top-50 end-0 translate-middle-y pe-3 text-success fw-semibold small">✓ sélectionné</span>
+                  }
+                  @if (suggestionOuverte) {
+                    <ul class="list-group position-absolute w-100 shadow-sm z-3" style="top: 100%; max-height: 220px; overflow-y: auto;">
+                      @for (auteur of auteursSuggestions; track auteur.id) {
+                        <li class="list-group-item list-group-item-action py-2"
+                          (mousedown)="selectionnerAuteur(auteur)">
+                          {{ auteur.prenom }} {{ auteur.nom }}
+                        </li>
+                      }
+                      <li class="list-group-item list-group-item-action py-2 text-primary fw-semibold"
+                        (mousedown)="choisirNouvelAuteur()">
+                        + Créer un nouvel auteur
+                      </li>
+                    </ul>
+                  }
+                </div>
+              }
+
+              <!-- Champs nouvel auteur -->
+              @if (auteurNouveauVisible) {
+                <div class="border rounded p-3 bg-light">
+                  <p class="small text-muted mb-2">Nouvel auteur</p>
+                  <div class="row g-2">
+                    <div class="col-6">
+                      <input
+                        type="text"
+                        class="form-control"
+                        [(ngModel)]="auteurPrenom"
+                        placeholder="Prénom"
+                      />
+                    </div>
+                    <div class="col-6">
+                      <input
+                        type="text"
+                        class="form-control"
+                        [(ngModel)]="auteurNom"
+                        placeholder="Nom"
+                      />
+                    </div>
+                  </div>
+                  <button type="button" class="btn btn-link btn-sm p-0 mt-2 text-secondary"
+                    (click)="auteurNouveauVisible = false; auteurQuery = ''">
+                    ← Revenir à la recherche
+                  </button>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Champs REVUE -->
+          @if (type === 'revue') {
+            <div class="mb-3">
+              <label for="numero" class="form-label fw-semibold"
+                >Numéro <span class="text-danger">*</span></label
+              >
+              <input
+                id="numero"
+                type="number"
+                class="form-control"
+                min="1"
+                step="1"
+                [(ngModel)]="numero"
+                placeholder="Ex : 258"
+              />
+            </div>
+          }
+
+          <div class="d-grid mt-4">
+            <button
+              type="button"
+              class="btn btn-primary"
+              (click)="soumettre()"
+              [disabled]="enCours"
+            >
+              @if (enCours) {
+                <span class="spinner-border spinner-border-sm me-2"></span>
+              }
+              Créer {{ type === 'livre' ? 'le livre' : 'la revue' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
