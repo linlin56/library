@@ -1,0 +1,58 @@
+<div class="container py-5">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <h2 class="fw-bold mb-0">Emprunts en retard</h2>
+    @if (emprunts.length > 0) {
+      <button type="button" class="btn btn-warning" (click)="envoyerRappels()">
+        Envoyer des mails de rappel
+      </button>
+    }
+  </div>
+
+  @if (notification) {
+    <div class="alert alert-success d-flex align-items-center gap-2 mb-4">
+      <span>✅ {{ notification }}</span>
+    </div>
+  }
+
+  @if (erreur) {
+    <div class="alert alert-danger mb-4">{{ erreur }}</div>
+  }
+
+  @if (enCours) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status"></div>
+    </div>
+  } @else if (emprunts.length === 0) {
+    <div class="alert alert-success">
+      Aucun emprunt en retard. Tout est en ordre !
+    </div>
+  } @else {
+    <p class="text-muted small mb-3">{{ emprunts.length }} emprunt(s) en retard</p>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead class="table-danger">
+          <tr>
+            <th>Emprunteur</th>
+            <th>Téléphone</th>
+            <th>Ouvrage</th>
+            <th>Code-barre</th>
+            <th>Date limite</th>
+            <th>Retard</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (emprunt of emprunts; track emprunt.id) {
+            <tr class="table-danger">
+              <td class="fw-semibold">{{ emprunt.nom }} {{ emprunt.prenom }}</td>
+              <td>{{ emprunt.numero_telephone || '—' }}</td>
+              <td>{{ emprunt.titre }}</td>
+              <td><code>{{ emprunt.code_barre }}</code></td>
+              <td>{{ emprunt.date_fin }}</td>
+              <td><span class="badge bg-danger">En retard</span></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

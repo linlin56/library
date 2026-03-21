@@ -29,6 +29,18 @@ func ListerEmprunts(c *gin.Context) {
 	c.JSON(http.StatusOK, items)
 }
 
+// ListerEmpruntsEnRetard : GET /api/emprunts/retard
+// Réservé aux bibliothécaires. Retourne tous les emprunts dont la date de retour est dépassée.
+func ListerEmpruntsEnRetard(c *gin.Context) {
+	repo := repositories.NewEmpruntRepository(db.GlobalDBO)
+	items, err := repo.GetEmpruntsEnRetard()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"erreur": "Impossible de recuperer les emprunts en retard."})
+		return
+	}
+	c.JSON(http.StatusOK, items)
+}
+
 // RechercherUtilisateurs : GET /api/utilisateurs/rechercher?nom=&prenom=&code_postal=&numero_telephone=
 // Réservé aux bibliothécaires. Au moins un champ non vide est requis.
 func RechercherUtilisateurs(c *gin.Context) {

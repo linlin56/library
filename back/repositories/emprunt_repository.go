@@ -137,6 +137,51 @@ func (r *EmpruntRepository) GetEmprunts(utilisateurId int) ([]*EmpruntItem, erro
 	}
 	return items, rows.Err()
 }
+// EmpruntEnRetardItem est retourne dans la liste globale des emprunts en retard (bibliothécaires).
+type EmpruntEnRetardItem struct {
+	Id              int    `json:"id"`
+	CodeBarre       string `json:"code_barre"`
+	Titre           string `json:"titre"`
+	DateFin         string `json:"date_fin"`
+	Nom             string `json:"nom"`
+	Prenom          string `json:"prenom"`
+	NumeroTelephone string `json:"numero_telephone"`
+}
+
+// GetEmpruntsEnRetard retourne tous les exemplaires en retard avec les informations de l'emprunteur.
+func (r *EmpruntRepository) GetEmpruntsEnRetard() ([]*EmpruntEnRetardItem, error) {
+	rows, err := r.dbo.QueryRows(`
+		SELECT e.id, e.code_barre, o.titre,
+		       to_char(e.date_fin_emprunt, 'YYYY-MM-DD'),
+		       u.nom, u.prenom, COALESCE(u.numero_telephone, '')
+		FROM exemplaires e
+		JOIN ouvrages o ON o.id = e.ouvrage_id
+		JOIN (
+			SELECT id, nom, prenom, numero_telephone FROM etudiants
+			UNION ALL
+			SELECT id, nom, prenom, numero_telephone FROM enseignants
+			UNION ALL
+			SELECT id, nom, prenom, numero_telephone FROM ONLY utilisateurs
+		) u ON u.id = e.emprunteur_id
+		WHERE e.est_emprunte = TRUE AND e.date_fin_emprunt < NOW()
+		ORDER BY e.date_fin_emprunt ASC`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	items := make([]*EmpruntEnRetardItem, 0)
+	for rows.Next() {
+		item := &EmpruntEnRetardItem{}
+		if err := rows.Scan(&item.Id, &item.CodeBarre, &item.Titre,
+			&item.DateFin, &item.Nom, &item.Prenom, &item.NumeroTelephone); err != nil {
+			return nil, fmt.Errorf("GetEmpruntsEnRetard scan: %w", err)
+		}
+		items = append(items, item)
+	}
+	return items, rows.Err()
+}
+
 // Emprunter enregistre l'emprunt apres validation de l'utilisateur.
 func (r *EmpruntRepository) Emprunter(utilisateurId int, codeBarre string) error {
 	// Re-verifier avant d'enregistrer

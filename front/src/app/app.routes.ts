@@ -3,6 +3,7 @@ import { AccueilComponent } from './accueil/accueil';
 import { ConnexionComponent } from './connexion/connexion';
 import { CreerUtilisateurComponent } from './creer-utilisateur/creer-utilisateur';
 import { EmpruntsBibliothecaireComponent } from './emprunts-bibliothecaire/emprunts-bibliothecaire';
+import { EmpruntsRetardComponent } from './emprunts-retard/emprunts-retard';
 import { authGuard } from './guards/auth.guard';
 import { bibliothecaireGuard } from './guards/bibliothecaire.guard';
 import { connexionGuard } from './guards/connexion.guard';
@@ -22,6 +23,11 @@ export const routes: Routes = [
   {
     path: 'emprunts-bibliothecaire',
     component: EmpruntsBibliothecaireComponent,
+    canActivate: [bibliothecaireGuard],
+  },
+  {
+    path: 'emprunts-retard',
+    component: EmpruntsRetardComponent,
     canActivate: [bibliothecaireGuard],
   },
   { path: '**', redirectTo: '' },

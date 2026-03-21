@@ -53,6 +53,15 @@
               >Recherche utilisateur</a
             >
           </li>
+          <li *ngIf="utilisateur.role === 'bibliothecaire'" class="nav-item">
+            <a
+              class="nav-link"
+              routerLink="/emprunts-retard"
+              routerLinkActive="active"
+              data-bs-dismiss="collapse"
+              >Emprunts en retard</a
+            >
+          </li>
           <li *ngIf="utilisateur.role !== 'bibliothecaire'" class="nav-item">
             <a
               class="nav-link"

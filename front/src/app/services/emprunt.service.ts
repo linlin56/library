@@ -43,4 +43,18 @@ export class EmpruntService {
     const params = new HttpParams().set('utilisateur_id', utilisateurId.toString());
     return this.http.get<EmpruntItem[]>(this.apiUrl, { params });
   }
+
+  listerEmpruntsEnRetard(): Observable<EmpruntEnRetardItem[]> {
+    return this.http.get<EmpruntEnRetardItem[]>(`${this.apiUrl}/retard`);
+  }
+}
+
+export interface EmpruntEnRetardItem {
+  id: number;
+  code_barre: string;
+  titre: string;
+  date_fin: string;
+  nom: string;
+  prenom: string;
+  numero_telephone: string;
 }

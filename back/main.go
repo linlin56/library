@@ -30,6 +30,7 @@ AllowCredentials: true,
 		api.POST("/utilisateurs", controllers.CreerUtilisateur)
 		api.GET("/emprunts/verifier", controllers.VerifierEmprunt)
 		api.GET("/emprunts", controllers.ListerEmprunts)
+		api.GET("/emprunts/retard", controllers.ListerEmpruntsEnRetard)
 		api.POST("/emprunts", controllers.Emprunter)
 		api.GET("/utilisateurs/rechercher", controllers.RechercherUtilisateurs)
 	}
