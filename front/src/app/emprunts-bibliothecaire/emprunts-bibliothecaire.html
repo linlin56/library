@@ -7,7 +7,7 @@
     }
     <h2 class="fw-bold mb-0">
       @if (etape === 'recherche') {
-        Liste des emprunts
+        Recherche utilisateur
       }
       @if (etape === 'selection') {
         Choisir un utilisateur ({{ utilisateurs.length }} résultats)
@@ -55,14 +55,26 @@
             placeholder="Ex : Alice"
           />
         </div>
-        <div class="mb-4">
-          <label for="dateNaissance" class="form-label fw-semibold">Date de naissance</label>
+        <div class="mb-3">
+          <label for="codePostal" class="form-label fw-semibold">Code postal</label>
           <input
-            id="dateNaissance"
-            type="date"
+            id="codePostal"
+            type="text"
             class="form-control"
-            [(ngModel)]="dateNaissance"
+            [(ngModel)]="codePostal"
             (keyup.enter)="rechercherUtilisateur()"
+            placeholder="Ex : 75001"
+          />
+        </div>
+        <div class="mb-4">
+          <label for="numeroTelephone" class="form-label fw-semibold">Numéro de téléphone</label>
+          <input
+            id="numeroTelephone"
+            type="text"
+            class="form-control"
+            [(ngModel)]="numeroTelephone"
+            (keyup.enter)="rechercherUtilisateur()"
+            placeholder="Ex : 0601020304"
           />
         </div>
         <button
@@ -92,7 +104,9 @@
           <div>
             <span class="fw-semibold">{{ utilisateur.nom }} {{ utilisateur.prenom }}</span>
             <br />
-            <small class="text-muted">Né(e) le {{ utilisateur.date_de_naissance }}</small>
+            <small class="text-muted">{{
+              utilisateur.numero_telephone || 'Téléphone non renseigné'
+            }}</small>
           </div>
           <span class="badge bg-secondary">{{ formatRole(utilisateur.role) }}</span>
         </button>

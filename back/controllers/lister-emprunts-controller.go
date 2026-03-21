@@ -29,20 +29,21 @@ func ListerEmprunts(c *gin.Context) {
 	c.JSON(http.StatusOK, items)
 }
 
-// RechercherUtilisateurs : GET /api/utilisateurs/rechercher?nom=&prenom=&date_naissance=
+// RechercherUtilisateurs : GET /api/utilisateurs/rechercher?nom=&prenom=&code_postal=&numero_telephone=
 // Réservé aux bibliothécaires. Au moins un champ non vide est requis.
 func RechercherUtilisateurs(c *gin.Context) {
 	nom := strings.TrimSpace(c.Query("nom"))
 	prenom := strings.TrimSpace(c.Query("prenom"))
-	dateNaissance := strings.TrimSpace(c.Query("date_naissance"))
+	codePostal := strings.TrimSpace(c.Query("code_postal"))
+	numeroTelephone := strings.TrimSpace(c.Query("numero_telephone"))
 
-	if nom == "" && prenom == "" && dateNaissance == "" {
+	if nom == "" && prenom == "" && codePostal == "" && numeroTelephone == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"erreur": "Au moins un critere de recherche est requis."})
 		return
 	}
 
 	repo := repositories.NewUtilisateurRepository(db.GlobalDBO)
-	utilisateurs, err := repo.RechercherUtilisateurs(nom, prenom, dateNaissance)
+	utilisateurs, err := repo.RechercherUtilisateurs(nom, prenom, codePostal, numeroTelephone)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"erreur": "Erreur lors de la recherche."})
 		return

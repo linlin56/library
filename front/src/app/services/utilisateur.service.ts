@@ -6,7 +6,7 @@ export interface UtilisateurResume {
   id: number;
   nom: string;
   prenom: string;
-  date_de_naissance: string;
+  numero_telephone: string;
   role: string;
 }
 
@@ -19,12 +19,14 @@ export class UtilisateurService {
   rechercherUtilisateurs(
     nom: string,
     prenom: string,
-    dateNaissance: string,
+    codePostal: string,
+    numeroTelephone: string,
   ): Observable<UtilisateurResume[]> {
     let params = new HttpParams();
     if (nom) params = params.set('nom', nom);
     if (prenom) params = params.set('prenom', prenom);
-    if (dateNaissance) params = params.set('date_naissance', dateNaissance);
+    if (codePostal) params = params.set('code_postal', codePostal);
+    if (numeroTelephone) params = params.set('numero_telephone', numeroTelephone);
     return this.http.get<UtilisateurResume[]>(`${this.apiUrl}/rechercher`, { params });
   }
 }

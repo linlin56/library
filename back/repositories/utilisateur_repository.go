@@ -151,36 +151,40 @@ type UtilisateurResume struct {
 	Id              int    `json:"id"`
 	Nom             string `json:"nom"`
 	Prenom          string `json:"prenom"`
-	DateDeNaissance string `json:"date_de_naissance"`
+	NumeroTelephone string `json:"numero_telephone"`
 	Role            string `json:"role"`
 }
 
-// RechercherUtilisateurs cherche des utilisateurs par nom, prénom et/ou date de naissance.
+// RechercherUtilisateurs cherche des utilisateurs par nom, prénom, code postal et/ou numéro de téléphone.
 // Au moins un critère non vide est attendu (validé dans le controller).
-func (r *UtilisateurRepository) RechercherUtilisateurs(nom, prenom, dateNaissance string) ([]*UtilisateurResume, error) {
-	// NULLIF($3, '') convertit la chaîne vide en NULL côté PostgreSQL,
-	// ce qui évite tout problème de type lors du cast ::date.
+func (r *UtilisateurRepository) RechercherUtilisateurs(nom, prenom, codePostal, numeroTelephone string) ([]*UtilisateurResume, error) {
 	const q = `
-		SELECT id, nom, prenom, COALESCE(to_char(date_de_naissance, 'YYYY-MM-DD'), ''), 'etudiant'
-		FROM etudiants
-		WHERE ($1 = '' OR nom ILIKE '%' || $1 || '%')
-		  AND ($2 = '' OR prenom ILIKE '%' || $2 || '%')
-		  AND (NULLIF($3, '')::date IS NULL OR date_de_naissance = NULLIF($3, '')::date)
+		SELECT u.id, u.nom, u.prenom, COALESCE(u.numero_telephone, ''), 'etudiant'
+		FROM etudiants u
+		LEFT JOIN adresses a ON a.id = u.adresse_id
+		WHERE ($1 = '' OR u.nom ILIKE '%' || $1 || '%')
+		  AND ($2 = '' OR u.prenom ILIKE '%' || $2 || '%')
+		  AND ($3 = '' OR a.code_postal = $3)
+		  AND ($4 = '' OR COALESCE(u.numero_telephone, '') ILIKE '%' || $4 || '%')
 		UNION ALL
-		SELECT id, nom, prenom, COALESCE(to_char(date_de_naissance, 'YYYY-MM-DD'), ''), 'enseignant'
-		FROM enseignants
-		WHERE ($1 = '' OR nom ILIKE '%' || $1 || '%')
-		  AND ($2 = '' OR prenom ILIKE '%' || $2 || '%')
-		  AND (NULLIF($3, '')::date IS NULL OR date_de_naissance = NULLIF($3, '')::date)
+		SELECT u.id, u.nom, u.prenom, COALESCE(u.numero_telephone, ''), 'enseignant'
+		FROM enseignants u
+		LEFT JOIN adresses a ON a.id = u.adresse_id
+		WHERE ($1 = '' OR u.nom ILIKE '%' || $1 || '%')
+		  AND ($2 = '' OR u.prenom ILIKE '%' || $2 || '%')
+		  AND ($3 = '' OR a.code_postal = $3)
+		  AND ($4 = '' OR COALESCE(u.numero_telephone, '') ILIKE '%' || $4 || '%')
 		UNION ALL
-		SELECT id, nom, prenom, COALESCE(to_char(date_de_naissance, 'YYYY-MM-DD'), ''), 'utilisateur'
-		FROM ONLY utilisateurs
-		WHERE ($1 = '' OR nom ILIKE '%' || $1 || '%')
-		  AND ($2 = '' OR prenom ILIKE '%' || $2 || '%')
-		  AND (NULLIF($3, '')::date IS NULL OR date_de_naissance = NULLIF($3, '')::date)
+		SELECT u.id, u.nom, u.prenom, COALESCE(u.numero_telephone, ''), 'utilisateur'
+		FROM ONLY utilisateurs u
+		LEFT JOIN adresses a ON a.id = u.adresse_id
+		WHERE ($1 = '' OR u.nom ILIKE '%' || $1 || '%')
+		  AND ($2 = '' OR u.prenom ILIKE '%' || $2 || '%')
+		  AND ($3 = '' OR a.code_postal = $3)
+		  AND ($4 = '' OR COALESCE(u.numero_telephone, '') ILIKE '%' || $4 || '%')
 		ORDER BY nom, prenom`
 
-	rows, err := r.dbo.QueryRows(q, nom, prenom, dateNaissance)
+	rows, err := r.dbo.QueryRows(q, nom, prenom, codePostal, numeroTelephone)
 	if err != nil {
 		return nil, err
 	}
@@ -189,7 +193,7 @@ func (r *UtilisateurRepository) RechercherUtilisateurs(nom, prenom, dateNaissanc
 	results := make([]*UtilisateurResume, 0)
 	for rows.Next() {
 		u := &UtilisateurResume{}
-		if err := rows.Scan(&u.Id, &u.Nom, &u.Prenom, &u.DateDeNaissance, &u.Role); err != nil {
+		if err := rows.Scan(&u.Id, &u.Nom, &u.Prenom, &u.NumeroTelephone, &u.Role); err != nil {
 			return nil, fmt.Errorf("RechercherUtilisateurs scan: %w", err)
 		}
 		results = append(results, u)

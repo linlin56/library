@@ -17,7 +17,8 @@ export class EmpruntsBibliothecaireComponent {
   // Formulaire de recherche
   nom = '';
   prenom = '';
-  dateNaissance = '';
+  codePostal = '';
+  numeroTelephone = '';
 
   // Etat
   etape: Etape = 'recherche';
@@ -35,12 +36,17 @@ export class EmpruntsBibliothecaireComponent {
   ) {}
 
   peutRechercher(): boolean {
-    return !!(this.nom.trim() || this.prenom.trim() || this.dateNaissance.trim());
+    return !!(
+      this.nom.trim() ||
+      this.prenom.trim() ||
+      this.codePostal.trim() ||
+      this.numeroTelephone.trim()
+    );
   }
 
   rechercherUtilisateur(): void {
     if (!this.peutRechercher()) {
-      this.erreur = 'Renseignez au moins un critere de recherche.';
+      this.erreur = 'Renseignez au moins un crit\u00e8re de recherche.';
       return;
     }
 
@@ -50,15 +56,18 @@ export class EmpruntsBibliothecaireComponent {
     this.utilisateurSelectionne = null;
 
     this.utilisateurService
-      .rechercherUtilisateurs(this.nom.trim(), this.prenom.trim(), this.dateNaissance.trim())
+      .rechercherUtilisateurs(
+        this.nom.trim(),
+        this.prenom.trim(),
+        this.codePostal.trim(),
+        this.numeroTelephone.trim(),
+      )
       .subscribe({
         next: (utilisateurs) => {
           this.utilisateurs = utilisateurs;
           this.enCours = false;
           if (utilisateurs.length === 0) {
             this.erreur = 'Aucun utilisateur trouv\u00e9 avec ces crit\u00e8res.';
-          } else if (utilisateurs.length === 1) {
-            this.selectionnerUtilisateur(utilisateurs[0]);
           } else {
             this.etape = 'selection';
           }
@@ -94,6 +103,10 @@ export class EmpruntsBibliothecaireComponent {
     this.emprunts = [];
     this.utilisateurs = [];
     this.erreur = null;
+    this.nom = '';
+    this.prenom = '';
+    this.codePostal = '';
+    this.numeroTelephone = '';
   }
 
   formatRole(role: string): string {
