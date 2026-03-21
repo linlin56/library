@@ -19,11 +19,11 @@ export class CreerOuvrageComponent implements OnInit {
 
   // Champs livre — auteur autocomplete
   isbn = '';
-  auteurQuery = '';              // texte tapé dans le champ
+  auteurQuery = ''; // texte tapé dans le champ
   auteursSuggestions: Auteur[] = []; // suggestions filtrées
   auteurSelectionne: Auteur | null = null; // auteur existant choisi
   suggestionOuverte = false;
-  auteurNouveauVisible = false;  // champs prenom/nom d'un nouvel auteur
+  auteurNouveauVisible = false; // champs prenom/nom d'un nouvel auteur
   auteurNom = '';
   auteurPrenom = '';
 
@@ -59,8 +59,7 @@ export class CreerOuvrageComponent implements OnInit {
       return;
     }
     this.auteursSuggestions = this.auteurs.filter(
-      (a) =>
-        a.nom.toLowerCase().includes(q) || a.prenom.toLowerCase().includes(q),
+      (a) => a.nom.toLowerCase().includes(q) || a.prenom.toLowerCase().includes(q),
     );
     this.suggestionOuverte = true;
   }

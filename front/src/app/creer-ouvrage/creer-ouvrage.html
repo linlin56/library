@@ -117,18 +117,28 @@
                     autocomplete="off"
                   />
                   @if (auteurSelectionne) {
-                    <span class="position-absolute top-50 end-0 translate-middle-y pe-3 text-success fw-semibold small">✓ sélectionné</span>
+                    <span
+                      class="position-absolute top-50 end-0 translate-middle-y pe-3 text-success fw-semibold small"
+                      >✓ sélectionné</span
+                    >
                   }
                   @if (suggestionOuverte) {
-                    <ul class="list-group position-absolute w-100 shadow-sm z-3" style="top: 100%; max-height: 220px; overflow-y: auto;">
+                    <ul
+                      class="list-group position-absolute w-100 shadow-sm z-3"
+                      style="top: 100%; max-height: 220px; overflow-y: auto"
+                    >
                       @for (auteur of auteursSuggestions; track auteur.id) {
-                        <li class="list-group-item list-group-item-action py-2"
-                          (mousedown)="selectionnerAuteur(auteur)">
+                        <li
+                          class="list-group-item list-group-item-action py-2"
+                          (mousedown)="selectionnerAuteur(auteur)"
+                        >
                           {{ auteur.prenom }} {{ auteur.nom }}
                         </li>
                       }
-                      <li class="list-group-item list-group-item-action py-2 text-primary fw-semibold"
-                        (mousedown)="choisirNouvelAuteur()">
+                      <li
+                        class="list-group-item list-group-item-action py-2 text-primary fw-semibold"
+                        (mousedown)="choisirNouvelAuteur()"
+                      >
                         + Créer un nouvel auteur
                       </li>
                     </ul>
@@ -158,8 +168,11 @@
                       />
                     </div>
                   </div>
-                  <button type="button" class="btn btn-link btn-sm p-0 mt-2 text-secondary"
-                    (click)="auteurNouveauVisible = false; auteurQuery = ''">
+                  <button
+                    type="button"
+                    class="btn btn-link btn-sm p-0 mt-2 text-secondary"
+                    (click)="auteurNouveauVisible = false; auteurQuery = ''"
+                  >
                     ← Revenir à la recherche
                   </button>
                 </div>
