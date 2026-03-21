@@ -23,9 +23,7 @@
       <div class="spinner-border text-primary" role="status"></div>
     </div>
   } @else if (emprunts.length === 0) {
-    <div class="alert alert-success">
-      Aucun emprunt en retard. Tout est en ordre !
-    </div>
+    <div class="alert alert-success">Aucun emprunt en retard. Tout est en ordre !</div>
   } @else {
     <p class="text-muted small mb-3">{{ emprunts.length }} emprunt(s) en retard</p>
     <div class="table-responsive">
@@ -46,7 +44,9 @@
               <td class="fw-semibold">{{ emprunt.nom }} {{ emprunt.prenom }}</td>
               <td>{{ emprunt.numero_telephone || '—' }}</td>
               <td>{{ emprunt.titre }}</td>
-              <td><code>{{ emprunt.code_barre }}</code></td>
+              <td>
+                <code>{{ emprunt.code_barre }}</code>
+              </td>
               <td>{{ emprunt.date_fin }}</td>
               <td><span class="badge bg-danger">En retard</span></td>
             </tr>
