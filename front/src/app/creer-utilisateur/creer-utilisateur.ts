@@ -57,10 +57,16 @@ export class CreerUtilisateurComponent implements OnInit {
         anneeCtrl.setValidators(Validators.required);
         deptCtrl.clearValidators();
         deptCtrl.setValue(null);
-      } else {
+      } else if (statut === 'enseignant') {
         deptCtrl.setValidators(Validators.required);
         anneeCtrl.clearValidators();
         anneeCtrl.setValue(null);
+      } else {
+        // particulier : aucun champ conditionnel
+        anneeCtrl.clearValidators();
+        anneeCtrl.setValue(null);
+        deptCtrl.clearValidators();
+        deptCtrl.setValue(null);
       }
       anneeCtrl.updateValueAndValidity();
       deptCtrl.updateValueAndValidity();

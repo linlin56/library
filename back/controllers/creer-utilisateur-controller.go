@@ -21,7 +21,7 @@ type CreerUtilisateurRequest struct {
 	NumeroTelephone string `json:"numero_telephone" binding:"required"`
 	DateNaissance   string `json:"date_naissance" binding:"required"`
 	Email           string `json:"email" binding:"required"`
-	Statut          string `json:"statut" binding:"required,oneof=etudiant enseignant"`
+	Statut          string `json:"statut" binding:"required,oneof=etudiant enseignant particulier"`
 	AnneeEtude      string `json:"annee_etude"`
 	DepartementId   int    `json:"departement_id"`
 	NumeroRue       string `json:"numero_rue" binding:"required"`
@@ -145,6 +145,19 @@ func CreerUtilisateur(c *gin.Context) {
 		enRepo := repositories.NewEnseignantRepository(db.GlobalDBO)
 		if _, err := enRepo.Create(en); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"erreur": "Erreur lors de la création de l'enseignant."})
+			return
+		}
+
+	case "particulier":
+		var newID int
+		err := db.GlobalDBO.ExecReturning(`
+			INSERT INTO utilisateurs (nom, prenom, numero_telephone, solde_caution, login, mot_de_passe, date_de_naissance, email, adresse_id)
+			VALUES ($1, $2, $3, 0, $4, $5, $6, $7, $8) RETURNING id`,
+			req.Nom, req.Prenom, req.NumeroTelephone,
+			login, motDePasse, dateNaissance, req.Email, adresseId,
+		).Scan(&newID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"erreur": "Erreur lors de la création du particulier."})
 			return
 		}
 	}
