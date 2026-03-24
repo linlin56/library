@@ -46,7 +46,7 @@ export class EmpruntsBibliothecaireComponent {
 
   rechercherUtilisateur(): void {
     if (!this.peutRechercher()) {
-      this.erreur = 'Renseignez au moins un crit\u00e8re de recherche.';
+      this.erreur = 'Renseignez au moins un critère de recherche.';
       return;
     }
 
@@ -67,7 +67,7 @@ export class EmpruntsBibliothecaireComponent {
           this.utilisateurs = utilisateurs;
           this.enCours = false;
           if (utilisateurs.length === 0) {
-            this.erreur = 'Aucun utilisateur trouv\u00e9 avec ces crit\u00e8res.';
+            this.erreur = 'Aucun utilisateur trouvé avec ces critères.';
           } else {
             this.etape = 'selection';
           }
