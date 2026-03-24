@@ -83,6 +83,25 @@
             />
           </div>
 
+          <!-- Emplacement (commun) -->
+          <div class="mb-3">
+            <label for="emplacement" class="form-label fw-semibold"
+              >Emplacement <span class="text-danger">*</span></label
+            >
+            <select id="emplacement" class="form-select" [(ngModel)]="emplacementId">
+              <option [ngValue]="null" disabled>Sélectionnez un emplacement</option>
+              @for (em of emplacements; track em.id) {
+                <option [ngValue]="em.id">
+                  Travée {{ em.numero_travee }} — Étagère {{ em.numero_etagere }} — Niveau
+                  {{ em.niveau }}
+                  @if (em.categorie_nom) {
+                    ({{ em.categorie_nom }})
+                  }
+                </option>
+              }
+            </select>
+          </div>
+
           <!-- Champs LIVRE -->
           @if (type === 'livre') {
             <div class="mb-3">
@@ -194,6 +213,17 @@
                 step="1"
                 [(ngModel)]="numero"
                 placeholder="Ex : 258"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="dateParution" class="form-label fw-semibold"
+                >Date de parution <span class="text-danger">*</span></label
+              >
+              <input
+                id="dateParution"
+                type="date"
+                class="form-control"
+                [(ngModel)]="dateParution"
               />
             </div>
           }

@@ -1,0 +1,50 @@
+@startuml
+title Connexion d'un utilisateur
+
+actor "Client" as C
+participant "ConnexionController" as CTL
+participant "UtilisateurRepository" as UR
+participant "BibliothecaireRepository" as BR
+participant "PostgreSQL" as DB
+
+C -> CTL : POST /api/connexion\n{login, mot_de_passe}
+activate CTL
+
+CTL -> UR : FindByLogin(login)
+activate UR
+UR -> DB : SELECT * FROM ONLY utilisateurs WHERE login = $1
+activate DB
+
+alt Utilisateur trouve
+DB --> UR : ligne utilisateur
+deactivate DB
+UR --> CTL : *Utilisateur, nil
+deactivate UR
+alt Mot de passe correct
+CTL --> C : 200 {id, nom, prenom, role: utilisateur}
+else Mot de passe incorrect
+CTL --> C : 401 Login ou mot de passe incorrect
+end
+
+else Utilisateur non trouve
+DB --> UR : sql.ErrNoRows
+deactivate DB
+UR --> CTL : nil, error
+deactivate UR
+CTL -> BR : FindByLogin(login)
+activate BR
+BR -> DB : SELECT * FROM bibliothecaires WHERE login = $1
+activate DB
+alt Bibliothecaire trouve et mdp correct
+DB --> BR : ligne bibliothecaire
+deactivate DB
+BR --> CTL : *Bibliothecaire, nil
+deactivate BR
+CTL --> C : 200 {id, nom, prenom, role: bibliothecaire}
+else Non trouve ou mauvais mot de passe
+CTL --> C : 401 Login ou mot de passe incorrect
+end
+
+end
+deactivate CTL
+@enduml

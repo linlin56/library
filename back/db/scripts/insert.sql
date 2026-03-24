@@ -77,7 +77,8 @@ CREATE TABLE bibliothecaires (
 CREATE TABLE ouvrages (
     id           SERIAL PRIMARY KEY,
     titre        VARCHAR(255) NOT NULL,
-    caution      DOUBLE PRECISION NOT NULL DEFAULT 0.0
+    caution      DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+    emplacement_id INT REFERENCES emplacements(id)
 );
 
 -- Livre hérite d'ouvrage
@@ -88,7 +89,8 @@ CREATE TABLE livres (
 
 -- Revue hérite d'ouvrage
 CREATE TABLE revues (
-    numero INT NOT NULL
+    numero        INT  NOT NULL,
+    date_parution DATE NOT NULL
 ) INHERITS (ouvrages);
 
 
@@ -102,7 +104,7 @@ CREATE TABLE exemplaires (
     date_debut_emprunt  DATE,
     date_fin_emprunt    DATE,
     code_barre          VARCHAR(50)      NOT NULL UNIQUE,
-    delai_emprunt_jours INT              NOT NULL DEFAULT 14,
+    delai_emprunt_jours INT              NOT NULL DEFAULT 15,
     ouvrage_id          INT              NOT NULL,  -- référence logique (héritage)
     emplacement_id      INT              REFERENCES emplacements(id),
     emprunteur_id       INT              -- FK vers utilisateurs (logique)
@@ -167,19 +169,19 @@ INSERT INTO auteurs (nom, prenom) VALUES
 -- -----------------------------------------------------------------------------
 -- Livres
 -- -----------------------------------------------------------------------------
-INSERT INTO livres (titre, caution, isbn, auteur_id) VALUES
-    ('Le Seigneur des anneaux — La Communauté de l''anneau', 5.00, '978-2267011296', 1),
-    ('Le Seigneur des anneaux — Les Deux Tours',             5.00, '978-2267011555', 1),
-    ('Le Seigneur des anneaux — Le Retour du roi',           5.00, '978-2267011777', 1),
-    ('Les Mille et Une Nuits',                               3.00, '978-2070379583', 2);
+INSERT INTO livres (titre, caution, isbn, auteur_id, emplacement_id) VALUES
+    ('Le Seigneur des anneaux — La Communauté de l''anneau', 5.00, '978-2267011296', 1, 1),
+    ('Le Seigneur des anneaux — Les Deux Tours',             5.00, '978-2267011555', 1, 1),
+    ('Le Seigneur des anneaux — Le Retour du roi',           5.00, '978-2267011777', 1, 1),
+    ('Les Mille et Une Nuits',                               3.00, '978-2070379583', 2, 1);
 
 -- -----------------------------------------------------------------------------
 -- Revues
 -- -----------------------------------------------------------------------------
-INSERT INTO revues (titre, caution, numero) VALUES
-    ('60 millions de consommateurs', 2.00, 581),
-    ('60 millions de consommateurs', 2.00, 582),
-    ('Science & Vie',                2.00, 1265);
+INSERT INTO revues (titre, caution, numero, date_parution, emplacement_id) VALUES
+    ('60 millions de consommateurs', 2.00, 581, '2024-01-01', 3),
+    ('60 millions de consommateurs', 2.00, 582, '2024-02-01', 3),
+    ('Science & Vie',                2.00, 1265, '2024-03-01', 2);
 
 -- -----------------------------------------------------------------------------
 -- Adresses
@@ -224,21 +226,21 @@ INSERT INTO enseignants (nom, prenom, numero_telephone, solde_caution, login, mo
 -- -----------------------------------------------------------------------------
 -- Exemplaires (1 par ouvrage)
 -- -----------------------------------------------------------------------------
-INSERT INTO exemplaires (est_emprunte, code_barre, delai_emprunt_jours, ouvrage_id, emplacement_id) VALUES
+INSERT INTO exemplaires (est_emprunte, code_barre, delai_emprunt_jours, ouvrage_id) VALUES
     -- La Communauté de l'anneau
-    (FALSE, 'EX-0001', 21, (SELECT id FROM livres WHERE isbn = '978-2267011296'), 1),
+    (FALSE, 'EX-0001', 15, (SELECT id FROM livres WHERE isbn = '978-2267011296')),
     -- Les Deux Tours
-    (FALSE, 'EX-0002', 21, (SELECT id FROM livres WHERE isbn = '978-2267011555'), 1),
+    (FALSE, 'EX-0002', 15, (SELECT id FROM livres WHERE isbn = '978-2267011555')),
     -- Le Retour du roi
-    (FALSE, 'EX-0003', 21, (SELECT id FROM livres WHERE isbn = '978-2267011777'), 1),
+    (FALSE, 'EX-0003', 15, (SELECT id FROM livres WHERE isbn = '978-2267011777')),
     -- Les Mille et Une Nuits
-    (FALSE, 'EX-0004', 21, (SELECT id FROM livres WHERE isbn = '978-2070379583'), 1),
+    (FALSE, 'EX-0004', 15, (SELECT id FROM livres WHERE isbn = '978-2070379583')),
     -- 60 millions de consommateurs n°581
-    (FALSE, 'EX-0005',  7, (SELECT id FROM revues WHERE numero = 581), 3),
+    (FALSE, 'EX-0005',  7, (SELECT id FROM revues WHERE numero = 581)),
     -- 60 millions de consommateurs n°582
-    (FALSE, 'EX-0006',  7, (SELECT id FROM revues WHERE numero = 582), 3),
+    (FALSE, 'EX-0006',  7, (SELECT id FROM revues WHERE numero = 582)),
     -- Science & Vie n°1265
-    (FALSE, 'EX-0007',  7, (SELECT id FROM revues WHERE numero = 1265), 2);
+    (FALSE, 'EX-0007',  7, (SELECT id FROM revues WHERE numero = 1265));
 
 -- =============================================================================
 -- VÉRIFICATIONS RAPIDES

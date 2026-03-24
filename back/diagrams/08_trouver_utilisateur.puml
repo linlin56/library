@@ -1,0 +1,27 @@
+@startuml
+title Recherche d'un utilisateur
+
+actor "Client (bibliothecaire)" as C
+participant "EmpruntController" as CTL
+participant "UtilisateurRepository" as UR
+participant "PostgreSQL" as DB
+
+C -> CTL : GET /api/utilisateurs/rechercher\n?nom=X&prenom=Y&code_postal=Z&numero_telephone=W
+activate CTL
+note right of CTL : Au moins un critere non vide est requis
+alt Aucun critere fourni
+CTL --> C : 400 Au moins un critere de recherche est requis
+else Au moins un critere fourni
+CTL -> UR : RechercherUtilisateurs(nom, prenom, codePostal, telephone)
+activate UR
+note right of UR : Construction dynamique\nde la requete SQL\nselon les criteres fournis
+UR -> DB : SELECT u.*, a.*\nFROM utilisateurs u JOIN adresses a ON a.id = u.adresse_id\nWHERE <criteres> ORDER BY nom, prenom
+activate DB
+DB --> UR : []UtilisateurResume
+deactivate DB
+UR --> CTL : []UtilisateurResume, nil
+deactivate UR
+CTL --> C : 200 [{id, nom, prenom, login, telephone, solde_caution}]
+end
+deactivate CTL
+@enduml

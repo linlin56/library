@@ -19,7 +19,7 @@ func NewRevueRepository(dbo *db.DBO) *RevueRepository {
 
 func (r *RevueRepository) FindAll() ([]*models.Revue, error) {
 	rows, err := r.dbo.QueryRows(`
-		SELECT rv.id, o.caution, o.titre, o.exemplaires, rv.numero
+		SELECT rv.id, o.caution, o.titre, o.exemplaires, rv.numero, rv.date_parution
 		FROM revues rv
 		JOIN ouvrages o ON o.id = rv.id
 		ORDER BY o.titre, rv.numero`)
@@ -31,7 +31,7 @@ func (r *RevueRepository) FindAll() ([]*models.Revue, error) {
 	var revues []*models.Revue
 	for rows.Next() {
 		rv := &models.Revue{}
-		if err := rows.Scan(&rv.Id, &rv.Caution, &rv.Titre, &rv.Exemplaires, &rv.Numero); err != nil {
+		if err := rows.Scan(&rv.Id, &rv.Caution, &rv.Titre, &rv.Exemplaires, &rv.Numero, &rv.DateParution); err != nil {
 			return nil, fmt.Errorf("FindAll revue scan: %w", err)
 		}
 		revues = append(revues, rv)
@@ -42,11 +42,11 @@ func (r *RevueRepository) FindAll() ([]*models.Revue, error) {
 func (r *RevueRepository) FindByID(id int) (*models.Revue, error) {
 	rv := &models.Revue{}
 	err := r.dbo.QueryRow(`
-		SELECT rv.id, o.caution, o.titre, o.exemplaires, rv.numero
+		SELECT rv.id, o.caution, o.titre, o.exemplaires, rv.numero, rv.date_parution
 		FROM revues rv
 		JOIN ouvrages o ON o.id = rv.id
 		WHERE rv.id = $1`, id).
-		Scan(&rv.Id, &rv.Caution, &rv.Titre, &rv.Exemplaires, &rv.Numero)
+		Scan(&rv.Id, &rv.Caution, &rv.Titre, &rv.Exemplaires, &rv.Numero, &rv.DateParution)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, fmt.Errorf("revue %d introuvable", id)
 	}
@@ -58,7 +58,7 @@ func (r *RevueRepository) FindByID(id int) (*models.Revue, error) {
 
 func (r *RevueRepository) FindByTitre(titre string) ([]*models.Revue, error) {
 	rows, err := r.dbo.QueryRows(`
-		SELECT rv.id, o.caution, o.titre, o.exemplaires, rv.numero
+		SELECT rv.id, o.caution, o.titre, o.exemplaires, rv.numero, rv.date_parution
 		FROM revues rv
 		JOIN ouvrages o ON o.id = rv.id
 		WHERE o.titre ILIKE $1
@@ -71,7 +71,7 @@ func (r *RevueRepository) FindByTitre(titre string) ([]*models.Revue, error) {
 	var revues []*models.Revue
 	for rows.Next() {
 		rv := &models.Revue{}
-		if err := rows.Scan(&rv.Id, &rv.Caution, &rv.Titre, &rv.Exemplaires, &rv.Numero); err != nil {
+		if err := rows.Scan(&rv.Id, &rv.Caution, &rv.Titre, &rv.Exemplaires, &rv.Numero, &rv.DateParution); err != nil {
 			return nil, fmt.Errorf("FindByTitre revue scan: %w", err)
 		}
 		revues = append(revues, rv)

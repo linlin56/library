@@ -21,6 +21,17 @@ func GetAuteurs(c *gin.Context) {
 	c.JSON(http.StatusOK, auteurs)
 }
 
+// GetEmplacements : GET /api/emplacements
+func GetEmplacements(c *gin.Context) {
+	repo := repositories.NewEmplacementRepository(db.GlobalDBO)
+	emplacements, err := repo.FindAll()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"erreur": "Impossible de charger les emplacements."})
+		return
+	}
+	c.JSON(http.StatusOK, emplacements)
+}
+
 type CreerLivreRequest struct {
 	Titre        string  `json:"titre"`
 	Caution      float64 `json:"caution"`
@@ -28,6 +39,7 @@ type CreerLivreRequest struct {
 	AuteurId     int     `json:"auteur_id"`
 	AuteurNom    string  `json:"auteur_nom"`
 	AuteurPrenom string  `json:"auteur_prenom"`
+	EmplacementId int   `json:"emplacement_id"`
 }
 
 // CreerLivre : POST /api/livres
@@ -45,6 +57,10 @@ func CreerLivre(c *gin.Context) {
 
 	if req.Titre == "" || req.Isbn == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"erreur": "Le titre et l'ISBN sont requis."})
+		return
+	}
+	if req.EmplacementId <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"erreur": "L'emplacement est requis."})
 		return
 	}
 	if req.Caution < 0 {
@@ -68,7 +84,7 @@ func CreerLivre(c *gin.Context) {
 	}
 
 	ouvrageRepo := repositories.NewOuvrageRepository(db.GlobalDBO)
-	id, err := ouvrageRepo.CreateLivre(req.Titre, req.Caution, req.Isbn, auteurId)
+	id, err := ouvrageRepo.CreateLivre(req.Titre, req.Caution, req.Isbn, auteurId, req.EmplacementId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"erreur": "Impossible de creer le livre."})
 		return
@@ -77,9 +93,11 @@ func CreerLivre(c *gin.Context) {
 }
 
 type CreerRevueRequest struct {
-	Titre   string  `json:"titre"`
-	Caution float64 `json:"caution"`
-	Numero  int     `json:"numero"`
+	Titre         string  `json:"titre"`
+	Caution       float64 `json:"caution"`
+	Numero        int     `json:"numero"`
+	DateParution  string  `json:"date_parution"`
+	EmplacementId int     `json:"emplacement_id"`
 }
 
 // CreerRevue : POST /api/revues
@@ -91,6 +109,7 @@ func CreerRevue(c *gin.Context) {
 	}
 
 	req.Titre = strings.TrimSpace(req.Titre)
+	req.DateParution = strings.TrimSpace(req.DateParution)
 
 	if req.Titre == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"erreur": "Le titre est requis."})
@@ -104,9 +123,17 @@ func CreerRevue(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"erreur": "La caution ne peut pas etre negative."})
 		return
 	}
+	if req.DateParution == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"erreur": "La date de parution est requise."})
+		return
+	}
+	if req.EmplacementId <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"erreur": "L'emplacement est requis."})
+		return
+	}
 
 	ouvrageRepo := repositories.NewOuvrageRepository(db.GlobalDBO)
-	id, err := ouvrageRepo.CreateRevue(req.Titre, req.Caution, req.Numero)
+	id, err := ouvrageRepo.CreateRevue(req.Titre, req.Caution, req.Numero, req.DateParution, req.EmplacementId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"erreur": "Impossible de creer la revue."})
 		return

@@ -1,0 +1,25 @@
+@startuml
+title Liste des emprunts en retard
+
+actor "Client (bibliothecaire)" as C
+participant "EmpruntController" as CTL
+participant "EmpruntRepository" as ER
+participant "PostgreSQL" as DB
+
+C -> CTL : GET /api/emprunts/retard
+activate CTL
+CTL -> ER : GetEmpruntsEnRetard()
+activate ER
+ER -> DB : SELECT e.*, o.titre, u.nom, u.prenom\nFROM exemplaires e\nJOIN ouvrages o ON o.id = e.ouvrage_id\nJOIN utilisateurs u ON u.id = e.emprunteur_id\nWHERE e.est_emprunte = TRUE\nAND e.date_fin_emprunt < NOW()\nORDER BY date_fin_emprunt ASC
+activate DB
+DB --> ER : []EmpruntRetardItem
+deactivate DB
+ER --> CTL : []EmpruntRetardItem, nil
+deactivate ER
+alt Retards trouves
+CTL --> C : 200 [{code_barre, titre, emprunteur, date_fin_prevue, nb_jours_retard}]
+else Aucun retard
+CTL --> C : 200 []
+end
+deactivate CTL
+@enduml

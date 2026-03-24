@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Auteur, CreerOuvrageService } from '../services/creer-ouvrage.service';
+import { Auteur, CreerOuvrageService, Emplacement } from '../services/creer-ouvrage.service';
 
 @Component({
   selector: 'app-creer-ouvrage',
@@ -29,9 +29,12 @@ export class CreerOuvrageComponent implements OnInit {
 
   // Champs revue
   numero: number | null = null;
+  dateParution = '';
 
   // Etat
   auteurs: Auteur[] = [];
+  emplacements: Emplacement[] = [];
+  emplacementId: number | null = null;
   enCours = false;
   erreur: string | null = null;
   succes: string | null = null;
@@ -41,6 +44,9 @@ export class CreerOuvrageComponent implements OnInit {
   ngOnInit(): void {
     this.service.getAuteurs().subscribe({
       next: (auteurs) => (this.auteurs = auteurs),
+    });
+    this.service.getEmplacements().subscribe({
+      next: (emplacements) => (this.emplacements = emplacements),
     });
   }
 
@@ -107,8 +113,24 @@ export class CreerOuvrageComponent implements OnInit {
         this.enCours = false;
         return;
       }
+      if (!this.dateParution) {
+        this.erreur = 'La date de parution est requise.';
+        this.enCours = false;
+        return;
+      }
+      if (!this.emplacementId) {
+        this.erreur = "L'emplacement est requis.";
+        this.enCours = false;
+        return;
+      }
       this.service
-        .creerRevue({ titre: this.titre.trim(), caution: this.caution, numero: this.numero })
+        .creerRevue({
+          titre: this.titre.trim(),
+          caution: this.caution,
+          numero: this.numero,
+          date_parution: this.dateParution,
+          emplacement_id: this.emplacementId,
+        })
         .subscribe({
           next: () => {
             this.succes = `La revue « ${this.titre.trim()} » a été créée avec succès.`;
@@ -126,10 +148,16 @@ export class CreerOuvrageComponent implements OnInit {
         this.enCours = false;
         return;
       }
+      if (!this.emplacementId) {
+        this.erreur = "L'emplacement est requis.";
+        this.enCours = false;
+        return;
+      }
       const payload: Parameters<CreerOuvrageService['creerLivre']>[0] = {
         titre: this.titre.trim(),
         caution: this.caution,
         isbn: this.isbn.trim(),
+        emplacement_id: this.emplacementId,
       };
       if (this.auteurSelectionne) {
         payload.auteur_id = this.auteurSelectionne.id;
@@ -176,5 +204,7 @@ export class CreerOuvrageComponent implements OnInit {
     this.auteurNom = '';
     this.auteurPrenom = '';
     this.numero = null;
+    this.dateParution = '';
+    this.emplacementId = null;
   }
 }

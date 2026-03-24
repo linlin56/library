@@ -21,13 +21,14 @@ Disponible bool
 
 // OuvrageResultat est la vue enrichie retournee par RechercheAvancee.
 type OuvrageResultat struct {
-Id      int     `json:"id"`
-Titre   string  `json:"titre"`
-Caution float64 `json:"caution"`
-Type    string  `json:"type"`
-Isbn    string  `json:"isbn,omitempty"`
-Auteur  string  `json:"auteur,omitempty"`
-Numero  *int    `json:"numero,omitempty"`
+Id           int     `json:"id"`
+Titre        string  `json:"titre"`
+Caution      float64 `json:"caution"`
+Type         string  `json:"type"`
+Isbn         string  `json:"isbn,omitempty"`
+Auteur       string  `json:"auteur,omitempty"`
+Numero       *int    `json:"numero,omitempty"`
+DateParution string  `json:"date_parution,omitempty"`
 }
 
 const rechercheSQL = `
@@ -36,6 +37,7 @@ SELECT
     l.isbn,
     COALESCE(a.prenom || ' ' || a.nom, '') AS auteur,
     NULL::int AS numero,
+    NULL::text AS date_parution,
     'livre' AS type
 FROM livres l
 LEFT JOIN auteurs a ON a.id = l.auteur_id
@@ -51,6 +53,7 @@ SELECT
     NULL::varchar AS isbn,
     NULL::varchar AS auteur,
     r.numero,
+    TO_CHAR(r.date_parution, 'YYYY-MM-DD') AS date_parution,
     'revue' AS type
 FROM revues r
 WHERE ($1 = '' OR r.titre ILIKE '%' || $1 || '%')
@@ -83,9 +86,9 @@ defer rows.Close()
 resultats := make([]OuvrageResultat, 0)
 for rows.Next() {
 var res OuvrageResultat
-var isbn, auteur sql.NullString
+var isbn, auteur, dateParution sql.NullString
 var numero sql.NullInt32
-if err := rows.Scan(&res.Id, &res.Caution, &res.Titre, &isbn, &auteur, &numero, &res.Type); err != nil {
+if err := rows.Scan(&res.Id, &res.Caution, &res.Titre, &isbn, &auteur, &numero, &dateParution, &res.Type); err != nil {
 return nil, fmt.Errorf("Rechercher scan: %w", err)
 }
 if isbn.Valid {
@@ -97,6 +100,9 @@ res.Auteur = auteur.String
 if numero.Valid {
 n := int(numero.Int32)
 res.Numero = &n
+}
+if dateParution.Valid {
+res.DateParution = dateParution.String
 }
 resultats = append(resultats, res)
 }
@@ -168,11 +174,11 @@ return fmt.Errorf("ouvrage %d introuvable", id)
 return nil
 }
 
-func (r *OuvrageRepository) CreateLivre(titre string, caution float64, isbn string, auteurId int) (int, error) {
+func (r *OuvrageRepository) CreateLivre(titre string, caution float64, isbn string, auteurId int, emplacementId int) (int, error) {
 	var newID int
 	err := r.dbo.ExecReturning(
-		`INSERT INTO livres (titre, caution, isbn, auteur_id) VALUES ($1, $2, $3, $4) RETURNING id`,
-		titre, caution, isbn, auteurId,
+		`INSERT INTO livres (titre, caution, isbn, auteur_id, emplacement_id) VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+		titre, caution, isbn, auteurId, emplacementId,
 	).Scan(&newID)
 	if err != nil {
 		return 0, fmt.Errorf("CreateLivre: %w", err)
@@ -180,11 +186,11 @@ func (r *OuvrageRepository) CreateLivre(titre string, caution float64, isbn stri
 	return newID, nil
 }
 
-func (r *OuvrageRepository) CreateRevue(titre string, caution float64, numero int) (int, error) {
+func (r *OuvrageRepository) CreateRevue(titre string, caution float64, numero int, dateParution string, emplacementId int) (int, error) {
 	var newID int
 	err := r.dbo.ExecReturning(
-		`INSERT INTO revues (titre, caution, numero) VALUES ($1, $2, $3) RETURNING id`,
-		titre, caution, numero,
+		`INSERT INTO revues (titre, caution, numero, date_parution, emplacement_id) VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+		titre, caution, numero, dateParution, emplacementId,
 	).Scan(&newID)
 	if err != nil {
 		return 0, fmt.Errorf("CreateRevue: %w", err)

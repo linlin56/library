@@ -27,6 +27,7 @@ AllowCredentials: true,
 		api.POST("/connexion", controllers.Connexion)
 		api.GET("/ouvrages", controllers.GetOuvrages)
 		api.GET("/auteurs", controllers.GetAuteurs)
+		api.GET("/emplacements", controllers.GetEmplacements)
 		api.POST("/livres", controllers.CreerLivre)
 		api.POST("/revues", controllers.CreerRevue)
 		api.GET("/departements", controllers.GetDepartements)
