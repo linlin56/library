@@ -114,6 +114,7 @@ func CreerUtilisateur(c *gin.Context) {
 				Nom:             req.Nom,
 				Prenom:          req.Prenom,
 				NumeroTelephone: req.NumeroTelephone,
+				SoldeCaution:    20.0,
 				Email:           req.Email,
 				Login:           login,
 				MotDePasse:      motDePasse,
@@ -134,6 +135,7 @@ func CreerUtilisateur(c *gin.Context) {
 				Nom:             req.Nom,
 				Prenom:          req.Prenom,
 				NumeroTelephone: req.NumeroTelephone,
+				SoldeCaution:    20.0,
 				Email:           req.Email,
 				Login:           login,
 				MotDePasse:      motDePasse,
@@ -152,7 +154,7 @@ func CreerUtilisateur(c *gin.Context) {
 		var newID int
 		err := db.GlobalDBO.ExecReturning(`
 			INSERT INTO utilisateurs (nom, prenom, numero_telephone, solde_caution, login, mot_de_passe, date_de_naissance, email, adresse_id)
-			VALUES ($1, $2, $3, 0, $4, $5, $6, $7, $8) RETURNING id`,
+			VALUES ($1, $2, $3, 20, $4, $5, $6, $7, $8) RETURNING id`,
 			req.Nom, req.Prenom, req.NumeroTelephone,
 			login, motDePasse, dateNaissance, req.Email, adresseId,
 		).Scan(&newID)
