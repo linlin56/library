@@ -10,6 +10,11 @@ export interface UtilisateurResume {
   role: string;
 }
 
+export interface CautionInfo {
+  solde_caution: number;
+  caution_totale: number;
+}
+
 @Injectable({ providedIn: 'root' })
 // Recherche des utilisateurs par critères (vue bibliothécaire).
 export class UtilisateurService {
@@ -29,5 +34,15 @@ export class UtilisateurService {
     if (codePostal) params = params.set('code_postal', codePostal);
     if (numeroTelephone) params = params.set('numero_telephone', numeroTelephone);
     return this.http.get<UtilisateurResume[]>(`${this.apiUrl}/rechercher`, { params });
+  }
+
+  getCaution(utilisateurId: number): Observable<CautionInfo> {
+    return this.http.get<CautionInfo>(`${this.apiUrl}/${utilisateurId}/caution`);
+  }
+
+  updateCautionTotale(utilisateurId: number, cautionTotale: number): Observable<{ message: string }> {
+    return this.http.put<{ message: string }>(`${this.apiUrl}/${utilisateurId}/caution`, {
+      caution_totale: cautionTotale,
+    });
   }
 }

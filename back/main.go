@@ -35,6 +35,8 @@ AllowCredentials: true,
 		api.POST("/revues", controllers.CreerRevue)
 		api.GET("/departements", controllers.GetDepartements)
 		api.POST("/utilisateurs", controllers.CreerUtilisateur)
+		api.GET("/utilisateurs/:id/caution", controllers.GetCaution)
+		api.PUT("/utilisateurs/:id/caution", controllers.UpdateCautionTotale)
 		api.GET("/emprunts/verifier", controllers.VerifierEmprunt)
 		api.GET("/emprunts", controllers.ListerEmprunts)
 		api.GET("/emprunts/retard", controllers.ListerEmpruntsEnRetard)

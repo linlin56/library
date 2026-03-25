@@ -422,7 +422,9 @@
               <tbody>
                 @for (ex of exemplairesTous; track ex.id) {
                   <tr>
-                    <td><code>{{ ex.code_barre }}</code></td>
+                    <td>
+                      <code>{{ ex.code_barre }}</code>
+                    </td>
                     <td>
                       @if (ex.est_emprunte) {
                         <span class="badge bg-danger">Emprunté</span>
@@ -468,7 +470,11 @@
           </div>
         </div>
         <div class="modal-footer border-0 pt-0">
-          <button type="button" class="btn btn-outline-secondary" (click)="fermerModalExemplaires()">
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            (click)="fermerModalExemplaires()"
+          >
             Fermer
           </button>
         </div>
@@ -476,4 +482,3 @@
     </div>
   </div>
 }
-

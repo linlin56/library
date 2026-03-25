@@ -8,6 +8,7 @@ type Utilisateur struct {
 	Prenom          string        `json:"prenom"`
 	NumeroTelephone string        `json:"numero_telephone"`
 	SoldeCaution    float64       `json:"solde_caution"`
+	CautionTotale   float64       `json:"caution_totale"`
 	Login           string        `json:"login"`
 	MotDePasse      string        `json:"mot_de_passe"`
 	DateDeNaissance time.Time     `json:"date_de_naissance"`

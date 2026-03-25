@@ -120,10 +120,67 @@
       <div class="text-center py-5">
         <div class="spinner-border text-primary" role="status"></div>
       </div>
-    } @else if (emprunts.length === 0) {
-      <div class="alert alert-info">Cet utilisateur n'a aucun emprunt en cours.</div>
     } @else {
-      <p class="text-muted small mb-3">{{ emprunts.length }} emprunt(s) en cours</p>
+      <!-- Caution -->
+      @if (caution) {
+        <div class="d-flex gap-3 mb-4 align-items-start flex-wrap">
+          <div class="card border-0 shadow-sm text-center py-3 px-4">
+            <div class="text-muted small mb-1">Caution totale</div>
+            <div class="fw-bold fs-5">{{ caution.caution_totale | number: '1.2-2' }} &euro;</div>
+          </div>
+          <div class="card border-0 shadow-sm text-center py-3 px-4">
+            <div class="text-muted small mb-1">Caution actuelle</div>
+            <div
+              class="fw-bold fs-5"
+              [class.text-success]="caution.solde_caution === caution.caution_totale"
+              [class.text-warning]="caution.solde_caution < caution.caution_totale && caution.solde_caution > 0"
+              [class.text-danger]="caution.solde_caution <= 0"
+            >{{ caution.solde_caution | number: '1.2-2' }} &euro;</div>
+          </div>
+          @if (!editionCaution) {
+            <div class="d-flex flex-column justify-content-center ms-2">
+              @if (successCaution) {
+                <span class="badge bg-success mb-2">Caution mise à jour</span>
+              }
+              <button type="button" class="btn btn-outline-primary btn-sm" (click)="ouvrirEditionCaution()">
+                Modifier la caution totale
+              </button>
+            </div>
+          } @else {
+            <div class="d-flex align-items-center gap-2 ms-2 flex-wrap">
+              <input
+                type="number"
+                min="0"
+                step="0.5"
+                class="form-control form-control-sm"
+                style="width: 120px"
+                [(ngModel)]="nouvelleCautionTotale"
+                placeholder="Montant €"
+              />
+              <button
+                type="button"
+                class="btn btn-success btn-sm"
+                (click)="enregistrerCaution()"
+                [disabled]="enregistrementCaution || nouvelleCautionTotale === null"
+              >
+                @if (enregistrementCaution) {
+                  <span class="spinner-border spinner-border-sm me-1"></span>
+                }
+                Enregistrer
+              </button>
+              <button type="button" class="btn btn-outline-secondary btn-sm" (click)="annulerEditionCaution()">Annuler</button>
+              @if (erreurCaution) {
+                <span class="text-danger small">{{ erreurCaution }}</span>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      @if (emprunts.length === 0) {
+        <div class="alert alert-info">Cet utilisateur n'a aucun emprunt en cours.</div>
+      } @else {
+        <p class="text-muted small mb-3">{{ emprunts.length }} emprunt(s) en cours</p>
       <div class="table-responsive">
         <table class="table table-hover align-middle">
           <thead class="table-light">
@@ -157,5 +214,6 @@
         </table>
       </div>
     }
-  }
+  }   <!-- fin @else (enCours) -->
+}   <!-- fin @if (etape === 'emprunts') -->
 </div>

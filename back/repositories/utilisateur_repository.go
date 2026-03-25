@@ -201,6 +201,49 @@ func (r *UtilisateurRepository) RechercherUtilisateurs(nom, prenom, codePostal, 
 	return results, rows.Err()
 }
 
+// CautionInfo contient le solde actuel et la caution totale d'un utilisateur.
+type CautionInfo struct {
+	SoldeCaution  float64 `json:"solde_caution"`
+	CautionTotale float64 `json:"caution_totale"`
+}
+
+// GetCaution retourne le solde_caution et caution_totale d'un utilisateur (toutes tables héritées).
+func (r *UtilisateurRepository) GetCaution(id int) (*CautionInfo, error) {
+	row := r.dbo.QueryRow(`
+		SELECT solde_caution, caution_totale FROM ONLY utilisateurs WHERE id = $1
+		UNION ALL
+		SELECT solde_caution, caution_totale FROM etudiants WHERE id = $1
+		UNION ALL
+		SELECT solde_caution, caution_totale FROM enseignants WHERE id = $1
+		LIMIT 1`, id)
+
+	info := &CautionInfo{}
+	err := row.Scan(&info.SoldeCaution, &info.CautionTotale)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, fmt.Errorf("utilisateur %d introuvable", id)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("GetCaution: %w", err)
+	}
+	return info, nil
+}
+
+// UpdateCautionTotale met à jour la caution_totale d'un utilisateur (toutes tables héritées).
+func (r *UtilisateurRepository) UpdateCautionTotale(id int, cautionTotale float64) error {
+	tables := []string{"etudiants", "enseignants", "utilisateurs"}
+	for _, table := range tables {
+		q := fmt.Sprintf(`UPDATE %s SET caution_totale = $1 WHERE id = $2`, table)
+		n, err := r.dbo.Exec(q, cautionTotale, id)
+		if err != nil {
+			return fmt.Errorf("UpdateCautionTotale(%s): %w", table, err)
+		}
+		if n > 0 {
+			return nil
+		}
+	}
+	return fmt.Errorf("utilisateur %d introuvable", id)
+}
+
 func (r *UtilisateurRepository) LoginExists(login string) (bool, error) {
 	var count int
 	err := r.dbo.QueryRow(`

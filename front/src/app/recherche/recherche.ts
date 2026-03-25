@@ -3,7 +3,12 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ConnexionService } from '../services/connexion.service';
-import { EmpruntService, ExemplaireComplet, ExemplaireDisponible, PreviewEmprunt } from '../services/emprunt.service';
+import {
+  EmpruntService,
+  ExemplaireComplet,
+  ExemplaireDisponible,
+  PreviewEmprunt,
+} from '../services/emprunt.service';
 import { FiltresRecherche, Ouvrage, RechercheService } from '../services/recherche.service';
 
 type EtapeModal = 'saisie' | 'preview' | 'succes' | 'echec';
@@ -241,20 +246,22 @@ export class RechercheComponent implements OnInit {
     this.creationEnCours = true;
     this.erreurExemplaires = null;
     this.creationSucces = false;
-    this.empruntService.creerExemplaire(this.ouvrageSelectionne.id, this.nouveauCodeBarre.trim()).subscribe({
-      next: (res) => {
-        this.exemplairesTous = [
-          ...this.exemplairesTous,
-          { id: res.id, code_barre: this.nouveauCodeBarre.trim(), est_emprunte: false },
-        ];
-        this.nouveauCodeBarre = '';
-        this.creationSucces = true;
-        this.creationEnCours = false;
-      },
-      error: (err) => {
-        this.erreurExemplaires = err.error?.erreur ?? 'Impossible de créer l\'exemplaire.';
-        this.creationEnCours = false;
-      },
-    });
+    this.empruntService
+      .creerExemplaire(this.ouvrageSelectionne.id, this.nouveauCodeBarre.trim())
+      .subscribe({
+        next: (res) => {
+          this.exemplairesTous = [
+            ...this.exemplairesTous,
+            { id: res.id, code_barre: this.nouveauCodeBarre.trim(), est_emprunte: false },
+          ];
+          this.nouveauCodeBarre = '';
+          this.creationSucces = true;
+          this.creationEnCours = false;
+        },
+        error: (err) => {
+          this.erreurExemplaires = err.error?.erreur ?? "Impossible de créer l'exemplaire.";
+          this.creationEnCours = false;
+        },
+      });
   }
 }

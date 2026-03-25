@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ConnexionService } from '../services/connexion.service';
 import { EmpruntItem, EmpruntService } from '../services/emprunt.service';
+import { CautionInfo, UtilisateurService } from '../services/utilisateur.service';
 
 @Component({
   selector: 'app-mes-emprunts',
@@ -16,10 +17,12 @@ export class MesEmpruntsComponent implements OnInit {
   enCours = true;
   erreur: string | null = null;
   nomUtilisateur = '';
+  caution: CautionInfo | null = null;
 
   constructor(
     private empruntService: EmpruntService,
     private connexionService: ConnexionService,
+    private utilisateurService: UtilisateurService,
   ) {}
 
   ngOnInit(): void {
@@ -35,6 +38,9 @@ export class MesEmpruntsComponent implements OnInit {
         this.erreur = 'Impossible de charger vos emprunts.';
         this.enCours = false;
       },
+    });
+    this.utilisateurService.getCaution(u.id).subscribe({
+      next: (info) => (this.caution = info),
     });
   }
 
