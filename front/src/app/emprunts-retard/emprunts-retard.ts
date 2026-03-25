@@ -9,6 +9,7 @@ import { EmpruntEnRetardItem, EmpruntService } from '../services/emprunt.service
   templateUrl: './emprunts-retard.html',
   styleUrl: './emprunts-retard.scss',
 })
+// Liste tous les emprunts dont la date de retour est dépassée (vue bibliothécaire).
 export class EmpruntsRetardComponent implements OnInit {
   emprunts: EmpruntEnRetardItem[] = [];
   enCours = true;

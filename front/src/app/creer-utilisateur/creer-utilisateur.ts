@@ -15,6 +15,7 @@ import {
   templateUrl: './creer-utilisateur.html',
   styleUrl: './creer-utilisateur.scss',
 })
+// Formulaire réactif de création d'un utilisateur avec champs conditionnels selon le statut.
 export class CreerUtilisateurComponent implements OnInit {
   readonly formulaire: FormGroup;
   departements: Departement[] = [];

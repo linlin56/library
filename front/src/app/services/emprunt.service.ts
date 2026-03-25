@@ -19,7 +19,13 @@ export interface EmpruntItem {
   en_retard: boolean;
 }
 
+export interface ExemplaireDisponible {
+  id: number;
+  code_barre: string;
+}
+
 @Injectable({ providedIn: 'root' })
+// Gère les emprunts : vérification des droits, enregistrement et consultation.
 export class EmpruntService {
   private readonly apiUrl = 'http://localhost:8080/api/emprunts';
 
@@ -46,6 +52,12 @@ export class EmpruntService {
 
   listerEmpruntsEnRetard(): Observable<EmpruntEnRetardItem[]> {
     return this.http.get<EmpruntEnRetardItem[]>(`${this.apiUrl}/retard`);
+  }
+
+  getExemplairesDisponibles(ouvrageId: number): Observable<ExemplaireDisponible[]> {
+    return this.http.get<ExemplaireDisponible[]>(
+      `http://localhost:8080/api/ouvrages/${ouvrageId}/exemplaires`,
+    );
   }
 }
 

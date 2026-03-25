@@ -10,6 +10,7 @@ import { EmpruntItem, EmpruntService } from '../services/emprunt.service';
   templateUrl: './mes-emprunts.html',
   styleUrl: './mes-emprunts.scss',
 })
+// Affiche les emprunts actifs de l'utilisateur connecté.
 export class MesEmpruntsComponent implements OnInit {
   emprunts: EmpruntItem[] = [];
   enCours = true;

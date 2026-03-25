@@ -28,6 +28,7 @@ type Config struct {
 // NewDBO crée une nouvelle instance du DBO et ouvre la connexion
 func NewDBO(cfg Config) (*DBO, error) {
 	dsn := fmt.Sprintf(
+		// URI de connexion PostgreSQL
 		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
 		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.DBName, cfg.SSLMode,
 	)
@@ -41,7 +42,7 @@ func NewDBO(cfg Config) (*DBO, error) {
 		return nil, fmt.Errorf("erreur ping base de données: %w", err)
 	}
 
-	log.Println("✅ Connexion à PostgreSQL établie")
+	log.Println("Connexion à PostgreSQL établie")
 	return &DBO{conn: conn}, nil
 }
 
@@ -63,7 +64,7 @@ func (d *DBO) Close() error {
 	return d.conn.Close()
 }
 
-// --- Méthodes raw de base ---
+// Méthodes SQL de base, à utiliser dans les repositories
 
 // QueryRows exécute une requête SELECT et retourne les lignes
 func (d *DBO) QueryRows(query string, args ...any) (*sql.Rows, error) {
@@ -98,8 +99,7 @@ func (d *DBO) ExecReturning(query string, args ...any) *sql.Row {
 	return d.conn.QueryRow(query, args...)
 }
 
-// --- Gestion des transactions ---
-
+// Gestion des transactions :
 // BeginTx démarre une transaction et retourne un TxDBO
 func (d *DBO) BeginTx() (*TxDBO, error) {
 	tx, err := d.conn.Begin()
@@ -146,7 +146,7 @@ func (d *DBO) SeedIfEmpty(scriptPath string) error {
 			return fmt.Errorf("erreur vérification données: %w", err)
 		}
 		if rowCount > 0 {
-			log.Println("ℹ️  Base de données déjà peuplée, aucun chargement nécessaire")
+			log.Println("Base de données déjà peuplée, aucun chargement nécessaire")
 			return nil
 		}
 	}
@@ -167,12 +167,13 @@ func (d *DBO) SeedIfEmpty(scriptPath string) error {
 		}
 	}
 
-	log.Println("✅ Base de données peuplée avec succès")
+	log.Println("Base de données peuplée avec succès")
 	return nil
 }
 
 // splitSQLStatements découpe un script SQL en instructions individuelles.
 // Gère les chaînes entre guillemets simples (y compris les '' échappés) et les commentaires --.
+// Cela évite les split naïfs sur les points-virgules qui pourraient être présents dans les données.
 func splitSQLStatements(script string) []string {
 	var stmts []string
 	var cur strings.Builder

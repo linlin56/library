@@ -11,6 +11,7 @@ import { connexionGuard } from './guards/connexion.guard';
 import { MesEmpruntsComponent } from './mes-emprunts/mes-emprunts';
 import { RechercheComponent } from './recherche/recherche';
 
+// Déclaration des routes de l'application et des guards de protection associés.
 export const routes: Routes = [
   { path: '', component: AccueilComponent },
   { path: 'connexion', component: ConnexionComponent, canActivate: [connexionGuard] },

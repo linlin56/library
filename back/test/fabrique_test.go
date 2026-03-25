@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// Tests pour le design pattern fabrique abstraite
 // ===================== FabriqueLivre =====================
 
 func TestFabriqueLivre_CreerOuvrage_RetourneLivre(t *testing.T) {

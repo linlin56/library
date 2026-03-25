@@ -29,6 +29,7 @@ export interface CreerUtilisateurResponse {
 }
 
 @Injectable({ providedIn: 'root' })
+// Accès à l'API pour la création d'un utilisateur et le chargement des départements.
 export class CreerUtilisateurService {
   private readonly apiUrl = 'http://localhost:8080/api';
 

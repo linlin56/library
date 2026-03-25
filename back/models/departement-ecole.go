@@ -1,8 +1,8 @@
 package models
 
 type DepartementEcole struct {
-	Id  int `gorm:"primaryKey;autoIncrement"`
-	Nom string
+	Id  int    `json:"id"`
+	Nom string `json:"nom"`
 }
 
 func NewDepartementEcole(id int, nom string) *DepartementEcole {

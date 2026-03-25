@@ -2,6 +2,7 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { ConnexionService } from '../services/connexion.service';
 
+// Autorise l'accès uniquement aux bibliothécaires connectés. Redirige vers l'accueil sinon.
 export const bibliothecaireGuard: CanActivateFn = () => {
   const connexionService = inject(ConnexionService);
   const router = inject(Router);

@@ -22,6 +22,7 @@ export interface CreerOuvrageResponse {
 }
 
 @Injectable({ providedIn: 'root' })
+// Accès à l'API pour la gestion des ouvrages : chargement des références et création.
 export class CreerOuvrageService {
   private readonly baseUrl = 'http://localhost:8080/api';
 

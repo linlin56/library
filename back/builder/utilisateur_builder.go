@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// Pattern builder
 type UtilisateurBuilder struct {
 	u models.Utilisateur
 }

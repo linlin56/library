@@ -11,6 +11,7 @@ export interface UtilisateurResume {
 }
 
 @Injectable({ providedIn: 'root' })
+// Recherche des utilisateurs par critères (vue bibliothécaire).
 export class UtilisateurService {
   private readonly apiUrl = 'http://localhost:8080/api/utilisateurs';
 

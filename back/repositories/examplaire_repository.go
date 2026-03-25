@@ -104,6 +104,28 @@ func (r *ExemplaireRepository) FindDisponibles() ([]*models.Exemplaire, error) {
 	return exemplaires, rows.Err()
 }
 
+func (r *ExemplaireRepository) FindDisponiblesByOuvrageId(ouvrageId int) ([]*models.Exemplaire, error) {
+	rows, err := r.dbo.QueryRows(`
+		SELECT id, est_emprunte, code_barre, delai_emprunt_jours
+		FROM exemplaires
+		WHERE ouvrage_id = $1 AND est_emprunte = false
+		ORDER BY code_barre`, ouvrageId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var result []*models.Exemplaire
+	for rows.Next() {
+		e := &models.Exemplaire{}
+		if err := rows.Scan(&e.Id, &e.EstEmprunte, &e.CodeBarre, &e.DelaiEmpruntJours); err != nil {
+			return nil, fmt.Errorf("FindDisponiblesByOuvrageId scan: %w", err)
+		}
+		result = append(result, e)
+	}
+	return result, rows.Err()
+}
+
 func (r *ExemplaireRepository) Create(e *models.Exemplaire) (int, error) {
 	var newID int
 	err := r.dbo.ExecReturning(

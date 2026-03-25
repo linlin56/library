@@ -1,3 +1,4 @@
+-- Ce script doit être lancé à l'exécution du projet
 -- =============================================================================
 -- BIBLIOTHÈQUE — Script SQL PostgreSQL
 -- Héritage natif PostgreSQL :
@@ -233,8 +234,10 @@ INSERT INTO exemplaires (est_emprunte, code_barre, delai_emprunt_jours, ouvrage_
     (FALSE, 'EX-0002', 15, (SELECT id FROM livres WHERE isbn = '978-2267011555')),
     -- Le Retour du roi
     (FALSE, 'EX-0003', 15, (SELECT id FROM livres WHERE isbn = '978-2267011777')),
-    -- Les Mille et Une Nuits
+    -- Les Mille et Une Nuits — exemplaire 1
     (FALSE, 'EX-0004', 15, (SELECT id FROM livres WHERE isbn = '978-2070379583')),
+    -- Les Mille et Une Nuits — exemplaire 2
+    (FALSE, 'EX-0008', 15, (SELECT id FROM livres WHERE isbn = '978-2070379583')),
     -- 60 millions de consommateurs n°581
     (FALSE, 'EX-0005',  7, (SELECT id FROM revues WHERE numero = 581)),
     -- 60 millions de consommateurs n°582

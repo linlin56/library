@@ -9,7 +9,7 @@ type IOuvrage interface {
 }
 
 type Ouvrage struct {
-	Id          int     `gorm:"primaryKey;autoIncrement" json:"id"`
+	Id          int     `json:"id"`
 	Caution     float64 `json:"caution"`
 	Titre       string  `json:"titre"`
 	Exemplaires int     `json:"exemplaires,omitempty"`

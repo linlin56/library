@@ -2,7 +2,7 @@ package models
 
 type Livre struct {
 	Ouvrage
-	AuteurId int     `gorm:"foreignKey" json:"auteur_id,omitempty"`
+	AuteurId int     `json:"auteur_id,omitempty"`
 	Auteur   *Auteur `json:"auteur,omitempty"`
 	Isbn     string  `json:"isbn,omitempty"`
 }

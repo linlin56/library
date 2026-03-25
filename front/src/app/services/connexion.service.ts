@@ -16,6 +16,7 @@ export interface UtilisateurConnecte {
 }
 
 @Injectable({ providedIn: 'root' })
+// Gère la session utilisateur : connexion, déconnexion et persistance via sessionStorage.
 export class ConnexionService {
   private readonly apiUrl = 'http://localhost:8080/api/connexion';
   private readonly storageKey = 'bibliotheque.utilisateur';

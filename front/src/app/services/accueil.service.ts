@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 export interface AccueilStats {
@@ -10,6 +10,7 @@ export interface AccueilStats {
 }
 
 @Injectable({ providedIn: 'root' })
+// Récupère les statistiques affichées sur la page d'accueil.
 export class AccueilService {
   private readonly apiUrl = 'http://localhost:8080/api/accueil';
 

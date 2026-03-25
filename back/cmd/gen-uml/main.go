@@ -18,6 +18,8 @@ import (
 	"bibliotheque/uml"
 )
 
+// Ce fichier sert à générer des diagrammes de séquence via une lib Go.
+// Pour comparer avec mes diagrammes faits à la main sur Paradigm et voir si tout correspond.
 func main() {
 	out := flag.String("out", "diagrams", "Répertoire de sortie pour les fichiers .puml")
 	flag.Parse()
@@ -27,6 +29,7 @@ func main() {
 	}
 
 	diagrams := map[string]*uml.SequenceDiagram{
+		// Liste des diagrammes à générer
 		"01_connexion":          connexionDiagram(),
 		"02_emprunt":            empruntDiagram(),
 		"03_creer_livre":        creerLivreDiagram(),
@@ -38,6 +41,7 @@ func main() {
 	}
 
 	for name, d := range diagrams {
+		// Écrit chaque diagramme dans un fichier .puml
 		path := filepath.Join(*out, name+".puml")
 		if err := d.WriteFile(path); err != nil {
 			log.Fatalf("Erreur écriture %s : %v", path, err)
@@ -75,9 +79,7 @@ func genClassDiagram(outDir string) {
 	fmt.Printf("OK  %s\n", outFile)
 }
 
-// ============================================================
 // Diagramme 1 — Connexion utilisateur
-// ============================================================
 
 func connexionDiagram() *uml.SequenceDiagram {
 	return uml.NewSequenceDiagram("Connexion d'un utilisateur").
@@ -129,9 +131,7 @@ func connexionDiagram() *uml.SequenceDiagram {
 		Deactivate("CTL")
 }
 
-// ============================================================
 // Diagramme 2 — Emprunt (verification puis enregistrement)
-// ============================================================
 
 func empruntDiagram() *uml.SequenceDiagram {
 	return uml.NewSequenceDiagram("Emprunt d'un exemplaire").
@@ -179,9 +179,7 @@ func empruntDiagram() *uml.SequenceDiagram {
 		Deactivate("CTL")
 }
 
-// ============================================================
 // Diagramme 3 — Creation d'un livre
-// ============================================================
 
 func creerLivreDiagram() *uml.SequenceDiagram {
 	return uml.NewSequenceDiagram("Creation d'un livre").
@@ -244,9 +242,7 @@ func creerLivreDiagram() *uml.SequenceDiagram {
 		Deactivate("CTL")
 }
 
-// ============================================================
 // Diagramme 4 — Recherche avancee d'ouvrages
-// ============================================================
 
 func rechercheDiagram() *uml.SequenceDiagram {
 	return uml.NewSequenceDiagram("Recherche avancee d'ouvrages").
@@ -276,9 +272,7 @@ func rechercheDiagram() *uml.SequenceDiagram {
 		Deactivate("CTL")
 }
 
-// ============================================================
 // Diagramme 5 — Creation d'un utilisateur
-// ============================================================
 
 func creerUtilisateurDiagram() *uml.SequenceDiagram {
 	return uml.NewSequenceDiagram("Creation d'un utilisateur").
@@ -337,9 +331,7 @@ func creerUtilisateurDiagram() *uml.SequenceDiagram {
 		Deactivate("CTL")
 }
 
-// ============================================================
 // Diagramme 6 — Liste des emprunts actifs d'un utilisateur
-// ============================================================
 
 func listerEmpruntsDiagram() *uml.SequenceDiagram {
 	return uml.NewSequenceDiagram("Liste des emprunts actifs").
@@ -367,9 +359,7 @@ func listerEmpruntsDiagram() *uml.SequenceDiagram {
 		Deactivate("CTL")
 }
 
-// ============================================================
 // Diagramme 7 — Emprunts en retard (vue bibliothecaire)
-// ============================================================
 
 func listerRetardsDiagram() *uml.SequenceDiagram {
 	return uml.NewSequenceDiagram("Liste des emprunts en retard").
@@ -396,9 +386,7 @@ func listerRetardsDiagram() *uml.SequenceDiagram {
 		Deactivate("CTL")
 }
 
-// ============================================================
 // Diagramme 8 — Recherche d'un utilisateur (vue bibliothecaire)
-// ============================================================
 
 func trouverUtilisateurDiagram() *uml.SequenceDiagram {
 	return uml.NewSequenceDiagram("Recherche d'un utilisateur").

@@ -10,6 +10,7 @@ import { Auteur, CreerOuvrageService, Emplacement } from '../services/creer-ouvr
   templateUrl: './creer-ouvrage.html',
   styleUrl: './creer-ouvrage.scss',
 })
+// Formulaire de création d'un livre ou d'une revue, avec autocomplétion sur l'auteur (vue bibliothécaire).
 export class CreerOuvrageComponent implements OnInit {
   type: 'livre' | 'revue' = 'livre';
 

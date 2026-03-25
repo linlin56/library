@@ -22,6 +22,7 @@ export interface FiltresRecherche {
 }
 
 @Injectable({ providedIn: 'root' })
+// Recherche des ouvrages en appliquant les filtres fournis en paramètres HTTP.
 export class RechercheService {
   private readonly apiUrl = 'http://localhost:8080/api/ouvrages';
 

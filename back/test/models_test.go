@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// Ces tests vérifient que les constructeurs ont le comportement attendu
 // ===================== Auteur =====================
 
 func TestNewAuteur_ChampsInitialises(t *testing.T) {

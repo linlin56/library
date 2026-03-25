@@ -2,8 +2,8 @@ package models
 
 type Enseignant struct {
 	Utilisateur
-	DepartementId int `gorm:"foreignKey"`
-	Departement   *DepartementEcole
+	DepartementId int               `json:"departement_id"`
+	Departement   *DepartementEcole `json:"departement,omitempty"`
 }
 
 func NewEnseignant(nom string, prenom string, login string, motDePasse string, departement *DepartementEcole) *Enseignant {

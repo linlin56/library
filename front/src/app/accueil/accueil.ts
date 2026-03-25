@@ -11,6 +11,7 @@ import { ConnexionService } from '../services/connexion.service';
   templateUrl: './accueil.html',
   styleUrl: './accueil.scss',
 })
+// Page d'accueil : affiche les statistiques de la bibliothèque.
 export class AccueilComponent implements OnInit {
   stats: AccueilStats | null = null;
   erreur = false;

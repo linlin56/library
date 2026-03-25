@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-// TxDBO encapsule une transaction SQL, même API que DBO
+// TxDBO encapsule une transaction SQL, même API que DBO mais avec commit/rollback
 type TxDBO struct {
 	tx *sql.Tx
 }

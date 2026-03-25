@@ -66,6 +66,7 @@ func CreerUtilisateur(c *gin.Context) {
 	}
 
 	dateNaissance, err := time.Parse("2006-01-02", req.DateNaissance)
+	// Normalement ça ne devrait pas arriver car on gère le format côté front
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"erreur": "Format de date invalide (attendu : AAAA-MM-JJ)."})
 		return
@@ -81,6 +82,8 @@ func CreerUtilisateur(c *gin.Context) {
 	}
 
 	login := genererLogin(req.Nom, req.Prenom)
+	// Pour simplifier le mot de passe sera toujours mdp.
+	// En situation réelle, il faudrait bien sûr générer un mdp aléatoire et le hasher
 	const motDePasse = "mdp"
 
 	utilisateurRepo := repositories.NewUtilisateurRepository(db.GlobalDBO)
@@ -172,7 +175,7 @@ func CreerUtilisateur(c *gin.Context) {
 }
 
 // --- helpers ---
-
+// Pour simplifier on ne stocke pas d'accent
 func normaliserChaine(s string) string {
 	r := strings.NewReplacer(
 		"à", "a", "â", "a", "ä", "a",

@@ -7,6 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// L'écran d'accueil affiche des stats sur la bibliothèque
+// Ça permet de voir que la BDD a été remplie
 type AccueilStats struct {
 	NbLivres                int `json:"nb_livres"`
 	NbRevues                int `json:"nb_revues"`

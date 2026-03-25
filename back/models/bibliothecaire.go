@@ -1,11 +1,11 @@
 package models
 
 type Bibliothecaire struct {
-	Id         int `gorm:"primaryKey;autoIncrement"`
-	Nom        string
-	Prenom     string
-	Login      string
-	MotDePasse string
+	Id         int    `json:"id"`
+	Nom        string `json:"nom"`
+	Prenom     string `json:"prenom"`
+	Login      string `json:"login"`
+	MotDePasse string `json:"mot_de_passe"`
 }
 
 func NewBibliothecaire(id int, nom string, prenom string, login string, motDePasse string) *Bibliothecaire {

@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// Pattern builder
 // EnseignantBuilder étend UtilisateurBuilder pour construire un Enseignant.
 type EnseignantBuilder struct {
 	UtilisateurBuilder

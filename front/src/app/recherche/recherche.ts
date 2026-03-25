@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ConnexionService } from '../services/connexion.service';
-import { EmpruntService, PreviewEmprunt } from '../services/emprunt.service';
+import { EmpruntService, ExemplaireDisponible, PreviewEmprunt } from '../services/emprunt.service';
 import { FiltresRecherche, Ouvrage, RechercheService } from '../services/recherche.service';
 
 type EtapeModal = 'saisie' | 'preview' | 'succes' | 'echec';
@@ -15,6 +15,7 @@ type EtapeModal = 'saisie' | 'preview' | 'succes' | 'echec';
   templateUrl: './recherche.html',
   styleUrl: './recherche.scss',
 })
+// Recherche d'ouvrages par filtres avec modal d'emprunt intégrée.
 export class RechercheComponent implements OnInit {
   // Champs recherche
   titre = '';
@@ -41,6 +42,8 @@ export class RechercheComponent implements OnInit {
   preview: PreviewEmprunt | null = null;
   erreurModal: string | null = null;
   enCoursModal = false;
+  exemplairesDisponibles: ExemplaireDisponible[] = [];
+  chargementExemplaires = false;
 
   constructor(
     private rechercheService: RechercheService,
@@ -129,7 +132,19 @@ export class RechercheComponent implements OnInit {
     this.preview = null;
     this.erreurModal = null;
     this.enCoursModal = false;
+    this.exemplairesDisponibles = [];
+    this.chargementExemplaires = true;
     this.modalVisible = true;
+    this.empruntService.getExemplairesDisponibles(ouvrage.id).subscribe({
+      next: (ex) => {
+        this.exemplairesDisponibles = ex;
+        this.chargementExemplaires = false;
+      },
+      error: () => {
+        this.erreurModal = 'Impossible de charger les exemplaires.';
+        this.chargementExemplaires = false;
+      },
+    });
   }
 
   fermerModal(): void {
@@ -165,7 +180,7 @@ export class RechercheComponent implements OnInit {
         this.enCoursModal = false;
       },
       error: (err) => {
-        this.erreurModal = err.error?.erreur ?? 'Erreur lors de l\'enregistrement.';
+        this.erreurModal = err.error?.erreur ?? "Erreur lors de l'enregistrement.";
         this.etapeModal = 'echec';
         this.enCoursModal = false;
       },

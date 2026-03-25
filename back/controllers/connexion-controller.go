@@ -1,12 +1,12 @@
 package controllers
 
 import (
-"bibliotheque/db"
-"bibliotheque/repositories"
-"net/http"
-"strings"
+	"bibliotheque/db"
+	"bibliotheque/repositories"
+	"net/http"
+	"strings"
 
-"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin"
 )
 
 type ConnexionRequest struct {
@@ -68,6 +68,6 @@ Id:      bibliothecaire.Id,
 Nom:     bibliothecaire.Nom,
 Prenom:  bibliothecaire.Prenom,
 Role:    "bibliothecaire",
-Message: "OK, l'utilisateur est connecte.",
+Message: "OK, l'utilisateur est connecté.",
 })
 }

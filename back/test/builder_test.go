@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// Tests pour le design pattern builder
 // ===================== UtilisateurBuilder =====================
 
 func TestUtilisateurBuilder_Build_ChampsSimples(t *testing.T) {

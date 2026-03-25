@@ -7,13 +7,22 @@ import (
 	"github.com/joho/godotenv"
 )
 
+/**
+ * Notes : pour gérer la connexion à la base de données, j'ai décidé d'utiliser un BDO
+ * Il y a un ORM pour Go qui s'appelle GORM, mais il ne gère pas l'héritage PostgreSQL
+ * J'ai commencé par faire la BDD et je trouve l'héritage très utile
+ * donc j'ai préféré utiliser un DBO et des repositories
+ */
+
 // DBO global accessible depuis tout le projet
+// C'est un singleton
 var GlobalDBO *DBO
 
 // Init charge le fichier db.env et initialise le DBO global
 func Init() {
+	// godotenv permet de charger un .env
 	if err := godotenv.Load("db/db.env"); err != nil {
-		log.Println("⚠️  Fichier db/db.env non trouvé, utilisation des variables d'environnement système")
+		log.Println(" Fichier db/db.env non trouvé, utilisation des variables d'environnement système")
 	}
 
 	port, err := strconv.Atoi(getEnv("DB_PORT", "5432"))
@@ -32,12 +41,12 @@ func Init() {
 
 	dbo, err := NewDBO(cfg)
 	if err != nil {
-		log.Fatalf("❌ Impossible de se connecter à la base de données: %v", err)
+		log.Fatalf("Impossible de se connecter à la base de données: %v", err)
 	}
 
 	GlobalDBO = dbo
 
 	if err := GlobalDBO.SeedIfEmpty("db/scripts/insert.sql"); err != nil {
-		log.Fatalf("❌ Erreur peuplement base de données: %v", err)
+		log.Fatalf("Erreur peuplement base de données: %v", err)
 	}
 }

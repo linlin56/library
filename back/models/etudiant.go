@@ -2,7 +2,7 @@ package models
 
 type Etudiant struct {
 	Utilisateur
-	AnneeEtude string
+	AnneeEtude string `json:"annee_etude"`
 }
 
 func NewEtudiant(nom string, prenom string, login string, motDePasse string, anneeEtude string) *Etudiant {

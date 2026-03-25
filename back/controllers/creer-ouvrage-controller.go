@@ -89,7 +89,7 @@ func CreerLivre(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"erreur": "Impossible de creer le livre."})
 		return
 	}
-	c.JSON(http.StatusCreated, gin.H{"id": id, "message": "Livre cree avec succes."})
+	c.JSON(http.StatusCreated, gin.H{"id": id, "message": "Livre créé avec succès."})
 }
 
 type CreerRevueRequest struct {
@@ -116,11 +116,11 @@ func CreerRevue(c *gin.Context) {
 		return
 	}
 	if req.Numero <= 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"erreur": "Le numero doit etre un entier positif."})
+		c.JSON(http.StatusBadRequest, gin.H{"erreur": "Le numéro doit être un entier positif."})
 		return
 	}
 	if req.Caution < 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"erreur": "La caution ne peut pas etre negative."})
+		c.JSON(http.StatusBadRequest, gin.H{"erreur": "La caution ne peut pas être négative."})
 		return
 	}
 	if req.DateParution == "" {
@@ -135,8 +135,8 @@ func CreerRevue(c *gin.Context) {
 	ouvrageRepo := repositories.NewOuvrageRepository(db.GlobalDBO)
 	id, err := ouvrageRepo.CreateRevue(req.Titre, req.Caution, req.Numero, req.DateParution, req.EmplacementId)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"erreur": "Impossible de creer la revue."})
+		c.JSON(http.StatusInternalServerError, gin.H{"erreur": "Impossible de créer la revue."})
 		return
 	}
-	c.JSON(http.StatusCreated, gin.H{"id": id, "message": "Revue creee avec succes."})
+	c.JSON(http.StatusCreated, gin.H{"id": id, "message": "Revue créée avec succès."})
 }
