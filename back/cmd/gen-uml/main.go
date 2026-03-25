@@ -28,16 +28,17 @@ func main() {
 		log.Fatalf("Impossible de créer le répertoire de sortie : %v", err)
 	}
 
-	diagrams := map[string]*uml.SequenceDiagram{
+	diagrams := map[string]uml.Diagram{
 		// Liste des diagrammes à générer
-		"01_connexion":          connexionDiagram(),
-		"02_emprunt":            empruntDiagram(),
-		"03_creer_livre":        creerLivreDiagram(),
-		"04_recherche":          rechercheDiagram(),
-		"05_creer_utilisateur":  creerUtilisateurDiagram(),
-		"06_lister_emprunts":    listerEmpruntsDiagram(),
-		"07_lister_retards":     listerRetardsDiagram(),
+		"01_connexion":           connexionDiagram(),
+		"02_emprunt":             empruntDiagram(),
+		"03_creer_ouvrage":       creerOuvrageDiagram(),
+		"04_recherche":           rechercheDiagram(),
+		"05_creer_utilisateur":   creerUtilisateurDiagram(),
+		"06_lister_emprunts":     listerEmpruntsDiagram(),
+		"07_lister_retards":      listerRetardsDiagram(),
 		"08_trouver_utilisateur": trouverUtilisateurDiagram(),
+		"09_cas_utilisation":     casDUtilisationDiagram(),
 	}
 
 	for name, d := range diagrams {
@@ -179,13 +180,13 @@ func empruntDiagram() *uml.SequenceDiagram {
 		Deactivate("CTL")
 }
 
-// Diagramme 3 — Creation d'un livre
+// Diagramme 3 — Creation d'un ouvrage (livre ou revue)
 
-func creerLivreDiagram() *uml.SequenceDiagram {
-	return uml.NewSequenceDiagram("Creation d'un livre").
+func creerOuvrageDiagram() *uml.SequenceDiagram {
+	return uml.NewSequenceDiagram("Creation d'un ouvrage (livre ou revue)").
 		Actor("C", "Client (bibliothecaire)").
 		Participant("CTL", "CreerOuvrageController").
-		Participant("FAB", "FabriqueLivre").
+		Participant("FAB", "FabriqueOuvrage").
 		Participant("OR", "OuvrageRepository").
 		Participant("AR", "AuteurRepository").
 		Participant("EMR", "EmplacementRepository").
@@ -216,11 +217,21 @@ func creerLivreDiagram() *uml.SequenceDiagram {
 		DashedArrow("CTL", "C", "200 [emplacements]").
 		Deactivate("CTL").
 		Blank().
-		Separator("Soumission du formulaire").
-		Arrow("C", "CTL", "POST /api/livres\\n{titre, isbn, caution, auteur_id, emplacement_id}").
+		Separator("Soumission - Livre").
+		Arrow("C", "CTL", "POST /api/livres\\n{titre, isbn, caution, auteur_id?, auteur_nom?, auteur_prenom?, emplacement_id}").
 		Activate("CTL").
-		Note("right of", "CTL", "Validation : titre, isbn, auteur_id > 0, emplacement_id > 0").
-		Arrow("CTL", "FAB", "CreerOuvrage()").
+		Note("right of", "CTL", "Validation : titre, isbn requis\\nemplacement_id > 0, caution >= 0").
+		AltStart("Auteur nouveau (auteur_id = 0)").
+		Arrow("CTL", "AR", "Create(&Auteur{nom, prenom})").
+		Activate("AR").
+		Arrow("AR", "DB", "INSERT INTO auteurs(nom, prenom) RETURNING id").
+		Activate("DB").
+		DashedArrow("DB", "AR", "auteurId").
+		Deactivate("DB").
+		DashedArrow("AR", "CTL", "auteurId, nil").
+		Deactivate("AR").
+		End().
+		Arrow("CTL", "FAB", "FabriqueLivre{}.CreerOuvrage()").
 		Activate("FAB").
 		DashedArrow("FAB", "CTL", "*Livre (id=0)").
 		Deactivate("FAB").
@@ -234,11 +245,28 @@ func creerLivreDiagram() *uml.SequenceDiagram {
 		Deactivate("DB").
 		DashedArrow("OR", "CTL", "newId, nil").
 		Deactivate("OR").
-		AltStart("Succes").
 		DashedArrow("CTL", "C", "201 {id, message: Livre cree avec succes}").
-		Else("Erreur (auteur inexistant, emplacement invalide...)").
-		DashedArrow("CTL", "C", "500 {erreur}").
-		End().
+		Deactivate("CTL").
+		Blank().
+		Separator("Soumission - Revue").
+		Arrow("C", "CTL", "POST /api/revues\\n{titre, numero, date_parution, caution, emplacement_id}").
+		Activate("CTL").
+		Note("right of", "CTL", "Validation : titre, numero, date_parution requis\\nemplacement_id > 0").
+		Arrow("CTL", "FAB", "FabriqueRevue{}.CreerOuvrage()").
+		Activate("FAB").
+		DashedArrow("FAB", "CTL", "*Revue (id=0)").
+		Deactivate("FAB").
+		Arrow("CTL", "OR", "CreateRevue(titre, caution, numero, dateParution, emplacementId)").
+		Activate("OR").
+		Arrow("OR", "DB", "BEGIN TRANSACTION").
+		Activate("DB").
+		Arrow("OR", "DB", "INSERT INTO ouvrages(titre, caution, emplacement_id) RETURNING id").
+		Arrow("OR", "DB", "INSERT INTO revues(id, numero, date_parution)").
+		Arrow("OR", "DB", "COMMIT").
+		Deactivate("DB").
+		DashedArrow("OR", "CTL", "newId, nil").
+		Deactivate("OR").
+		DashedArrow("CTL", "C", "201 {id, message: Revue creee avec succes}").
 		Deactivate("CTL")
 }
 
@@ -413,4 +441,63 @@ func trouverUtilisateurDiagram() *uml.SequenceDiagram {
 		DashedArrow("CTL", "C", "200 [{id, nom, prenom, login, telephone, solde_caution}]").
 		End().
 		Deactivate("CTL")
+}
+
+// Diagramme 9 — Cas d'utilisation (vue globale du système)
+
+func casDUtilisationDiagram() *uml.UseCaseDiagram {
+	return uml.NewUseCaseDiagram("Diagramme de cas d'utilisation - Bibliotheque").
+		Direction("left to right direction").
+		Blank().
+		// Acteurs
+		Actor("BIB", "Bibliothecaire").
+		Actor("UTI", "Utilisateur").
+		Actor("ETU", "Etudiant").
+		Actor("ENS", "Enseignant").
+		Blank().
+		// Héritages acteurs
+		ActorInherits("ETU", "UTI").
+		ActorInherits("ENS", "UTI").
+		Blank().
+		// Frontière système
+		RectangleStart("Gestion bibliotheque").
+		UseCase("UC_CO", "connexion").
+		UseCase("UC_CU", "creer_utilisateur").
+		UseCase("UC_TU", "trouver_un_utilisateur").
+		UseCase("UC_LR", "lister_les_retards").
+		UseCase("UC_EO", "enregistrer_ouvrage").
+		UseCase("UC_RS", "rechercher_simple").
+		UseCase("UC_RA", "rechercher_avancee").
+		UseCase("UC_RX", "recherche_exemplaire").
+		UseCase("UC_LEU", "lister_emprunts_utilisateur").
+		UseCase("UC_LSE", "lister_ses_emprunts").
+		UseCase("UC_EU", "emprunter_un_ouvrage").
+		RectangleEnd().
+		Blank().
+		// Associations Bibliothécaire
+		Association("BIB", "UC_CU").
+		Association("BIB", "UC_TU").
+		Association("BIB", "UC_LR").
+		Association("BIB", "UC_EO").
+		Association("BIB", "UC_RS").
+		Association("BIB", "UC_RA").
+		Association("BIB", "UC_LEU").
+		Blank().
+		// Associations Utilisateur (connecte)
+		Association("UTI", "UC_RS").
+		Association("UTI", "UC_RA").
+		Association("UTI", "UC_LSE").
+		Association("UTI", "UC_EU").
+		Blank().
+		// Relations <<include>>
+		Include("UC_CU", "UC_CO").
+		Include("UC_TU", "UC_CO").
+		Include("UC_EO", "UC_CO").
+		Include("UC_LEU", "UC_TU").
+		Include("UC_LSE", "UC_CO").
+		Include("UC_EU", "UC_CO").
+		Blank().
+		// Relations <<extend>>
+		Extend("UC_RS", "UC_RX").
+		Extend("UC_RA", "UC_RX")
 }

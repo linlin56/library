@@ -116,6 +116,11 @@ namespace controllers {
         + CodeBarre string
 
     }
+    class "ExemplaireResume" << (S,Aquamarine) >> {
+        + Id int
+        + CodeBarre string
+
+    }
 }
 namespace db {
     class "Config" << (S,Aquamarine) >> {
@@ -361,6 +366,7 @@ namespace repositories {
         + FindByID(id int) (*models.Exemplaire, error)
         + FindByCodeBarre(codeBarre string) (*models.Exemplaire, error)
         + FindDisponibles() ([]*models.Exemplaire, error)
+        + FindDisponiblesByOuvrageId(ouvrageId int) ([]*models.Exemplaire, error)
         + Create(e *models.Exemplaire) (int, error)
         + Update(e *models.Exemplaire) error
         + Emprunter(exemplaireID int, emprunteurID int, delaiJours int) error
@@ -458,6 +464,10 @@ namespace repositories {
 namespace test {
 }
 namespace uml {
+    interface "Diagram"  {
+        + WriteFile(path string) error
+
+    }
     class "SequenceDiagram" << (S,Aquamarine) >> {
         - title string
         - lines []string
@@ -482,6 +492,27 @@ namespace uml {
         + WriteFile(path string) error
 
     }
+    class "UseCaseDiagram" << (S,Aquamarine) >> {
+        - title string
+        - lines []string
+
+        - add(l string) *UseCaseDiagram
+
+        + Direction(dir string) *UseCaseDiagram
+        + Actor(alias string, label string) *UseCaseDiagram
+        + ActorInherits(child string, parent string) *UseCaseDiagram
+        + UseCase(alias string, label string) *UseCaseDiagram
+        + RectangleStart(label string) *UseCaseDiagram
+        + RectangleEnd() *UseCaseDiagram
+        + Association(from string, to string) *UseCaseDiagram
+        + Include(from string, to string) *UseCaseDiagram
+        + Extend(from string, to string) *UseCaseDiagram
+        + Blank() *UseCaseDiagram
+        + String() string
+        + WriteTo(w io.Writer) error
+        + WriteFile(path string) error
+
+    }
 }
 "builder.UtilisateurBuilder" *-- "builder.EnseignantBuilder"
 "builder.UtilisateurBuilder" *-- "builder.EtudiantBuilder"
@@ -493,6 +524,8 @@ namespace uml {
 "fabrique.FabriqueOuvrage" <|-- "fabrique.FabriqueLivre"
 "fabrique.FabriqueOuvrage" <|-- "fabrique.FabriqueRevue"
 "models.IOuvrage" <|-- "models.Ouvrage"
+"uml.Diagram" <|-- "uml.SequenceDiagram"
+"uml.Diagram" <|-- "uml.UseCaseDiagram"
 
 
 @enduml

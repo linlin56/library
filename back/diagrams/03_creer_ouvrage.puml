@@ -1,0 +1,88 @@
+@startuml
+title Creation d'un ouvrage (livre ou revue)
+
+actor "Client (bibliothecaire)" as C
+participant "CreerOuvrageController" as CTL
+participant "FabriqueOuvrage" as FAB
+participant "OuvrageRepository" as OR
+participant "AuteurRepository" as AR
+participant "EmplacementRepository" as EMR
+participant "PostgreSQL" as DB
+
+== Chargement du formulaire ==
+C -> CTL : GET /api/auteurs
+activate CTL
+CTL -> AR : FindAll()
+activate AR
+AR -> DB : SELECT id, nom, prenom FROM auteurs ORDER BY nom
+activate DB
+DB --> AR : []Auteur
+deactivate DB
+AR --> CTL : []Auteur, nil
+deactivate AR
+CTL --> C : 200 [auteurs]
+
+C -> CTL : GET /api/emplacements
+CTL -> EMR : FindAll()
+activate EMR
+EMR -> DB : SELECT emplacements JOIN categories
+activate DB
+DB --> EMR : []EmplacementResume
+deactivate DB
+EMR --> CTL : []EmplacementResume, nil
+deactivate EMR
+CTL --> C : 200 [emplacements]
+deactivate CTL
+
+== Soumission - Livre ==
+C -> CTL : POST /api/livres\n{titre, isbn, caution, auteur_id?, auteur_nom?, auteur_prenom?, emplacement_id}
+activate CTL
+note right of CTL : Validation : titre, isbn requis\nemplacement_id > 0, caution >= 0
+alt Auteur nouveau (auteur_id = 0)
+CTL -> AR : Create(&Auteur{nom, prenom})
+activate AR
+AR -> DB : INSERT INTO auteurs(nom, prenom) RETURNING id
+activate DB
+DB --> AR : auteurId
+deactivate DB
+AR --> CTL : auteurId, nil
+deactivate AR
+end
+CTL -> FAB : FabriqueLivre{}.CreerOuvrage()
+activate FAB
+FAB --> CTL : *Livre (id=0)
+deactivate FAB
+CTL -> OR : CreateLivre(titre, caution, isbn, auteurId, emplacementId)
+activate OR
+OR -> DB : BEGIN TRANSACTION
+activate DB
+OR -> DB : INSERT INTO ouvrages(titre, caution, emplacement_id) RETURNING id
+OR -> DB : INSERT INTO livres(id, isbn, auteur_id)
+OR -> DB : COMMIT
+deactivate DB
+OR --> CTL : newId, nil
+deactivate OR
+CTL --> C : 201 {id, message: Livre cree avec succes}
+deactivate CTL
+
+== Soumission - Revue ==
+C -> CTL : POST /api/revues\n{titre, numero, date_parution, caution, emplacement_id}
+activate CTL
+note right of CTL : Validation : titre, numero, date_parution requis\nemplacement_id > 0
+CTL -> FAB : FabriqueRevue{}.CreerOuvrage()
+activate FAB
+FAB --> CTL : *Revue (id=0)
+deactivate FAB
+CTL -> OR : CreateRevue(titre, caution, numero, dateParution, emplacementId)
+activate OR
+OR -> DB : BEGIN TRANSACTION
+activate DB
+OR -> DB : INSERT INTO ouvrages(titre, caution, emplacement_id) RETURNING id
+OR -> DB : INSERT INTO revues(id, numero, date_parution)
+OR -> DB : COMMIT
+deactivate DB
+OR --> CTL : newId, nil
+deactivate OR
+CTL --> C : 201 {id, message: Revue creee avec succes}
+deactivate CTL
+@enduml
