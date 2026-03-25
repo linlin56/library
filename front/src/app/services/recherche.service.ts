@@ -10,6 +10,8 @@ export interface Ouvrage {
   isbn?: string;
   auteur?: string;
   numero?: number;
+  exemplaires_disponibles: number;
+  emplacement?: string;
 }
 
 export interface FiltresRecherche {

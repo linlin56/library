@@ -161,6 +161,18 @@
                       <span class="fw-semibold">Numero :</span> {{ ouvrage.numero }}
                     </p>
                   }
+                  <p class="text-muted small mb-1">
+                    <span class="fw-semibold">Exemplaires disponibles :</span>
+                    <span [class.text-success]="ouvrage.exemplaires_disponibles > 0"
+                          [class.text-danger]="ouvrage.exemplaires_disponibles === 0">
+                      {{ ouvrage.exemplaires_disponibles }}
+                    </span>
+                  </p>
+                  @if (ouvrage.emplacement) {
+                    <p class="text-muted small mb-1">
+                      <span class="fw-semibold">Emplacement :</span> {{ ouvrage.emplacement }}
+                    </p>
+                  }
                   <div class="d-flex justify-content-between align-items-center mt-3">
                     <span class="text-primary fw-bold"
                       >Caution : {{ ouvrage.caution | number: '1.2-2' }} &euro;</span
