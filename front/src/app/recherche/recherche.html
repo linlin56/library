@@ -24,7 +24,7 @@
               class="btn btn-link p-0 text-decoration-none text-secondary fw-semibold small"
               (click)="rechercheAvanceeOuverte = !rechercheAvanceeOuverte"
             >
-              {{ rechercheAvanceeOuverte ? '▲' : '▼' }} Recherche avancee
+              {{ rechercheAvanceeOuverte ? '▲' : '▼' }} Recherche avancée
             </button>
           </div>
 
@@ -163,8 +163,10 @@
                   }
                   <p class="text-muted small mb-1">
                     <span class="fw-semibold">Exemplaires disponibles :</span>
-                    <span [class.text-success]="ouvrage.exemplaires_disponibles > 0"
-                          [class.text-danger]="ouvrage.exemplaires_disponibles === 0">
+                    <span
+                      [class.text-success]="ouvrage.exemplaires_disponibles > 0"
+                      [class.text-danger]="ouvrage.exemplaires_disponibles === 0"
+                    >
                       {{ ouvrage.exemplaires_disponibles }}
                     </span>
                   </p>
