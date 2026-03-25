@@ -179,19 +179,31 @@
                     <span class="text-primary fw-bold"
                       >Caution : {{ ouvrage.caution | number: '1.2-2' }} &euro;</span
                     >
-                    <button
-                      type="button"
-                      class="btn btn-sm"
-                      [class.btn-primary]="estConnecte"
-                      [class.btn-outline-secondary]="!estConnecte"
-                      [disabled]="!estConnecte"
-                      [title]="
-                        estConnecte ? 'Emprunter cet ouvrage' : 'Connectez-vous pour emprunter'
-                      "
-                      (click)="estConnecte && ouvrirModal(ouvrage)"
-                    >
-                      {{ estConnecte ? 'Emprunter' : 'Connectez-vous' }}
-                    </button>
+                    <div class="d-flex gap-2">
+                      @if (estBibliothecaire) {
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-outline-warning"
+                          title="Gérer les exemplaires"
+                          (click)="ouvrirModalExemplaires(ouvrage)"
+                        >
+                          Éditer exemplaires
+                        </button>
+                      }
+                      <button
+                        type="button"
+                        class="btn btn-sm"
+                        [class.btn-primary]="estConnecte"
+                        [class.btn-outline-secondary]="!estConnecte"
+                        [disabled]="!estConnecte"
+                        [title]="
+                          estConnecte ? 'Emprunter cet ouvrage' : 'Connectez-vous pour emprunter'
+                        "
+                        (click)="estConnecte && ouvrirModal(ouvrage)"
+                      >
+                        {{ estConnecte ? 'Emprunter' : 'Connectez-vous' }}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -373,3 +385,95 @@
     </div>
   </div>
 }
+
+<!-- ===== MODAL ÉDITION EXEMPLAIRES ===== -->
+@if (modalExemplairesVisible) {
+  <div class="modal-backdrop fade show"></div>
+  <div class="modal d-block" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold">Exemplaires</h5>
+          <button type="button" class="btn-close" (click)="fermerModalExemplaires()"></button>
+        </div>
+        <div class="modal-body">
+          @if (ouvrageSelectionne) {
+            <div class="alert alert-light border mb-3">
+              <span class="fw-semibold">{{ ouvrageSelectionne.titre }}</span>
+            </div>
+          }
+
+          <!-- Tableau des exemplaires -->
+          @if (chargementTousExemplaires) {
+            <div class="text-center py-3">
+              <span class="spinner-border spinner-border-sm me-2"></span> Chargement...
+            </div>
+          } @else if (exemplairesTous.length === 0) {
+            <div class="alert alert-warning mb-3">Aucun exemplaire pour cet ouvrage.</div>
+          } @else {
+            <table class="table table-sm table-bordered mb-4">
+              <thead class="table-light">
+                <tr>
+                  <th>Code-barre</th>
+                  <th>Statut</th>
+                  <th>Retour prévu</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (ex of exemplairesTous; track ex.id) {
+                  <tr>
+                    <td><code>{{ ex.code_barre }}</code></td>
+                    <td>
+                      @if (ex.est_emprunte) {
+                        <span class="badge bg-danger">Emprunté</span>
+                      } @else {
+                        <span class="badge bg-success">Disponible</span>
+                      }
+                    </td>
+                    <td class="text-muted small">{{ ex.date_fin_emprunt ?? '—' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+
+          <!-- Formulaire création -->
+          <hr />
+          <h6 class="fw-semibold mb-3">Créer un exemplaire</h6>
+          @if (creationSucces) {
+            <div class="alert alert-success py-2">Exemplaire créé avec succès.</div>
+          }
+          @if (erreurExemplaires && !chargementTousExemplaires) {
+            <div class="alert alert-danger py-2">{{ erreurExemplaires }}</div>
+          }
+          <div class="input-group">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Code-barre du nouvel exemplaire"
+              [(ngModel)]="nouveauCodeBarre"
+              [disabled]="creationEnCours"
+            />
+            <button
+              type="button"
+              class="btn btn-primary"
+              (click)="creerExemplaire()"
+              [disabled]="creationEnCours || !nouveauCodeBarre.trim()"
+            >
+              @if (creationEnCours) {
+                <span class="spinner-border spinner-border-sm me-1"></span>
+              }
+              Créer
+            </button>
+          </div>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button type="button" class="btn btn-outline-secondary" (click)="fermerModalExemplaires()">
+            Fermer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
