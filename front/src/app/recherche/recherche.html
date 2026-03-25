@@ -57,7 +57,7 @@
                 />
               </div>
               <div class="mb-3">
-                <label for="codeRevue" class="form-label">Code revue (numero)</label>
+                <label for="codeRevue" class="form-label">Code revue (numéro)</label>
                 <input
                   id="codeRevue"
                   type="text"
@@ -134,7 +134,7 @@
         </div>
       }
       @if (resultats.length > 0) {
-        <p class="text-muted small mb-3">{{ resultats.length }} ouvrage(s) trouve(s)</p>
+        <p class="text-muted small mb-3">{{ resultats.length }} ouvrage(s) trouvé(s)</p>
         <div class="row g-3">
           @for (ouvrage of resultats; track ouvrage.id) {
             <div class="col-12">
