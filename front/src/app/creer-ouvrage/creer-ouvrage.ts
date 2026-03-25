@@ -2,6 +2,9 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Auteur, CreerOuvrageService, Emplacement } from '../services/creer-ouvrage.service';
+import { EmpruntService, ExemplaireComplet } from '../services/emprunt.service';
+
+type Etape = 'formulaire' | 'exemplaires';
 
 @Component({
   selector: 'app-creer-ouvrage',
@@ -12,6 +15,8 @@ import { Auteur, CreerOuvrageService, Emplacement } from '../services/creer-ouvr
 })
 // Formulaire de création d'un livre ou d'une revue, avec autocomplétion sur l'auteur (vue bibliothécaire).
 export class CreerOuvrageComponent implements OnInit {
+  etape: Etape = 'formulaire';
+
   type: 'livre' | 'revue' = 'livre';
 
   // Champs communs
@@ -32,7 +37,7 @@ export class CreerOuvrageComponent implements OnInit {
   numero: number | null = null;
   dateParution = '';
 
-  // Etat
+  // Etat formulaire
   auteurs: Auteur[] = [];
   emplacements: Emplacement[] = [];
   emplacementId: number | null = null;
@@ -40,7 +45,20 @@ export class CreerOuvrageComponent implements OnInit {
   erreur: string | null = null;
   succes: string | null = null;
 
-  constructor(private service: CreerOuvrageService) {}
+  // Etape 2 — exemplaires
+  ouvrageCreeTitre = '';
+  ouvrageId: number | null = null;
+  exemplairesTous: ExemplaireComplet[] = [];
+  chargementExemplaires = false;
+  nouveauCodeBarre = '';
+  creationEnCours = false;
+  creationSucces = false;
+  erreurExemplaires: string | null = null;
+
+  constructor(
+    private service: CreerOuvrageService,
+    private empruntService: EmpruntService,
+  ) {}
 
   ngOnInit(): void {
     this.service.getAuteurs().subscribe({
@@ -133,10 +151,9 @@ export class CreerOuvrageComponent implements OnInit {
           emplacement_id: this.emplacementId,
         })
         .subscribe({
-          next: () => {
-            this.succes = `La revue « ${this.titre.trim()} » a été créée avec succès.`;
+          next: (res) => {
             this.enCours = false;
-            this.resetChamps();
+            this.passerEtapeExemplaires(res.id, this.titre.trim());
           },
           error: (err) => {
             this.erreur = err.error?.erreur ?? 'Erreur lors de la création de la revue.';
@@ -176,14 +193,13 @@ export class CreerOuvrageComponent implements OnInit {
         return;
       }
       this.service.creerLivre(payload).subscribe({
-        next: () => {
-          this.succes = `Le livre « ${this.titre.trim()} » a été créé avec succès.`;
+        next: (res) => {
           this.enCours = false;
           const etaitNouvelAuteur = this.auteurNouveauVisible;
-          this.resetChamps();
           if (etaitNouvelAuteur) {
             this.service.getAuteurs().subscribe({ next: (a) => (this.auteurs = a) });
           }
+          this.passerEtapeExemplaires(res.id, this.titre.trim());
         },
         error: (err) => {
           this.erreur = err.error?.erreur ?? 'Erreur lors de la création du livre.';
@@ -191,6 +207,54 @@ export class CreerOuvrageComponent implements OnInit {
         },
       });
     }
+  }
+
+  private passerEtapeExemplaires(id: number, titre: string): void {
+    this.ouvrageId = id;
+    this.ouvrageCreeTitre = titre;
+    this.exemplairesTous = [];
+    this.nouveauCodeBarre = '';
+    this.creationEnCours = false;
+    this.creationSucces = false;
+    this.erreurExemplaires = null;
+    this.chargementExemplaires = true;
+    this.etape = 'exemplaires';
+    this.empruntService.getTousExemplaires(id).subscribe({
+      next: (ex) => {
+        this.exemplairesTous = ex;
+        this.chargementExemplaires = false;
+      },
+      error: () => {
+        this.chargementExemplaires = false;
+      },
+    });
+  }
+
+  creerExemplaire(): void {
+    if (!this.nouveauCodeBarre.trim() || !this.ouvrageId) return;
+    this.creationEnCours = true;
+    this.erreurExemplaires = null;
+    this.creationSucces = false;
+    this.empruntService.creerExemplaire(this.ouvrageId, this.nouveauCodeBarre.trim()).subscribe({
+      next: (res) => {
+        this.exemplairesTous = [
+          ...this.exemplairesTous,
+          { id: res.id, code_barre: this.nouveauCodeBarre.trim(), est_emprunte: false },
+        ];
+        this.nouveauCodeBarre = '';
+        this.creationSucces = true;
+        this.creationEnCours = false;
+      },
+      error: (err) => {
+        this.erreurExemplaires = err.error?.erreur ?? "Impossible de créer l'exemplaire.";
+        this.creationEnCours = false;
+      },
+    });
+  }
+
+  creerNouvelOuvrage(): void {
+    this.etape = 'formulaire';
+    this.resetChamps();
   }
 
   private resetChamps(): void {
@@ -207,5 +271,7 @@ export class CreerOuvrageComponent implements OnInit {
     this.numero = null;
     this.dateParution = '';
     this.emplacementId = null;
+    this.erreur = null;
+    this.succes = null;
   }
 }

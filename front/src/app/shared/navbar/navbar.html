@@ -35,6 +35,18 @@
         </li>
 
         <ng-container *ngIf="utilisateurConnecte$ | async as utilisateur; else nonConnecte">
+          <!-- Lien Emprunts visible pour tous les connectés -->
+          <li class="nav-item">
+            <a
+              class="nav-link"
+              [routerLink]="
+                utilisateur.role === 'bibliothecaire' ? '/emprunts-retard' : '/mes-emprunts'
+              "
+              routerLinkActive="active"
+              data-bs-dismiss="collapse"
+              >Emprunts</a
+            >
+          </li>
           <!-- Sous-menu Gestion pour la bibliothécaire -->
           <li *ngIf="utilisateur.role === 'bibliothecaire'" class="nav-item dropdown">
             <a
@@ -75,15 +87,6 @@
                 >
               </li>
             </ul>
-          </li>
-          <li *ngIf="utilisateur.role !== 'bibliothecaire'" class="nav-item">
-            <a
-              class="nav-link"
-              routerLink="/mes-emprunts"
-              routerLinkActive="active"
-              data-bs-dismiss="collapse"
-              >Mes emprunts</a
-            >
           </li>
           <li class="nav-item d-flex align-items-center ms-2 text-white fw-semibold">
             Bonjour {{ utilisateur.prenom }} {{ utilisateur.nom }}

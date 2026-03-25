@@ -131,6 +131,15 @@ func (r *ExemplaireRepository) FindAllByOuvrageId(ouvrageId int) ([]*models.Exem
 }
 
 func (r *ExemplaireRepository) CreateForOuvrage(ouvrageId int, codeBarre string, delai int) (int, error) {
+	// Vérifier l'unicité du code-barre (tous ouvrages confondus)
+	var exists bool
+	if err := r.dbo.QueryRow(`SELECT EXISTS(SELECT 1 FROM exemplaires WHERE code_barre = $1)`, codeBarre).Scan(&exists); err != nil {
+		return 0, fmt.Errorf("CreateForOuvrage (vérification): %w", err)
+	}
+	if exists {
+		return 0, fmt.Errorf("Ce code-barre existe déjà.")
+	}
+
 	var newID int
 	err := r.dbo.ExecReturning(
 		`INSERT INTO exemplaires (ouvrage_id, code_barre, delai_emprunt_jours, est_emprunte)

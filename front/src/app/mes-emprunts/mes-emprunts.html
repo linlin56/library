@@ -31,9 +31,13 @@
           <div
             class="fw-bold fs-5"
             [class.text-success]="caution.solde_caution === caution.caution_totale"
-            [class.text-warning]="caution.solde_caution < caution.caution_totale && caution.solde_caution > 0"
+            [class.text-warning]="
+              caution.solde_caution < caution.caution_totale && caution.solde_caution > 0
+            "
             [class.text-danger]="caution.solde_caution <= 0"
-          >{{ caution.solde_caution | number: '1.2-2' }} &euro;</div>
+          >
+            {{ caution.solde_caution | number: '1.2-2' }} &euro;
+          </div>
         </div>
       </div>
     }

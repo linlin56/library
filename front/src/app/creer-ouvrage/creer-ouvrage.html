@@ -4,245 +4,327 @@
       <h1 class="fw-bold mb-1">Créer un ouvrage</h1>
       <p class="text-muted mb-4">Ajoutez un livre ou une revue au catalogue.</p>
 
-      @if (succes) {
-        <div class="alert alert-success d-flex align-items-center gap-2 mb-4">
-          <span>✅ {{ succes }}</span>
-          <button type="button" class="btn-close ms-auto" (click)="succes = null"></button>
-        </div>
-      }
+      @if (etape === 'formulaire') {
+        @if (erreur) {
+          <div class="alert alert-danger d-flex align-items-center gap-2 mb-4">
+            <span>{{ erreur }}</span>
+            <button type="button" class="btn-close ms-auto" (click)="erreur = null"></button>
+          </div>
+        }
 
-      @if (erreur) {
-        <div class="alert alert-danger d-flex align-items-center gap-2 mb-4">
-          <span>{{ erreur }}</span>
-          <button type="button" class="btn-close ms-auto" (click)="erreur = null"></button>
-        </div>
-      }
-
-      <div class="card border-0 shadow-sm">
-        <div class="card-body p-4">
-          <!-- Type -->
-          <div class="mb-4">
-            <label class="form-label fw-semibold"
-              >Type d'ouvrage <span class="text-danger">*</span></label
-            >
-            <div class="d-flex gap-4">
-              <div class="form-check">
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  id="typeLivre"
-                  name="type"
-                  [(ngModel)]="type"
-                  value="livre"
-                  (change)="changerType()"
-                />
-                <label class="form-check-label" for="typeLivre">Livre</label>
-              </div>
-              <div class="form-check">
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  id="typeRevue"
-                  name="type"
-                  [(ngModel)]="type"
-                  value="revue"
-                  (change)="changerType()"
-                />
-                <label class="form-check-label" for="typeRevue">Revue</label>
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <!-- Type -->
+            <div class="mb-4">
+              <label class="form-label fw-semibold"
+                >Type d'ouvrage <span class="text-danger">*</span></label
+              >
+              <div class="d-flex gap-4">
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    id="typeLivre"
+                    name="type"
+                    [(ngModel)]="type"
+                    value="livre"
+                    (change)="changerType()"
+                  />
+                  <label class="form-check-label" for="typeLivre">Livre</label>
+                </div>
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    id="typeRevue"
+                    name="type"
+                    [(ngModel)]="type"
+                    value="revue"
+                    (change)="changerType()"
+                  />
+                  <label class="form-check-label" for="typeRevue">Revue</label>
+                </div>
               </div>
             </div>
-          </div>
 
-          <!-- Titre -->
-          <div class="mb-3">
-            <label for="titre" class="form-label fw-semibold"
-              >Titre <span class="text-danger">*</span></label
-            >
-            <input
-              id="titre"
-              type="text"
-              class="form-control"
-              [(ngModel)]="titre"
-              placeholder="Ex : Clean Code"
-            />
-          </div>
-
-          <!-- Caution -->
-          <div class="mb-3">
-            <label for="caution" class="form-label fw-semibold"
-              >Caution (€) <span class="text-danger">*</span></label
-            >
-            <input
-              id="caution"
-              type="number"
-              class="form-control"
-              min="0"
-              step="0.01"
-              [(ngModel)]="caution"
-              placeholder="Ex : 5.00"
-            />
-          </div>
-
-          <!-- Emplacement (commun) -->
-          <div class="mb-3">
-            <label for="emplacement" class="form-label fw-semibold"
-              >Emplacement <span class="text-danger">*</span></label
-            >
-            <select id="emplacement" class="form-select" [(ngModel)]="emplacementId">
-              <option [ngValue]="null" disabled>Sélectionnez un emplacement</option>
-              @for (em of emplacements; track em.id) {
-                <option [ngValue]="em.id">
-                  Travée {{ em.numero_travee }} — Étagère {{ em.numero_etagere }} — Niveau
-                  {{ em.niveau }}
-                  @if (em.categorie_nom) {
-                    ({{ em.categorie_nom }})
-                  }
-                </option>
-              }
-            </select>
-          </div>
-
-          <!-- Champs LIVRE -->
-          @if (type === 'livre') {
+            <!-- Titre -->
             <div class="mb-3">
-              <label for="isbn" class="form-label fw-semibold"
-                >ISBN <span class="text-danger">*</span></label
+              <label for="titre" class="form-label fw-semibold"
+                >Titre <span class="text-danger">*</span></label
               >
               <input
-                id="isbn"
+                id="titre"
                 type="text"
                 class="form-control"
-                [(ngModel)]="isbn"
-                placeholder="Ex : 978-0132350884"
+                [(ngModel)]="titre"
+                placeholder="Ex : Clean Code"
               />
             </div>
 
+            <!-- Caution -->
             <div class="mb-3">
-              <label for="auteurRecherche" class="form-label fw-semibold"
-                >Auteur <span class="text-danger">*</span></label
-              >
-
-              <!-- Champ autocomplete -->
-              @if (!auteurNouveauVisible) {
-                <div class="position-relative">
-                  <input
-                    id="auteurRecherche"
-                    type="text"
-                    class="form-control"
-                    [(ngModel)]="auteurQuery"
-                    (input)="filtrerAuteurs()"
-                    (blur)="fermerSuggestions()"
-                    placeholder="Tapez un nom ou prénom…"
-                    autocomplete="off"
-                  />
-                  @if (auteurSelectionne) {
-                    <span
-                      class="position-absolute top-50 end-0 translate-middle-y pe-3 text-success fw-semibold small"
-                      >✓ sélectionné</span
-                    >
-                  }
-                  @if (suggestionOuverte) {
-                    <ul
-                      class="list-group position-absolute w-100 shadow-sm z-3"
-                      style="top: 100%; max-height: 220px; overflow-y: auto"
-                    >
-                      @for (auteur of auteursSuggestions; track auteur.id) {
-                        <li
-                          class="list-group-item list-group-item-action py-2"
-                          (mousedown)="selectionnerAuteur(auteur)"
-                        >
-                          {{ auteur.prenom }} {{ auteur.nom }}
-                        </li>
-                      }
-                      <li
-                        class="list-group-item list-group-item-action py-2 text-primary fw-semibold"
-                        (mousedown)="choisirNouvelAuteur()"
-                      >
-                        + Créer un nouvel auteur
-                      </li>
-                    </ul>
-                  }
-                </div>
-              }
-
-              <!-- Champs nouvel auteur -->
-              @if (auteurNouveauVisible) {
-                <div class="border rounded p-3 bg-light">
-                  <p class="small text-muted mb-2">Nouvel auteur</p>
-                  <div class="row g-2">
-                    <div class="col-6">
-                      <input
-                        type="text"
-                        class="form-control"
-                        [(ngModel)]="auteurPrenom"
-                        placeholder="Prénom"
-                      />
-                    </div>
-                    <div class="col-6">
-                      <input
-                        type="text"
-                        class="form-control"
-                        [(ngModel)]="auteurNom"
-                        placeholder="Nom"
-                      />
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    class="btn btn-link btn-sm p-0 mt-2 text-secondary"
-                    (click)="auteurNouveauVisible = false; auteurQuery = ''"
-                  >
-                    ← Revenir à la recherche
-                  </button>
-                </div>
-              }
-            </div>
-          }
-
-          <!-- Champs REVUE -->
-          @if (type === 'revue') {
-            <div class="mb-3">
-              <label for="numero" class="form-label fw-semibold"
-                >Numéro <span class="text-danger">*</span></label
+              <label for="caution" class="form-label fw-semibold"
+                >Caution (€) <span class="text-danger">*</span></label
               >
               <input
-                id="numero"
+                id="caution"
                 type="number"
                 class="form-control"
-                min="1"
-                step="1"
-                [(ngModel)]="numero"
-                placeholder="Ex : 258"
+                min="0"
+                step="0.01"
+                [(ngModel)]="caution"
+                placeholder="Ex : 5.00"
               />
             </div>
-            <div class="mb-3">
-              <label for="dateParution" class="form-label fw-semibold"
-                >Date de parution <span class="text-danger">*</span></label
-              >
-              <input
-                id="dateParution"
-                type="date"
-                class="form-control"
-                [(ngModel)]="dateParution"
-              />
-            </div>
-          }
 
-          <div class="d-grid mt-4">
-            <button
-              type="button"
-              class="btn btn-primary"
-              (click)="soumettre()"
-              [disabled]="enCours"
-            >
-              @if (enCours) {
-                <span class="spinner-border spinner-border-sm me-2"></span>
-              }
-              Créer {{ type === 'livre' ? 'le livre' : 'la revue' }}
-            </button>
+            <!-- Emplacement (commun) -->
+            <div class="mb-3">
+              <label for="emplacement" class="form-label fw-semibold"
+                >Emplacement <span class="text-danger">*</span></label
+              >
+              <select id="emplacement" class="form-select" [(ngModel)]="emplacementId">
+                <option [ngValue]="null" disabled>Sélectionnez un emplacement</option>
+                @for (em of emplacements; track em.id) {
+                  <option [ngValue]="em.id">
+                    Travée {{ em.numero_travee }} — Étagère {{ em.numero_etagere }} — Niveau
+                    {{ em.niveau }}
+                    @if (em.categorie_nom) {
+                      ({{ em.categorie_nom }})
+                    }
+                  </option>
+                }
+              </select>
+            </div>
+
+            <!-- Champs LIVRE -->
+            @if (type === 'livre') {
+              <div class="mb-3">
+                <label for="isbn" class="form-label fw-semibold"
+                  >ISBN <span class="text-danger">*</span></label
+                >
+                <input
+                  id="isbn"
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="isbn"
+                  placeholder="Ex : 978-0132350884"
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="auteurRecherche" class="form-label fw-semibold"
+                  >Auteur <span class="text-danger">*</span></label
+                >
+
+                <!-- Champ autocomplete -->
+                @if (!auteurNouveauVisible) {
+                  <div class="position-relative">
+                    <input
+                      id="auteurRecherche"
+                      type="text"
+                      class="form-control"
+                      [(ngModel)]="auteurQuery"
+                      (input)="filtrerAuteurs()"
+                      (blur)="fermerSuggestions()"
+                      placeholder="Tapez un nom ou prénom…"
+                      autocomplete="off"
+                    />
+                    @if (auteurSelectionne) {
+                      <span
+                        class="position-absolute top-50 end-0 translate-middle-y pe-3 text-success fw-semibold small"
+                        >✓ sélectionné</span
+                      >
+                    }
+                    @if (suggestionOuverte) {
+                      <ul
+                        class="list-group position-absolute w-100 shadow-sm z-3"
+                        style="top: 100%; max-height: 220px; overflow-y: auto"
+                      >
+                        @for (auteur of auteursSuggestions; track auteur.id) {
+                          <li
+                            class="list-group-item list-group-item-action py-2"
+                            (mousedown)="selectionnerAuteur(auteur)"
+                          >
+                            {{ auteur.prenom }} {{ auteur.nom }}
+                          </li>
+                        }
+                        <li
+                          class="list-group-item list-group-item-action py-2 text-primary fw-semibold"
+                          (mousedown)="choisirNouvelAuteur()"
+                        >
+                          + Créer un nouvel auteur
+                        </li>
+                      </ul>
+                    }
+                  </div>
+                }
+
+                <!-- Champs nouvel auteur -->
+                @if (auteurNouveauVisible) {
+                  <div class="border rounded p-3 bg-light">
+                    <p class="small text-muted mb-2">Nouvel auteur</p>
+                    <div class="row g-2">
+                      <div class="col-6">
+                        <input
+                          type="text"
+                          class="form-control"
+                          [(ngModel)]="auteurPrenom"
+                          placeholder="Prénom"
+                        />
+                      </div>
+                      <div class="col-6">
+                        <input
+                          type="text"
+                          class="form-control"
+                          [(ngModel)]="auteurNom"
+                          placeholder="Nom"
+                        />
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      class="btn btn-link btn-sm p-0 mt-2 text-secondary"
+                      (click)="auteurNouveauVisible = false; auteurQuery = ''"
+                    >
+                      ← Revenir à la recherche
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- Champs REVUE -->
+            @if (type === 'revue') {
+              <div class="mb-3">
+                <label for="numero" class="form-label fw-semibold"
+                  >Numéro <span class="text-danger">*</span></label
+                >
+                <input
+                  id="numero"
+                  type="number"
+                  class="form-control"
+                  min="1"
+                  step="1"
+                  [(ngModel)]="numero"
+                  placeholder="Ex : 258"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="dateParution" class="form-label fw-semibold"
+                  >Date de parution <span class="text-danger">*</span></label
+                >
+                <input
+                  id="dateParution"
+                  type="date"
+                  class="form-control"
+                  [(ngModel)]="dateParution"
+                />
+              </div>
+            }
+
+            <div class="d-grid mt-4">
+              <button
+                type="button"
+                class="btn btn-primary"
+                (click)="soumettre()"
+                [disabled]="enCours"
+              >
+                @if (enCours) {
+                  <span class="spinner-border spinner-border-sm me-2"></span>
+                }
+                Créer {{ type === 'livre' ? 'le livre' : 'la revue' }}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      }
+
+      <!-- ETAPE 2 : gestion des exemplaires -->
+      @if (etape === 'exemplaires') {
+        <div class="alert alert-success d-flex align-items-center gap-2 mb-4">
+          <span
+            >✅ <strong>{{ ouvrageCreeTitre }}</strong> créé avec succès.</span
+          >
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h5 class="fw-semibold mb-3">Exemplaires</h5>
+
+            @if (chargementExemplaires) {
+              <div class="text-center py-3">
+                <span class="spinner-border spinner-border-sm me-2"></span> Chargement...
+              </div>
+            } @else if (exemplairesTous.length === 0) {
+              <div class="alert alert-warning mb-3">Aucun exemplaire pour cet ouvrage.</div>
+            } @else {
+              <table class="table table-sm table-bordered mb-4">
+                <thead class="table-light">
+                  <tr>
+                    <th>Code-barre</th>
+                    <th>Statut</th>
+                    <th>Retour prévu</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (ex of exemplairesTous; track ex.id) {
+                    <tr>
+                      <td>
+                        <code>{{ ex.code_barre }}</code>
+                      </td>
+                      <td>
+                        @if (ex.est_emprunte) {
+                          <span class="badge bg-danger">Emprunté</span>
+                        } @else {
+                          <span class="badge bg-success">Disponible</span>
+                        }
+                      </td>
+                      <td class="text-muted small">{{ ex.date_fin_emprunt ?? '—' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            }
+
+            <hr />
+            <h6 class="fw-semibold mb-3">Créer un exemplaire</h6>
+            @if (creationSucces) {
+              <div class="alert alert-success py-2">Exemplaire créé avec succès.</div>
+            }
+            @if (erreurExemplaires) {
+              <div class="alert alert-danger py-2">{{ erreurExemplaires }}</div>
+            }
+            <div class="input-group">
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Code-barre du nouvel exemplaire (EX-0001)"
+                [(ngModel)]="nouveauCodeBarre"
+                [disabled]="creationEnCours"
+              />
+              <button
+                type="button"
+                class="btn btn-primary"
+                (click)="creerExemplaire()"
+                [disabled]="creationEnCours || !nouveauCodeBarre.trim()"
+              >
+                @if (creationEnCours) {
+                  <span class="spinner-border spinner-border-sm me-1"></span>
+                }
+                Créer
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="btn btn-outline-secondary w-100"
+          (click)="creerNouvelOuvrage()"
+        >
+          + Créer un autre ouvrage
+        </button>
+      }
     </div>
   </div>
 </div>

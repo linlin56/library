@@ -30,6 +30,8 @@ func GetCaution(c *gin.Context) {
 
 // UpdateCautionTotale : PUT /api/utilisateurs/:id/caution
 // Met à jour la caution_totale d'un utilisateur (réservé à la bibliothécaire).
+// Recalcule solde_caution en conservant le montant emprunté.
+// Retourne 400 si la nouvelle valeur est inférieure au montant emprunté.
 func UpdateCautionTotale(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil || id <= 0 {
@@ -47,9 +49,15 @@ func UpdateCautionTotale(c *gin.Context) {
 
 	repo := repositories.NewUtilisateurRepository(db.GlobalDBO)
 	if err := repo.UpdateCautionTotale(id, payload.CautionTotale); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"erreur": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"erreur": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Caution mise à jour."})
+	// Retourner la nouvelle info de caution
+	info, err := repo.GetCaution(id)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"message": "Caution mise à jour."})
+		return
+	}
+	c.JSON(http.StatusOK, info)
 }

@@ -133,16 +133,24 @@
             <div
               class="fw-bold fs-5"
               [class.text-success]="caution.solde_caution === caution.caution_totale"
-              [class.text-warning]="caution.solde_caution < caution.caution_totale && caution.solde_caution > 0"
+              [class.text-warning]="
+                caution.solde_caution < caution.caution_totale && caution.solde_caution > 0
+              "
               [class.text-danger]="caution.solde_caution <= 0"
-            >{{ caution.solde_caution | number: '1.2-2' }} &euro;</div>
+            >
+              {{ caution.solde_caution | number: '1.2-2' }} &euro;
+            </div>
           </div>
           @if (!editionCaution) {
             <div class="d-flex flex-column justify-content-center ms-2">
               @if (successCaution) {
                 <span class="badge bg-success mb-2">Caution mise à jour</span>
               }
-              <button type="button" class="btn btn-outline-primary btn-sm" (click)="ouvrirEditionCaution()">
+              <button
+                type="button"
+                class="btn btn-outline-primary btn-sm"
+                (click)="ouvrirEditionCaution()"
+              >
                 Modifier la caution totale
               </button>
             </div>
@@ -168,7 +176,13 @@
                 }
                 Enregistrer
               </button>
-              <button type="button" class="btn btn-outline-secondary btn-sm" (click)="annulerEditionCaution()">Annuler</button>
+              <button
+                type="button"
+                class="btn btn-outline-secondary btn-sm"
+                (click)="annulerEditionCaution()"
+              >
+                Annuler
+              </button>
               @if (erreurCaution) {
                 <span class="text-danger small">{{ erreurCaution }}</span>
               }
@@ -181,39 +195,41 @@
         <div class="alert alert-info">Cet utilisateur n'a aucun emprunt en cours.</div>
       } @else {
         <p class="text-muted small mb-3">{{ emprunts.length }} emprunt(s) en cours</p>
-      <div class="table-responsive">
-        <table class="table table-hover align-middle">
-          <thead class="table-light">
-            <tr>
-              <th>Ouvrage</th>
-              <th>Code-barre</th>
-              <th>Emprunté le</th>
-              <th>A retourner avant le</th>
-              <th>Statut</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (emprunt of emprunts; track emprunt.id) {
-              <tr [class.table-danger]="emprunt.en_retard">
-                <td class="fw-semibold">{{ emprunt.titre }}</td>
-                <td>
-                  <code>{{ emprunt.code_barre }}</code>
-                </td>
-                <td>{{ emprunt.date_debut }}</td>
-                <td>{{ emprunt.date_fin }}</td>
-                <td>
-                  @if (emprunt.en_retard) {
-                    <span class="badge bg-danger">En retard</span>
-                  } @else {
-                    <span class="badge bg-success">En cours</span>
-                  }
-                </td>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Ouvrage</th>
+                <th>Code-barre</th>
+                <th>Emprunté le</th>
+                <th>A retourner avant le</th>
+                <th>Statut</th>
               </tr>
-            }
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              @for (emprunt of emprunts; track emprunt.id) {
+                <tr [class.table-danger]="emprunt.en_retard">
+                  <td class="fw-semibold">{{ emprunt.titre }}</td>
+                  <td>
+                    <code>{{ emprunt.code_barre }}</code>
+                  </td>
+                  <td>{{ emprunt.date_debut }}</td>
+                  <td>{{ emprunt.date_fin }}</td>
+                  <td>
+                    @if (emprunt.en_retard) {
+                      <span class="badge bg-danger">En retard</span>
+                    } @else {
+                      <span class="badge bg-success">En cours</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
     }
-  }   <!-- fin @else (enCours) -->
-}   <!-- fin @if (etape === 'emprunts') -->
+    <!-- fin @else (enCours) -->
+  }
+  <!-- fin @if (etape === 'emprunts') -->
 </div>

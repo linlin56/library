@@ -40,8 +40,8 @@ export class UtilisateurService {
     return this.http.get<CautionInfo>(`${this.apiUrl}/${utilisateurId}/caution`);
   }
 
-  updateCautionTotale(utilisateurId: number, cautionTotale: number): Observable<{ message: string }> {
-    return this.http.put<{ message: string }>(`${this.apiUrl}/${utilisateurId}/caution`, {
+  updateCautionTotale(utilisateurId: number, cautionTotale: number): Observable<CautionInfo> {
+    return this.http.put<CautionInfo>(`${this.apiUrl}/${utilisateurId}/caution`, {
       caution_totale: cautionTotale,
     });
   }

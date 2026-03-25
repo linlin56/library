@@ -228,12 +228,26 @@ func (r *UtilisateurRepository) GetCaution(id int) (*CautionInfo, error) {
 	return info, nil
 }
 
-// UpdateCautionTotale met à jour la caution_totale d'un utilisateur (toutes tables héritées).
-func (r *UtilisateurRepository) UpdateCautionTotale(id int, cautionTotale float64) error {
+// UpdateCautionTotale met à jour caution_totale ET recalcule solde_caution
+// en conservant le montant actuellement emprunté (caution_totale - solde_caution).
+// Retourne une erreur si la nouvelle valeur est inférieure au montant emprunté.
+func (r *UtilisateurRepository) UpdateCautionTotale(id int, nouvelleCautionTotale float64) error {
+	current, err := r.GetCaution(id)
+	if err != nil {
+		return err
+	}
+
+	montantEmprunte := current.CautionTotale - current.SoldeCaution
+	if nouvelleCautionTotale < montantEmprunte {
+		return fmt.Errorf("La caution totale ne peut pas être inférieure au montant déjà emprunté (%.2f EUR).", montantEmprunte)
+	}
+
+	nouveauSolde := nouvelleCautionTotale - montantEmprunte
+
 	tables := []string{"etudiants", "enseignants", "utilisateurs"}
 	for _, table := range tables {
-		q := fmt.Sprintf(`UPDATE %s SET caution_totale = $1 WHERE id = $2`, table)
-		n, err := r.dbo.Exec(q, cautionTotale, id)
+		q := fmt.Sprintf(`UPDATE %s SET caution_totale = $1, solde_caution = $2 WHERE id = $3`, table)
+		n, err := r.dbo.Exec(q, nouvelleCautionTotale, nouveauSolde, id)
 		if err != nil {
 			return fmt.Errorf("UpdateCautionTotale(%s): %w", table, err)
 		}

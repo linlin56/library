@@ -102,7 +102,7 @@ func CreerExemplaireForOuvrage(c *gin.Context) {
 	repo := repositories.NewExemplaireRepository(db.GlobalDBO)
 	newID, err := repo.CreateForOuvrage(ouvrageId, payload.CodeBarre, payload.Delai)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"erreur": "Impossible de créer l'exemplaire."})
+		c.JSON(http.StatusBadRequest, gin.H{"erreur": err.Error()})
 		return
 	}
 

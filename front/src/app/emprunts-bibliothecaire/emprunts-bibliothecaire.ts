@@ -2,7 +2,11 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { EmpruntItem, EmpruntService } from '../services/emprunt.service';
-import { CautionInfo, UtilisateurResume, UtilisateurService } from '../services/utilisateur.service';
+import {
+  CautionInfo,
+  UtilisateurResume,
+  UtilisateurService,
+} from '../services/utilisateur.service';
 
 type Etape = 'recherche' | 'selection' | 'emprunts';
 
@@ -125,24 +129,39 @@ export class EmpruntsBibliothecaireComponent {
   }
 
   enregistrerCaution(): void {
-    if (!this.utilisateurSelectionne || this.nouvelleCautionTotale === null || this.nouvelleCautionTotale < 0) {
+    if (
+      !this.utilisateurSelectionne ||
+      this.nouvelleCautionTotale === null ||
+      this.nouvelleCautionTotale < 0
+    ) {
       this.erreurCaution = 'Valeur invalide.';
       return;
     }
+    const montantEmprunte = Math.max(
+      0,
+      (this.caution?.caution_totale ?? 0) - (this.caution?.solde_caution ?? 0),
+    );
+    if (this.nouvelleCautionTotale < montantEmprunte) {
+      this.erreurCaution = `Valeur minimale : ${montantEmprunte.toFixed(2)} € (montant actuellement emprunté).`;
+      return;
+    }
+    const utilisateurId = this.utilisateurSelectionne.id;
     this.enregistrementCaution = true;
     this.erreurCaution = null;
-    this.utilisateurService.updateCautionTotale(this.utilisateurSelectionne.id, this.nouvelleCautionTotale).subscribe({
-      next: () => {
-        if (this.caution) this.caution = { ...this.caution, caution_totale: this.nouvelleCautionTotale! };
-        this.editionCaution = false;
-        this.successCaution = true;
-        this.enregistrementCaution = false;
-      },
-      error: () => {
-        this.erreurCaution = 'Impossible de mettre à jour la caution.';
-        this.enregistrementCaution = false;
-      },
-    });
+    this.utilisateurService
+      .updateCautionTotale(utilisateurId, this.nouvelleCautionTotale)
+      .subscribe({
+        next: (fresh) => {
+          this.caution = fresh;
+          this.editionCaution = false;
+          this.successCaution = true;
+          this.enregistrementCaution = false;
+        },
+        error: (err) => {
+          this.erreurCaution = err.error?.erreur ?? 'Impossible de mettre à jour la caution.';
+          this.enregistrementCaution = false;
+        },
+      });
   }
 
   retourRecherche(): void {
