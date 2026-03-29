@@ -122,6 +122,7 @@ CREATE TABLE utilisateurs (
     prenom           VARCHAR(100)     NOT NULL,
     numero_telephone VARCHAR(20),
     solde_caution    DOUBLE PRECISION NOT NULL DEFAULT 20.0,
+    caution_totale   DOUBLE PRECISION NOT NULL DEFAULT 20.0,
     login            VARCHAR(50)      NOT NULL UNIQUE,
     mot_de_passe     VARCHAR(255)     NOT NULL,
     date_de_naissance DATE,

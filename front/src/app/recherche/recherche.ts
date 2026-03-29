@@ -3,7 +3,12 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ConnexionService } from '../services/connexion.service';
-import { EmpruntService, ExemplaireDisponible, PreviewEmprunt } from '../services/emprunt.service';
+import {
+  EmpruntService,
+  ExemplaireComplet,
+  ExemplaireDisponible,
+  PreviewEmprunt,
+} from '../services/emprunt.service';
 import { FiltresRecherche, Ouvrage, RechercheService } from '../services/recherche.service';
 
 type EtapeModal = 'saisie' | 'preview' | 'succes' | 'echec';
@@ -33,6 +38,7 @@ export class RechercheComponent implements OnInit {
   aRecherche = false;
   utilisateurId: number | null = null;
   estConnecte = false;
+  estBibliothecaire = false;
 
   // Etat modal emprunt
   modalVisible = false;
@@ -45,6 +51,15 @@ export class RechercheComponent implements OnInit {
   exemplairesDisponibles: ExemplaireDisponible[] = [];
   chargementExemplaires = false;
 
+  // Etat modal édition exemplaires
+  modalExemplairesVisible = false;
+  exemplairesTous: ExemplaireComplet[] = [];
+  nouveauCodeBarre = '';
+  chargementTousExemplaires = false;
+  erreurExemplaires: string | null = null;
+  creationEnCours = false;
+  creationSucces = false;
+
   constructor(
     private rechercheService: RechercheService,
     private empruntService: EmpruntService,
@@ -56,6 +71,7 @@ export class RechercheComponent implements OnInit {
     const u = this.connexionService.getUtilisateurConnecte();
     this.estConnecte = u !== null;
     this.utilisateurId = u?.id ?? null;
+    this.estBibliothecaire = u?.role === 'bibliothecaire';
   }
 
   // ---- Recherche ----
@@ -195,5 +211,57 @@ export class RechercheComponent implements OnInit {
   voirMesEmprunts(): void {
     this.fermerModal();
     this.router.navigate(['/mes-emprunts']);
+  }
+
+  // ---- Modal édition exemplaires ----
+
+  ouvrirModalExemplaires(ouvrage: Ouvrage): void {
+    this.ouvrageSelectionne = ouvrage;
+    this.exemplairesTous = [];
+    this.nouveauCodeBarre = '';
+    this.erreurExemplaires = null;
+    this.creationEnCours = false;
+    this.creationSucces = false;
+    this.chargementTousExemplaires = true;
+    this.modalExemplairesVisible = true;
+    this.empruntService.getTousExemplaires(ouvrage.id).subscribe({
+      next: (ex) => {
+        this.exemplairesTous = ex;
+        this.chargementTousExemplaires = false;
+      },
+      error: () => {
+        this.erreurExemplaires = 'Impossible de charger les exemplaires.';
+        this.chargementTousExemplaires = false;
+      },
+    });
+  }
+
+  fermerModalExemplaires(): void {
+    this.modalExemplairesVisible = false;
+    this.ouvrageSelectionne = null;
+  }
+
+  creerExemplaire(): void {
+    if (!this.nouveauCodeBarre.trim() || !this.ouvrageSelectionne) return;
+    this.creationEnCours = true;
+    this.erreurExemplaires = null;
+    this.creationSucces = false;
+    this.empruntService
+      .creerExemplaire(this.ouvrageSelectionne.id, this.nouveauCodeBarre.trim())
+      .subscribe({
+        next: (res) => {
+          this.exemplairesTous = [
+            ...this.exemplairesTous,
+            { id: res.id, code_barre: this.nouveauCodeBarre.trim(), est_emprunte: false },
+          ];
+          this.nouveauCodeBarre = '';
+          this.creationSucces = true;
+          this.creationEnCours = false;
+        },
+        error: (err) => {
+          this.erreurExemplaires = err.error?.erreur ?? "Impossible de créer l'exemplaire.";
+          this.creationEnCours = false;
+        },
+      });
   }
 }

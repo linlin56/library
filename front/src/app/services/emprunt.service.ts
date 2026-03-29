@@ -24,6 +24,13 @@ export interface ExemplaireDisponible {
   code_barre: string;
 }
 
+export interface ExemplaireComplet {
+  id: number;
+  code_barre: string;
+  est_emprunte: boolean;
+  date_fin_emprunt?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 // Gère les emprunts : vérification des droits, enregistrement et consultation.
 export class EmpruntService {
@@ -57,6 +64,19 @@ export class EmpruntService {
   getExemplairesDisponibles(ouvrageId: number): Observable<ExemplaireDisponible[]> {
     return this.http.get<ExemplaireDisponible[]>(
       `http://localhost:8080/api/ouvrages/${ouvrageId}/exemplaires`,
+    );
+  }
+
+  getTousExemplaires(ouvrageId: number): Observable<ExemplaireComplet[]> {
+    return this.http.get<ExemplaireComplet[]>(
+      `http://localhost:8080/api/ouvrages/${ouvrageId}/exemplaires/tous`,
+    );
+  }
+
+  creerExemplaire(ouvrageId: number, codeBarre: string): Observable<{ id: number }> {
+    return this.http.post<{ id: number }>(
+      `http://localhost:8080/api/ouvrages/${ouvrageId}/exemplaires`,
+      { code_barre: codeBarre },
     );
   }
 }

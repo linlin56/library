@@ -1,4 +1,4 @@
-.PHONY: run-back run-front mg sql-start sql-stop uml
+.PHONY: run-back run-front mg sql-start sql-stop
 
 run-back:
 	@echo "API REST dispo sur http://localhost:8080"
@@ -16,10 +16,3 @@ sql-start:
 
 sql-stop:
 	docker stop psql-container && docker rm psql-container
-
-uml:
-	@echo "Génération des diagrammes dans back/diagrams/"
-	cd back && go run ./cmd/gen-uml
-	@echo "Conversion en PNG..."
-	plantuml -tpng back/diagrams/*.puml
-	@echo "Diagrammes PNG disponibles dans back/diagrams/"

@@ -201,6 +201,63 @@ func (r *UtilisateurRepository) RechercherUtilisateurs(nom, prenom, codePostal, 
 	return results, rows.Err()
 }
 
+// CautionInfo contient le solde actuel et la caution totale d'un utilisateur.
+type CautionInfo struct {
+	SoldeCaution  float64 `json:"solde_caution"`
+	CautionTotale float64 `json:"caution_totale"`
+}
+
+// GetCaution retourne le solde_caution et caution_totale d'un utilisateur (toutes tables héritées).
+func (r *UtilisateurRepository) GetCaution(id int) (*CautionInfo, error) {
+	row := r.dbo.QueryRow(`
+		SELECT solde_caution, caution_totale FROM ONLY utilisateurs WHERE id = $1
+		UNION ALL
+		SELECT solde_caution, caution_totale FROM etudiants WHERE id = $1
+		UNION ALL
+		SELECT solde_caution, caution_totale FROM enseignants WHERE id = $1
+		LIMIT 1`, id)
+
+	info := &CautionInfo{}
+	err := row.Scan(&info.SoldeCaution, &info.CautionTotale)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, fmt.Errorf("utilisateur %d introuvable", id)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("GetCaution: %w", err)
+	}
+	return info, nil
+}
+
+// UpdateCautionTotale met à jour caution_totale ET recalcule solde_caution
+// en conservant le montant actuellement emprunté (caution_totale - solde_caution).
+// Retourne une erreur si la nouvelle valeur est inférieure au montant emprunté.
+func (r *UtilisateurRepository) UpdateCautionTotale(id int, nouvelleCautionTotale float64) error {
+	current, err := r.GetCaution(id)
+	if err != nil {
+		return err
+	}
+
+	montantEmprunte := current.CautionTotale - current.SoldeCaution
+	if nouvelleCautionTotale < montantEmprunte {
+		return fmt.Errorf("La caution totale ne peut pas être inférieure au montant déjà emprunté (%.2f EUR).", montantEmprunte)
+	}
+
+	nouveauSolde := nouvelleCautionTotale - montantEmprunte
+
+	tables := []string{"etudiants", "enseignants", "utilisateurs"}
+	for _, table := range tables {
+		q := fmt.Sprintf(`UPDATE %s SET caution_totale = $1, solde_caution = $2 WHERE id = $3`, table)
+		n, err := r.dbo.Exec(q, nouvelleCautionTotale, nouveauSolde, id)
+		if err != nil {
+			return fmt.Errorf("UpdateCautionTotale(%s): %w", table, err)
+		}
+		if n > 0 {
+			return nil
+		}
+	}
+	return fmt.Errorf("utilisateur %d introuvable", id)
+}
+
 func (r *UtilisateurRepository) LoginExists(login string) (bool, error) {
 	var count int
 	err := r.dbo.QueryRow(`

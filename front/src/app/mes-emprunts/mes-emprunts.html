@@ -20,6 +20,27 @@
   }
 
   @if (!enCours && !erreur) {
+    @if (caution) {
+      <div class="d-flex gap-3 mb-4">
+        <div class="card border-0 shadow-sm flex-fill text-center py-3">
+          <div class="text-muted small mb-1">Caution totale</div>
+          <div class="fw-bold fs-5">{{ caution.caution_totale | number: '1.2-2' }} &euro;</div>
+        </div>
+        <div class="card border-0 shadow-sm flex-fill text-center py-3">
+          <div class="text-muted small mb-1">Caution actuelle</div>
+          <div
+            class="fw-bold fs-5"
+            [class.text-success]="caution.solde_caution === caution.caution_totale"
+            [class.text-warning]="
+              caution.solde_caution < caution.caution_totale && caution.solde_caution > 0
+            "
+            [class.text-danger]="caution.solde_caution <= 0"
+          >
+            {{ caution.solde_caution | number: '1.2-2' }} &euro;
+          </div>
+        </div>
+      </div>
+    }
     @if (emprunts.length === 0) {
       <div class="alert alert-info text-center">
         <p class="mb-0">Vous n'avez aucun emprunt en cours.</p>

@@ -104,6 +104,54 @@ func (r *ExemplaireRepository) FindDisponibles() ([]*models.Exemplaire, error) {
 	return exemplaires, rows.Err()
 }
 
+func (r *ExemplaireRepository) FindAllByOuvrageId(ouvrageId int) ([]*models.Exemplaire, error) {
+	rows, err := r.dbo.QueryRows(`
+		SELECT id, est_emprunte, code_barre, date_fin_emprunt
+		FROM exemplaires
+		WHERE ouvrage_id = $1
+		ORDER BY code_barre`, ouvrageId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var result []*models.Exemplaire
+	for rows.Next() {
+		e := &models.Exemplaire{}
+		var dateFin sql.NullTime
+		if err := rows.Scan(&e.Id, &e.EstEmprunte, &e.CodeBarre, &dateFin); err != nil {
+			return nil, fmt.Errorf("FindAllByOuvrageId scan: %w", err)
+		}
+		if dateFin.Valid {
+			e.DateFinEmprunt = dateFin.Time
+		}
+		result = append(result, e)
+	}
+	return result, rows.Err()
+}
+
+func (r *ExemplaireRepository) CreateForOuvrage(ouvrageId int, codeBarre string, delai int) (int, error) {
+	// Vérifier l'unicité du code-barre (tous ouvrages confondus)
+	var exists bool
+	if err := r.dbo.QueryRow(`SELECT EXISTS(SELECT 1 FROM exemplaires WHERE code_barre = $1)`, codeBarre).Scan(&exists); err != nil {
+		return 0, fmt.Errorf("CreateForOuvrage (vérification): %w", err)
+	}
+	if exists {
+		return 0, fmt.Errorf("Ce code-barre existe déjà.")
+	}
+
+	var newID int
+	err := r.dbo.ExecReturning(
+		`INSERT INTO exemplaires (ouvrage_id, code_barre, delai_emprunt_jours, est_emprunte)
+		 VALUES ($1, $2, $3, false) RETURNING id`,
+		ouvrageId, codeBarre, delai,
+	).Scan(&newID)
+	if err != nil {
+		return 0, fmt.Errorf("CreateForOuvrage: %w", err)
+	}
+	return newID, nil
+}
+
 func (r *ExemplaireRepository) FindDisponiblesByOuvrageId(ouvrageId int) ([]*models.Exemplaire, error) {
 	rows, err := r.dbo.QueryRows(`
 		SELECT id, est_emprunte, code_barre, delai_emprunt_jours
