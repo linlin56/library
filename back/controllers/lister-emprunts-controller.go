@@ -26,6 +26,10 @@ func ListerEmprunts(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"erreur": "Impossible de recuperer les emprunts."})
 		return
 	}
+	if len(items) == 0 {
+		c.Status(http.StatusNoContent)
+		return
+	}
 	c.JSON(http.StatusOK, items)
 }
 
@@ -36,6 +40,10 @@ func ListerEmpruntsEnRetard(c *gin.Context) {
 	items, err := repo.GetEmpruntsEnRetard()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"erreur": "Impossible de recuperer les emprunts en retard."})
+		return
+	}
+	if len(items) == 0 {
+		c.Status(http.StatusNoContent)
 		return
 	}
 	c.JSON(http.StatusOK, items)
@@ -58,6 +66,10 @@ func RechercherUtilisateurs(c *gin.Context) {
 	utilisateurs, err := repo.RechercherUtilisateurs(nom, prenom, codePostal, numeroTelephone)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"erreur": "Erreur lors de la recherche."})
+		return
+	}
+	if len(utilisateurs) == 0 {
+		c.Status(http.StatusNoContent)
 		return
 	}
 	c.JSON(http.StatusOK, utilisateurs)

@@ -116,6 +116,13 @@ namespace controllers {
         + CodeBarre string
 
     }
+    class "ExemplaireDetail" << (S,Aquamarine) >> {
+        + Id int
+        + CodeBarre string
+        + EstEmprunte bool
+        + DateFin string
+
+    }
     class "ExemplaireResume" << (S,Aquamarine) >> {
         + Id int
         + CodeBarre string
@@ -255,6 +262,7 @@ namespace models {
         + Prenom string
         + NumeroTelephone string
         + SoldeCaution float64
+        + CautionTotale float64
         + Login string
         + MotDePasse string
         + DateDeNaissance time.Time
@@ -284,6 +292,11 @@ namespace repositories {
         + Create(b *models.Bibliothecaire) (int, error)
         + Update(b *models.Bibliothecaire) error
         + Delete(id int) error
+
+    }
+    class "CautionInfo" << (S,Aquamarine) >> {
+        + SoldeCaution float64
+        + CautionTotale float64
 
     }
     class "DepartementEcoleRepository" << (S,Aquamarine) >> {
@@ -366,6 +379,8 @@ namespace repositories {
         + FindByID(id int) (*models.Exemplaire, error)
         + FindByCodeBarre(codeBarre string) (*models.Exemplaire, error)
         + FindDisponibles() ([]*models.Exemplaire, error)
+        + FindAllByOuvrageId(ouvrageId int) ([]*models.Exemplaire, error)
+        + CreateForOuvrage(ouvrageId int, codeBarre string, delai int) (int, error)
         + FindDisponiblesByOuvrageId(ouvrageId int) ([]*models.Exemplaire, error)
         + Create(e *models.Exemplaire) (int, error)
         + Update(e *models.Exemplaire) error
@@ -417,6 +432,8 @@ namespace repositories {
         + Auteur string
         + Numero *int
         + DateParution string
+        + ExemplairesDisponibles int
+        + Emplacement string
 
     }
     class "PreviewEmprunt" << (S,Aquamarine) >> {
@@ -449,6 +466,8 @@ namespace repositories {
         + Delete(id int) error
         + FindEmpruntsActifs(utilisateurID int) ([]*models.Exemplaire, error)
         + RechercherUtilisateurs(nom string, prenom string, codePostal string, numeroTelephone string) ([]*UtilisateurResume, error)
+        + GetCaution(id int) (*CautionInfo, error)
+        + UpdateCautionTotale(id int, nouvelleCautionTotale float64) error
         + LoginExists(login string) (bool, error)
 
     }

@@ -20,7 +20,7 @@ deactivate OR
 alt Resultats trouves
 CTL --> C : 200 [{id, titre, type, auteur, isbn, date_parution, caution, disponibles}]
 else Aucun resultat
-CTL --> C : 200 []
+CTL --> C : 204 No Content
 end
 deactivate CTL
 @enduml

@@ -42,6 +42,10 @@ func GetExemplairesDisponibles(c *gin.Context) {
 	for _, e := range exemplaires {
 		result = append(result, ExemplaireResume{Id: e.Id, CodeBarre: e.CodeBarre})
 	}
+	if len(result) == 0 {
+		c.Status(http.StatusNoContent)
+		return
+	}
 	c.JSON(http.StatusOK, result)
 }
 
@@ -73,6 +77,10 @@ func GetTousExemplaires(c *gin.Context) {
 			d.DateFin = e.DateFinEmprunt.Format("02/01/2006")
 		}
 		result = append(result, d)
+	}
+	if len(result) == 0 {
+		c.Status(http.StatusNoContent)
+		return
 	}
 	c.JSON(http.StatusOK, result)
 }

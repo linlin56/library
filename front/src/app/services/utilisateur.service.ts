@@ -1,6 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 export interface UtilisateurResume {
   id: number;
@@ -33,7 +34,9 @@ export class UtilisateurService {
     if (prenom) params = params.set('prenom', prenom);
     if (codePostal) params = params.set('code_postal', codePostal);
     if (numeroTelephone) params = params.set('numero_telephone', numeroTelephone);
-    return this.http.get<UtilisateurResume[]>(`${this.apiUrl}/rechercher`, { params });
+    return this.http
+      .get<UtilisateurResume[]>(`${this.apiUrl}/rechercher`, { params })
+      .pipe(map((res) => res ?? []));
   }
 
   getCaution(utilisateurId: number): Observable<CautionInfo> {

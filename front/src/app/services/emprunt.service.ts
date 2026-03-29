@@ -1,6 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 export interface PreviewEmprunt {
   titre: string;
@@ -54,23 +55,25 @@ export class EmpruntService {
 
   listerEmprunts(utilisateurId: number): Observable<EmpruntItem[]> {
     const params = new HttpParams().set('utilisateur_id', utilisateurId.toString());
-    return this.http.get<EmpruntItem[]>(this.apiUrl, { params });
+    return this.http.get<EmpruntItem[]>(this.apiUrl, { params }).pipe(map((res) => res ?? []));
   }
 
   listerEmpruntsEnRetard(): Observable<EmpruntEnRetardItem[]> {
-    return this.http.get<EmpruntEnRetardItem[]>(`${this.apiUrl}/retard`);
+    return this.http
+      .get<EmpruntEnRetardItem[]>(`${this.apiUrl}/retard`)
+      .pipe(map((res) => res ?? []));
   }
 
   getExemplairesDisponibles(ouvrageId: number): Observable<ExemplaireDisponible[]> {
-    return this.http.get<ExemplaireDisponible[]>(
-      `http://localhost:8080/api/ouvrages/${ouvrageId}/exemplaires`,
-    );
+    return this.http
+      .get<ExemplaireDisponible[]>(`http://localhost:8080/api/ouvrages/${ouvrageId}/exemplaires`)
+      .pipe(map((res) => res ?? []));
   }
 
   getTousExemplaires(ouvrageId: number): Observable<ExemplaireComplet[]> {
-    return this.http.get<ExemplaireComplet[]>(
-      `http://localhost:8080/api/ouvrages/${ouvrageId}/exemplaires/tous`,
-    );
+    return this.http
+      .get<ExemplaireComplet[]>(`http://localhost:8080/api/ouvrages/${ouvrageId}/exemplaires/tous`)
+      .pipe(map((res) => res ?? []));
   }
 
   creerExemplaire(ouvrageId: number, codeBarre: string): Observable<{ id: number }> {

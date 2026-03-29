@@ -1,6 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 export interface Ouvrage {
   id: number;
@@ -38,6 +39,6 @@ export class RechercheService {
     if (filtres.codeBarre?.trim()) params = params.set('code_barre', filtres.codeBarre.trim());
     if (filtres.codeRevue?.trim()) params = params.set('code_revue', filtres.codeRevue.trim());
     if (filtres.disponible) params = params.set('disponible', 'true');
-    return this.http.get<Ouvrage[]>(this.apiUrl, { params });
+    return this.http.get<Ouvrage[]>(this.apiUrl, { params }).pipe(map((res) => res ?? []));
   }
 }

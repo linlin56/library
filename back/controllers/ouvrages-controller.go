@@ -1,12 +1,12 @@
 package controllers
 
 import (
-"bibliotheque/db"
-"bibliotheque/repositories"
-"net/http"
-"strconv"
+	"bibliotheque/db"
+	"bibliotheque/repositories"
+	"net/http"
+	"strconv"
 
-"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin"
 )
 
 func GetOuvrages(c *gin.Context) {
@@ -27,6 +27,10 @@ if !auMoinsUnChamp && !disponible {
 ouvrages, err := repo.FindAll()
 if err != nil {
 c.JSON(http.StatusInternalServerError, gin.H{"erreur": err.Error()})
+return
+}
+if len(ouvrages) == 0 {
+c.Status(http.StatusNoContent)
 return
 }
 c.JSON(http.StatusOK, ouvrages)
@@ -51,6 +55,10 @@ Disponible: disponible,
 resultats, err := repo.Rechercher(filtres)
 if err != nil {
 c.JSON(http.StatusInternalServerError, gin.H{"erreur": err.Error()})
+return
+}
+if len(resultats) == 0 {
+c.Status(http.StatusNoContent)
 return
 }
 c.JSON(http.StatusOK, resultats)
