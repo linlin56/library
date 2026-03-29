@@ -1,0 +1,26 @@
+@startuml
+title Liste des emprunts actifs
+
+actor "Client (utilisateur)" as C
+participant "EmpruntController" as CTL
+participant "EmpruntRepository" as ER
+participant "PostgreSQL" as DB
+
+C -> CTL : GET /api/emprunts?utilisateur_id=X
+activate CTL
+note right of CTL : Validation : utilisateur_id > 0
+CTL -> ER : GetEmprunts(utilisateurId)
+activate ER
+ER -> DB : SELECT e.*, o.titre, o.caution\nFROM exemplaires e JOIN ouvrages o ON o.id = e.ouvrage_id\nWHERE e.emprunteur_id = $1 AND e.est_emprunte = TRUE
+activate DB
+DB --> ER : []EmpruntItem
+deactivate DB
+ER --> CTL : []EmpruntItem, nil
+deactivate ER
+alt Emprunts trouves
+CTL --> C : 200 [{code_barre, titre, date_debut, date_fin_prevue, caution}]
+else Aucun emprunt actif
+CTL --> C : 200 []
+end
+deactivate CTL
+@enduml

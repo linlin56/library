@@ -1,0 +1,57 @@
+@startuml
+title Creation d'un utilisateur
+
+actor "Client (bibliothecaire)" as C
+participant "CreerUtilisateurController" as CTL
+participant "DepartementRepository" as DR
+participant "UtilisateurRepository" as UR
+participant "EtudiantRepo | EnseignantRepo" as SR
+participant "PostgreSQL" as DB
+
+== Chargement du formulaire ==
+C -> CTL : GET /api/departements
+activate CTL
+CTL -> DR : FindAll()
+activate DR
+DR -> DB : SELECT * FROM departements_ecole ORDER BY nom
+activate DB
+DB --> DR : []DepartementEcole
+deactivate DB
+DR --> CTL : []DepartementEcole, nil
+deactivate DR
+CTL --> C : 200 [departements]
+deactivate CTL
+
+== Soumission du formulaire ==
+C -> CTL : POST /api/utilisateurs\n{nom, prenom, telephone, date_naissance,\nemail, statut, annee_etude?, departement_id?, adresse}
+activate CTL
+note right of CTL : Validation : telephone 10 chiffres,\ndate valide, statut in {etudiant,enseignant,particulier}
+
+CTL -> UR : LoginExists(login)
+activate UR
+UR -> DB : SELECT COUNT(*) FROM utilisateurs WHERE login = $1
+activate DB
+DB --> UR : count
+deactivate DB
+UR --> CTL : bool, nil
+deactivate UR
+
+alt Login deja pris
+CTL --> C : 409 Un compte existe deja avec ce login
+else Login disponible
+CTL -> DB : INSERT INTO adresses(...) RETURNING id
+activate DB
+DB --> CTL : adresseId
+deactivate DB
+CTL -> SR : Create(*Etudiant | *Enseignant | *Particulier)
+activate SR
+SR -> DB : BEGIN\nINSERT INTO utilisateurs(...) RETURNING id\nINSERT INTO etudiants|enseignants(id,...)\nCOMMIT
+activate DB
+DB --> SR : newId
+deactivate DB
+SR --> CTL : newId, nil
+deactivate SR
+CTL --> C : 201 {login, mot_de_passe, message}
+end
+deactivate CTL
+@enduml
