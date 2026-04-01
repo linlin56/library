@@ -1,0 +1,76 @@
+name: Build
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build-back:
+    name: Backend (Go)
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: admin_bibli
+          POSTGRES_DB: bibliotheque
+        ports:
+          - 5435:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5435
+      DB_USER: postgres
+      DB_PASSWORD: admin_bibli
+      DB_NAME: bibliotheque
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: back/go.mod
+
+      - name: Download dependencies
+        working-directory: back
+        run: go mod download
+
+      - name: Build
+        working-directory: back
+        run: go build ./...
+
+      - name: Run tests
+        working-directory: back
+        run: go test ./...
+
+  build-front:
+    name: Frontend (Angular)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: front/package-lock.json
+
+      - name: Install dependencies
+        working-directory: front
+        run: npm ci
+
+      - name: Build
+        working-directory: front
+        run: npm run build -- --configuration production
