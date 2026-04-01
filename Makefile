@@ -1,4 +1,4 @@
-.PHONY: run-back run-front mg sql-start sql-stop uml
+.PHONY: run-back run-front mg sql-start sql-stop uml restart
 
 run-back:
 	@echo "API REST dispo sur http://localhost:8080"
@@ -23,3 +23,12 @@ uml:
 	@echo "Conversion en PNG..."
 	plantuml -tpng back/diagrams/*.puml
 	@echo "Diagrammes PNG disponibles dans back/diagrams/"
+
+
+restart:
+	$(MAKE) sql-stop
+	$(MAKE) sql-start
+	@echo "Attente de PostgreSQL..."
+	@until docker exec psql-container pg_isready -U postgres -q 2>/dev/null; do sleep 1; done
+	@echo "PostgreSQL pret."
+	(cd back && go run main.go) & (cd front && npm start) & wait

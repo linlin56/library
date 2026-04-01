@@ -20,7 +20,7 @@ deactivate ER
 alt Emprunts trouves
 CTL --> C : 200 [{code_barre, titre, date_debut, date_fin_prevue, caution}]
 else Aucun emprunt actif
-CTL --> C : 204 No Content
+CTL --> C : 200 []
 end
 deactivate CTL
 @enduml

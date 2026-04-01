@@ -33,7 +33,8 @@ func main() {
 		"01_connexion":           connexionDiagram(),
 		"02_emprunt":             empruntDiagram(),
 		"03_creer_ouvrage":       creerOuvrageDiagram(),
-		"04_recherche":           rechercheDiagram(),
+		// 04_recherche.puml est maintenu manuellement — ne pas ecraser.
+		// "04_recherche": rechercheDiagram(),
 		"05_creer_utilisateur":   creerUtilisateurDiagram(),
 		"06_lister_emprunts":     listerEmpruntsDiagram(),
 		"07_lister_retards":      listerRetardsDiagram(),
@@ -466,9 +467,7 @@ func casDUtilisationDiagram() *uml.UseCaseDiagram {
 		UseCase("UC_TU", "trouver_un_utilisateur").
 		UseCase("UC_LR", "lister_les_retards").
 		UseCase("UC_EO", "enregistrer_ouvrage").
-		UseCase("UC_RS", "rechercher_simple").
-		UseCase("UC_RA", "rechercher_avancee").
-		UseCase("UC_RX", "recherche_exemplaire").
+		UseCase("UC_RO", "rechercher_ouvrage").
 		UseCase("UC_LEU", "lister_emprunts_utilisateur").
 		UseCase("UC_LSE", "lister_ses_emprunts").
 		UseCase("UC_EU", "emprunter_un_ouvrage").
@@ -479,13 +478,11 @@ func casDUtilisationDiagram() *uml.UseCaseDiagram {
 		Association("BIB", "UC_TU").
 		Association("BIB", "UC_LR").
 		Association("BIB", "UC_EO").
-		Association("BIB", "UC_RS").
-		Association("BIB", "UC_RA").
+		Association("BIB", "UC_RO").
 		Association("BIB", "UC_LEU").
 		Blank().
 		// Associations Utilisateur (connecte)
-		Association("UTI", "UC_RS").
-		Association("UTI", "UC_RA").
+		Association("UTI", "UC_RO").
 		Association("UTI", "UC_LSE").
 		Association("UTI", "UC_EU").
 		Blank().
@@ -495,9 +492,5 @@ func casDUtilisationDiagram() *uml.UseCaseDiagram {
 		Include("UC_EO", "UC_CO").
 		Include("UC_LEU", "UC_TU").
 		Include("UC_LSE", "UC_CO").
-		Include("UC_EU", "UC_CO").
-		Blank().
-		// Relations <<extend>>
-		Extend("UC_RS", "UC_RX").
-		Extend("UC_RA", "UC_RX")
+		Include("UC_EU", "UC_CO")
 }

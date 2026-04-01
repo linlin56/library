@@ -19,7 +19,7 @@ deactivate ER
 alt Retards trouves
 CTL --> C : 200 [{code_barre, titre, emprunteur, date_fin_prevue, nb_jours_retard}]
 else Aucun retard
-CTL --> C : 204 No Content
+CTL --> C : 200 []
 end
 deactivate CTL
 @enduml

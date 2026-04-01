@@ -17,9 +17,7 @@ usecase "creer_utilisateur" as UC_CU
 usecase "trouver_un_utilisateur" as UC_TU
 usecase "lister_les_retards" as UC_LR
 usecase "enregistrer_ouvrage" as UC_EO
-usecase "rechercher_simple" as UC_RS
-usecase "rechercher_avancee" as UC_RA
-usecase "recherche_exemplaire" as UC_RX
+usecase "rechercher_ouvrage" as UC_RO
 usecase "lister_emprunts_utilisateur" as UC_LEU
 usecase "lister_ses_emprunts" as UC_LSE
 usecase "emprunter_un_ouvrage" as UC_EU
@@ -29,12 +27,10 @@ BIB --> UC_CU
 BIB --> UC_TU
 BIB --> UC_LR
 BIB --> UC_EO
-BIB --> UC_RS
-BIB --> UC_RA
+BIB --> UC_RO
 BIB --> UC_LEU
 
-UTI --> UC_RS
-UTI --> UC_RA
+UTI --> UC_RO
 UTI --> UC_LSE
 UTI --> UC_EU
 
@@ -44,7 +40,4 @@ UC_EO ..> UC_CO : <<include>>
 UC_LEU ..> UC_TU : <<include>>
 UC_LSE ..> UC_CO : <<include>>
 UC_EU ..> UC_CO : <<include>>
-
-UC_RS ..> UC_RX : <<extend>>
-UC_RA ..> UC_RX : <<extend>>
 @enduml

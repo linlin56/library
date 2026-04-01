@@ -21,11 +21,7 @@ DB --> UR : []UtilisateurResume
 deactivate DB
 UR --> CTL : []UtilisateurResume, nil
 deactivate UR
-alt Utilisateurs trouves
 CTL --> C : 200 [{id, nom, prenom, login, telephone, solde_caution}]
-else Aucun resultat
-CTL --> C : 204 No Content
-end
 end
 deactivate CTL
 @enduml
