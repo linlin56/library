@@ -14,6 +14,24 @@ import { before, describe, it } from 'mocha';
 const API_URL = process.env['API_URL'] ?? 'http://localhost:8080';
 const ENDPOINT = `${API_URL}/api/connexion`;
 
+// ─── Vérification de disponibilité du backend ─────────────────────────────────
+
+async function backendDisponible(): Promise<boolean> {
+  try {
+    await fetch(`${API_URL}/api/ouvrages`, { signal: AbortSignal.timeout(3000) });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+before(async function () {
+  if (!(await backendDisponible())) {
+    console.warn(`\n  ⚠ Backend inaccessible (${API_URL}) — tests e2e ignorés.\n`);
+    this.skip();
+  }
+});
+
 // ─── Cas nominal — étudiant ───────────────────────────────────────────────────
 
 describe('[E2E] Connexion — étudiant valide (amartin / mdp)', () => {
