@@ -7,7 +7,7 @@
  */
 
 import { expect } from 'chai';
-import { before, after, describe, it } from 'mocha';
+import { after, before, describe, it } from 'mocha';
 import { TestContext } from './test-context.js';
 
 const API_URL = process.env['API_URL'] ?? 'http://localhost:8080';

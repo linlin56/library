@@ -42,9 +42,7 @@ export class TestContext {
     await this.client.query(
       `ALTER TABLE ouvrages ADD COLUMN IF NOT EXISTS emplacement_id INT REFERENCES emplacements(id)`,
     );
-    await this.client.query(
-      `ALTER TABLE revues ADD COLUMN IF NOT EXISTS date_parution DATE`,
-    );
+    await this.client.query(`ALTER TABLE revues ADD COLUMN IF NOT EXISTS date_parution DATE`);
 
     await this.client.query(`
       TRUNCATE

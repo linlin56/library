@@ -6,7 +6,7 @@
  */
 
 import { expect } from 'chai';
-import { before, after, describe, it } from 'mocha';
+import { after, before, describe, it } from 'mocha';
 import { TestContext } from './test-context.js';
 
 const API_URL = process.env['API_URL'] ?? 'http://localhost:8080';
@@ -48,8 +48,7 @@ describe('[E2E] Accueil', () => {
       expect(body['nb_exemplaires_disponibles']).to.be.a('number'));
     it('retourne un champ nb_utilisateurs numérique', () =>
       expect(body['nb_utilisateurs']).to.be.a('number'));
-    it('nb_livres vaut 1 (données insérées)', () =>
-      expect(body['nb_livres']).to.equal(1));
+    it('nb_livres vaut 1 (données insérées)', () => expect(body['nb_livres']).to.equal(1));
     it('nb_utilisateurs vaut 1 (données insérées)', () =>
       expect(body['nb_utilisateurs']).to.equal(1));
   });

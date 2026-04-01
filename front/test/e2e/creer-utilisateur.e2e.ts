@@ -10,7 +10,7 @@
  */
 
 import { expect } from 'chai';
-import { before, after, describe, it } from 'mocha';
+import { after, before, describe, it } from 'mocha';
 import { TestContext } from './test-context.js';
 
 const API_URL = process.env['API_URL'] ?? 'http://localhost:8080';
@@ -148,7 +148,8 @@ describe('[E2E] Créer utilisateur', () => {
     });
 
     it('retourne HTTP 400', () => expect(status).to.equal(400));
-    it("retourne un message d'erreur", () => expect(body['erreur']).to.be.a('string').and.not.empty);
+    it("retourne un message d'erreur", () =>
+      expect(body['erreur']).to.be.a('string').and.not.empty);
   });
 
   // ─── POST — étudiant sans année d'étude ──────────────────────────────────────
