@@ -1,0 +1,5 @@
+{
+  "require": ["tsx/cjs"],
+  "spec": "test/**/*.tu.ts",
+  "timeout": 5000
+}
