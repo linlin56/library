@@ -12,6 +12,16 @@ import (
 
 // ListerEmprunts : GET /api/emprunts?utilisateur_id=X
 // Retourne les emprunts actifs d'un utilisateur.
+// @Summary      Lister les emprunts d'un utilisateur
+// @Description  Retourne les emprunts actifs pour un utilisateur donne.
+// @Tags         Emprunts
+// @Produce      json
+// @Param        utilisateur_id  query     int  true  "ID utilisateur"
+// @Success      200             {array}   repositories.EmpruntItem
+// @Success      204             {string}  string  "No Content"
+// @Failure      400             {object}  ErrorResponse
+// @Failure      500             {object}  ErrorResponse
+// @Router       /emprunts [get]
 func ListerEmprunts(c *gin.Context) {
 	idStr := c.Query("utilisateur_id")
 	utilisateurId, err := strconv.Atoi(idStr)
@@ -35,6 +45,14 @@ func ListerEmprunts(c *gin.Context) {
 
 // ListerEmpruntsEnRetard : GET /api/emprunts/retard
 // Réservé aux bibliothécaires. Retourne tous les emprunts dont la date de retour est dépassée.
+// @Summary      Lister les emprunts en retard
+// @Description  Retourne tous les emprunts en retard.
+// @Tags         Emprunts
+// @Produce      json
+// @Success      200  {array}   repositories.EmpruntEnRetardItem
+// @Success      204  {string}  string  "No Content"
+// @Failure      500  {object}  ErrorResponse
+// @Router       /emprunts/retard [get]
 func ListerEmpruntsEnRetard(c *gin.Context) {
 	repo := repositories.NewEmpruntRepository(db.GlobalDBO)
 	items, err := repo.GetEmpruntsEnRetard()
@@ -51,6 +69,19 @@ func ListerEmpruntsEnRetard(c *gin.Context) {
 
 // RechercherUtilisateurs : GET /api/utilisateurs/rechercher?nom=&prenom=&code_postal=&numero_telephone=
 // Réservé aux bibliothécaires. Au moins un champ non vide est requis.
+// @Summary      Rechercher des utilisateurs
+// @Description  Recherche des utilisateurs par nom, prenom, code postal ou numero de telephone.
+// @Tags         Utilisateurs
+// @Produce      json
+// @Param        nom               query     string  false  "Nom"
+// @Param        prenom            query     string  false  "Prenom"
+// @Param        code_postal       query     string  false  "Code postal"
+// @Param        numero_telephone  query     string  false  "Numero de telephone"
+// @Success      200               {array}   repositories.UtilisateurResume
+// @Success      204               {string}  string  "No Content"
+// @Failure      400               {object}  ErrorResponse
+// @Failure      500               {object}  ErrorResponse
+// @Router       /utilisateurs/rechercher [get]
 func RechercherUtilisateurs(c *gin.Context) {
 	nom := strings.TrimSpace(c.Query("nom"))
 	prenom := strings.TrimSpace(c.Query("prenom"))

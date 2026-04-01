@@ -11,6 +11,13 @@ import (
 )
 
 // GetAuteurs : GET /api/auteurs
+// @Summary      Lister les auteurs
+// @Description  Retourne la liste des auteurs disponibles.
+// @Tags         Ouvrages
+// @Produce      json
+// @Success      200  {array}   models.Auteur
+// @Failure      500  {object}  ErrorResponse
+// @Router       /auteurs [get]
 func GetAuteurs(c *gin.Context) {
 	repo := repositories.NewAuteurRepository(db.GlobalDBO)
 	auteurs, err := repo.FindAll()
@@ -22,6 +29,13 @@ func GetAuteurs(c *gin.Context) {
 }
 
 // GetEmplacements : GET /api/emplacements
+// @Summary      Lister les emplacements
+// @Description  Retourne la liste des emplacements disponibles.
+// @Tags         Ouvrages
+// @Produce      json
+// @Success      200  {array}   repositories.EmplacementResume
+// @Failure      500  {object}  ErrorResponse
+// @Router       /emplacements [get]
 func GetEmplacements(c *gin.Context) {
 	repo := repositories.NewEmplacementRepository(db.GlobalDBO)
 	emplacements, err := repo.FindAll()
@@ -33,16 +47,26 @@ func GetEmplacements(c *gin.Context) {
 }
 
 type CreerLivreRequest struct {
-	Titre        string  `json:"titre"`
-	Caution      float64 `json:"caution"`
-	Isbn         string  `json:"isbn"`
-	AuteurId     int     `json:"auteur_id"`
-	AuteurNom    string  `json:"auteur_nom"`
-	AuteurPrenom string  `json:"auteur_prenom"`
-	EmplacementId int   `json:"emplacement_id"`
+	Titre         string  `json:"titre"`
+	Caution       float64 `json:"caution"`
+	Isbn          string  `json:"isbn"`
+	AuteurId      int     `json:"auteur_id"`
+	AuteurNom     string  `json:"auteur_nom"`
+	AuteurPrenom  string  `json:"auteur_prenom"`
+	EmplacementId int     `json:"emplacement_id"`
 }
 
 // CreerLivre : POST /api/livres
+// @Summary      Creer un livre
+// @Description  Cree un nouveau livre avec auteur existant ou nouvel auteur.
+// @Tags         Ouvrages
+// @Accept       json
+// @Produce      json
+// @Param        payload  body      CreerLivreRequest  true  "Donnees du livre"
+// @Success      201      {object}  IDResponse
+// @Failure      400      {object}  ErrorResponse
+// @Failure      500      {object}  ErrorResponse
+// @Router       /livres [post]
 func CreerLivre(c *gin.Context) {
 	var req CreerLivreRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -101,6 +125,16 @@ type CreerRevueRequest struct {
 }
 
 // CreerRevue : POST /api/revues
+// @Summary      Creer une revue
+// @Description  Cree une nouvelle revue.
+// @Tags         Ouvrages
+// @Accept       json
+// @Produce      json
+// @Param        payload  body      CreerRevueRequest  true  "Donnees de la revue"
+// @Success      201      {object}  IDResponse
+// @Failure      400      {object}  ErrorResponse
+// @Failure      500      {object}  ErrorResponse
+// @Router       /revues [post]
 func CreerRevue(c *gin.Context) {
 	var req CreerRevueRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

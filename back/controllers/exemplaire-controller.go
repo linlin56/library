@@ -23,6 +23,16 @@ type ExemplaireDetail struct {
 
 // GetExemplairesDisponibles : GET /api/ouvrages/:id/exemplaires
 // Retourne les exemplaires disponibles (non empruntés) pour un ouvrage donné.
+// @Summary      Lister les exemplaires disponibles
+// @Description  Retourne les exemplaires non empruntes pour un ouvrage.
+// @Tags         Exemplaires
+// @Produce      json
+// @Param        id   path      int  true  "ID ouvrage"
+// @Success      200  {array}   ExemplaireResume
+// @Success      204  {string}  string  "No Content"
+// @Failure      400  {object}  ErrorResponse
+// @Failure      500  {object}  ErrorResponse
+// @Router       /ouvrages/{id}/exemplaires [get]
 func GetExemplairesDisponibles(c *gin.Context) {
 	idStr := c.Param("id")
 	ouvrageId, err := strconv.Atoi(idStr)
@@ -51,6 +61,16 @@ func GetExemplairesDisponibles(c *gin.Context) {
 
 // GetTousExemplaires : GET /api/ouvrages/:id/exemplaires/tous
 // Retourne tous les exemplaires (disponibles et empruntés) pour un ouvrage donné.
+// @Summary      Lister tous les exemplaires
+// @Description  Retourne tous les exemplaires d'un ouvrage.
+// @Tags         Exemplaires
+// @Produce      json
+// @Param        id   path      int  true  "ID ouvrage"
+// @Success      200  {array}   ExemplaireDetail
+// @Success      204  {string}  string  "No Content"
+// @Failure      400  {object}  ErrorResponse
+// @Failure      500  {object}  ErrorResponse
+// @Router       /ouvrages/{id}/exemplaires/tous [get]
 func GetTousExemplaires(c *gin.Context) {
 	idStr := c.Param("id")
 	ouvrageId, err := strconv.Atoi(idStr)
@@ -87,6 +107,16 @@ func GetTousExemplaires(c *gin.Context) {
 
 // CreerExemplaireForOuvrage : POST /api/ouvrages/:id/exemplaires
 // Crée un nouvel exemplaire pour un ouvrage donné.
+// @Summary      Creer un exemplaire
+// @Description  Cree un exemplaire pour un ouvrage donne.
+// @Tags         Exemplaires
+// @Accept       json
+// @Produce      json
+// @Param        id       path      int                    true  "ID ouvrage"
+// @Param        payload  body      CreerExemplaireRequest true  "Donnees exemplaire"
+// @Success      201      {object}  IDResponse
+// @Failure      400      {object}  ErrorResponse
+// @Router       /ouvrages/{id}/exemplaires [post]
 func CreerExemplaireForOuvrage(c *gin.Context) {
 	idStr := c.Param("id")
 	ouvrageId, err := strconv.Atoi(idStr)
@@ -116,4 +146,3 @@ func CreerExemplaireForOuvrage(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, gin.H{"id": newID})
 }
-

@@ -31,11 +31,19 @@ type CreerUtilisateurRequest struct {
 }
 
 type CreerUtilisateurResponse struct {
-	Login     string `json:"login"`
+	Login      string `json:"login"`
 	MotDePasse string `json:"mot_de_passe"`
-	Message   string `json:"message"`
+	Message    string `json:"message"`
 }
 
+// GetDepartements godoc
+// @Summary      Lister les departements
+// @Description  Retourne la liste des departements d'ecole.
+// @Tags         Utilisateurs
+// @Produce      json
+// @Success      200  {array}   models.DepartementEcole
+// @Failure      500  {object}  ErrorResponse
+// @Router       /departements [get]
 func GetDepartements(c *gin.Context) {
 	repo := repositories.NewDepartementEcoleRepository(db.GlobalDBO)
 	departements, err := repo.FindAll()
@@ -46,6 +54,18 @@ func GetDepartements(c *gin.Context) {
 	c.JSON(http.StatusOK, departements)
 }
 
+// CreerUtilisateur godoc
+// @Summary      Creer un utilisateur
+// @Description  Cree un etudiant, un enseignant ou un particulier.
+// @Tags         Utilisateurs
+// @Accept       json
+// @Produce      json
+// @Param        payload  body      CreerUtilisateurRequest  true  "Donnees utilisateur"
+// @Success      201      {object}  CreerUtilisateurResponse
+// @Failure      400      {object}  ErrorResponse
+// @Failure      409      {object}  map[string]string
+// @Failure      500      {object}  ErrorResponse
+// @Router       /utilisateurs [post]
 func CreerUtilisateur(c *gin.Context) {
 	var req CreerUtilisateurRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

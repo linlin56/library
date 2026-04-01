@@ -11,6 +11,15 @@ import (
 
 // GetCaution : GET /api/utilisateurs/:id/caution
 // Retourne le solde_caution et la caution_totale d'un utilisateur.
+// @Summary      Consulter la caution d'un utilisateur
+// @Description  Retourne le solde de caution disponible et la caution totale.
+// @Tags         Utilisateurs
+// @Produce      json
+// @Param        id   path      int  true  "ID utilisateur"
+// @Success      200  {object}  repositories.CautionInfo
+// @Failure      400  {object}  ErrorResponse
+// @Failure      404  {object}  ErrorResponse
+// @Router       /utilisateurs/{id}/caution [get]
 func GetCaution(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil || id <= 0 {
@@ -32,6 +41,16 @@ func GetCaution(c *gin.Context) {
 // Met à jour la caution_totale d'un utilisateur (réservé à la bibliothécaire).
 // Recalcule solde_caution en conservant le montant emprunté.
 // Retourne 400 si la nouvelle valeur est inférieure au montant emprunté.
+// @Summary      Mettre a jour la caution totale
+// @Description  Met a jour la caution totale d'un utilisateur et recalcule son solde.
+// @Tags         Utilisateurs
+// @Accept       json
+// @Produce      json
+// @Param        id       path      int                   true  "ID utilisateur"
+// @Param        payload  body      UpdateCautionRequest  true  "Nouvelle caution"
+// @Success      200      {object}  repositories.CautionInfo
+// @Failure      400      {object}  ErrorResponse
+// @Router       /utilisateurs/{id}/caution [put]
 func UpdateCautionTotale(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil || id <= 0 {
