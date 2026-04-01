@@ -71,7 +71,7 @@ jobs:
         working-directory: front
         run: npm run build -- --configuration production
 
-  tests:
+  tests-back:
     name: Tests unitaires (Go)
     runs-on: ubuntu-latest
     needs: build-back
@@ -118,7 +118,7 @@ jobs:
   tests-front:
     name: Tests e2e (Mocha)
     runs-on: ubuntu-latest
-    needs: [build-back, tests-tu-front]
+    needs: [tests-tu-front, tests-back]
 
     services:
       postgres:
