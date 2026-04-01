@@ -9,7 +9,7 @@
  *   API_URL, DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME
  */
 
-import { spawn, ChildProcess } from 'node:child_process';
+import { ChildProcess, spawn } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 
