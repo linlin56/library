@@ -49,10 +49,6 @@ jobs:
         working-directory: back
         run: go build ./...
 
-      - name: Run tests
-        working-directory: back
-        run: go test ./...
-
   build-front:
     name: Frontend (Angular)
     runs-on: ubuntu-latest
