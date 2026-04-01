@@ -70,3 +70,24 @@ jobs:
       - name: Build
         working-directory: front
         run: npm run build -- --configuration production
+
+  tests:
+    name: Tests unitaires (Go)
+    runs-on: ubuntu-latest
+    needs: build-back
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: back/go.mod
+
+      - name: Download dependencies
+        working-directory: back
+        run: go mod download
+
+      - name: Run tests unitaires
+        working-directory: back
+        run: go test ./test/...
