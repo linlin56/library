@@ -70,14 +70,16 @@ async function waitForBackend(timeoutMs = 20000): Promise<void> {
 
 export const mochaHooks = {
   async beforeAll() {
-    // 1. Seed toujours, pour garantir un état connu
-    await seedDatabase();
-
-    // 2. Démarrer le backend seulement s'il ne tourne pas déjà
+    // Si le backend tourne déjà, ne pas relancer insert.sql :
+    // DROP + CREATE TABLE casserait les connexions actives du backend (→ 500 sur les queries).
+    // Chaque fichier de test appellera TestContext.before() qui fera un TRUNCATE (sans DROP).
     if (await isBackendUp()) {
-      console.log('  ✔ Backend déjà démarré — réutilisation\n');
+      console.log('  ✔ Backend déjà démarré — réutilisation (sans re-seed)\n');
       return;
     }
+
+    // Backend non disponible : créer le schéma + données initiales, puis démarrer.
+    await seedDatabase();
 
     console.log('  → Démarrage du backend (go run main.go)...');
     backendProcess = spawn('go', ['run', 'main.go'], {
