@@ -185,3 +185,38 @@ jobs:
       - name: Run tests e2e
         working-directory: front
         run: npm run test:e2e
+
+  swagger:
+    name: Swagger (generate + verify)
+    runs-on: ubuntu-latest
+    needs: tests-front
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: back/go.mod
+
+      - name: Download dependencies
+        working-directory: back
+        run: go mod download
+
+      - name: Install swag CLI
+        run: go install github.com/swaggo/swag/cmd/swag@latest
+
+      - name: Generate Swagger docs
+        working-directory: back
+        run: ~/go/bin/swag init -g main.go -o docs
+
+      - name: Verify generated Swagger is committed
+        run: git diff --exit-code -- back/docs
+
+      - name: Upload Swagger artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: swagger-docs
+          path: |
+            back/docs/swagger.json
+            back/docs/swagger.yaml
