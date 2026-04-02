@@ -1,0 +1,4 @@
+[project]
+site_name = "Bibliotheque Docs"
+site_description = "Documentation du projet bibliotheque"
+language = "fr"

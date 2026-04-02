@@ -1,0 +1,1 @@
+{"config":{"separator":"[\\s\\-_,:!=\\[\\]()\\\\\"`/]+|\\.(?!\\d)"},"items":[{"location":"","level":1,"title":"Documentation","text":"<p>Voir la page Hello World.</p>","path":["Documentation"],"tags":[]},{"location":"zensical/hello-world/","level":1,"title":"Hello World","text":"<p>Bienvenue sur la documentation Zensical.</p>","path":["Zensical","Hello World"],"tags":[]}]}

@@ -1,5 +1,10 @@
 name: Build
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 on:
   push:
     branches: ["main"]
@@ -220,3 +225,27 @@ jobs:
           path: |
             back/docs/swagger.json
             back/docs/swagger.yaml
+
+  deploy-docs:
+    name: Deploy docs (GitHub Pages)
+    runs-on: ubuntu-latest
+    needs: [swagger]
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload docs artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,4 +1,4 @@
-.PHONY: run-back run-front mg sql-start sql-stop uml restart
+.PHONY: run-back run-front mg sql-start sql-stop uml restart docs
 
 run-back:
 	@echo "API REST dispo sur http://localhost:8080"
@@ -32,3 +32,8 @@ restart:
 	@until docker exec psql-container pg_isready -U postgres -q 2>/dev/null; do sleep 1; done
 	@echo "PostgreSQL pret."
 	(cd back && go run main.go) & (cd front && npm start) & wait
+
+docs:
+	@echo "Documentation locale sur http://localhost:4173"
+	@echo "Lancement Zensical..."
+	@cd docs && zensical serve -f ../zensical.toml --dev-addr localhost:4173

@@ -1,2 +1,9 @@
 *.DS_Store
 back/.DS_Store
+
+# Docs build outputs / caches
+docs/.zensical/
+docs/.zensical-cache/
+docs/.cache/
+docs/dist/
+docs/site/
