@@ -1,3 +1,6 @@
 # Documentation
 
-Voir la page [Hello World](./zensical/hello-world.md).
+## Sections
+
+- [Backend](./back/index.md)
+- [Frontend](./front/index.md)
