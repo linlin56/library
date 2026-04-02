@@ -69,7 +69,7 @@ func genClassDiagram(outDir string) {
 		log.Printf("Erreur creation %s : %v", outFile, err)
 		return
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	cmd := exec.Command(path, "-recursive", ".")
 	cmd.Stdout = f
@@ -268,36 +268,6 @@ func creerOuvrageDiagram() *uml.SequenceDiagram {
 		DashedArrow("OR", "CTL", "newId, nil").
 		Deactivate("OR").
 		DashedArrow("CTL", "C", "201 {id, message: Revue creee avec succes}").
-		Deactivate("CTL")
-}
-
-// Diagramme 4 — Recherche avancee d'ouvrages
-
-func rechercheDiagram() *uml.SequenceDiagram {
-	return uml.NewSequenceDiagram("Recherche avancee d'ouvrages").
-		Actor("C", "Client").
-		Participant("CTL", "OuvragesController").
-		Participant("OR", "OuvrageRepository").
-		Participant("DB", "PostgreSQL").
-		Blank().
-		Arrow("C", "CTL", "GET /api/ouvrages?titre=X&auteur=Y&isbn=Z&code_barre=B&disponible=true").
-		Activate("CTL").
-		Arrow("CTL", "OR", "Rechercher(filtres)").
-		Activate("OR").
-		Note("right of", "OR", "Construction dynamique\\nde la requete SQL\\nselon les filtres fournis").
-		Arrow("OR", "DB",
-			"SELECT ouvrages+livres+auteurs UNION ALL ouvrages+revues\\n"+
-				"WHERE <filtres> ORDER BY titre").
-		Activate("DB").
-		DashedArrow("DB", "OR", "[]OuvrageResultat").
-		Deactivate("DB").
-		DashedArrow("OR", "CTL", "[]OuvrageResultat, nil").
-		Deactivate("OR").
-		AltStart("Resultats trouves").
-		DashedArrow("CTL", "C", "200 [{id, titre, type, auteur, isbn, date_parution, caution, disponibles}]").
-		Else("Aucun resultat").
-		DashedArrow("CTL", "C", "200 []").
-		End().
 		Deactivate("CTL")
 }
 

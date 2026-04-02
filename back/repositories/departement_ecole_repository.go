@@ -22,7 +22,7 @@ func (r *DepartementEcoleRepository) FindAll() ([]*models.DepartementEcole, erro
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var departements []*models.DepartementEcole
 	for rows.Next() {

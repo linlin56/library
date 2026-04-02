@@ -10,6 +10,7 @@ import (
 	"bibliotheque/controllers"
 	"bibliotheque/db"
 	_ "bibliotheque/docs"
+	"log"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -19,7 +20,7 @@ import (
 
 func main() {
 	db.Init()
-	defer db.GlobalDBO.Close()
+	defer func() { _ = db.GlobalDBO.Close() }()
 
 	r := gin.Default()
 
@@ -55,5 +56,7 @@ func main() {
 		api.GET("/utilisateurs/rechercher", controllers.RechercherUtilisateurs)
 	}
 
-	r.Run(":8080")
+	if err := r.Run(":8080"); err != nil {
+		log.Fatal(err)
+	}
 }

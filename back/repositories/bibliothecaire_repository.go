@@ -22,7 +22,7 @@ func (r *BibliothécaireRepository) FindAll() ([]*models.Bibliothecaire, error) 
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var bibliothecaires []*models.Bibliothecaire
 	for rows.Next() {

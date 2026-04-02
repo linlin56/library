@@ -88,7 +88,7 @@ func (u *UseCaseDiagram) String() string {
 	var b strings.Builder
 	b.WriteString("@startuml\n")
 	if u.title != "" {
-		b.WriteString(fmt.Sprintf("title %s\n\n", u.title))
+		fmt.Fprintf(&b, "title %s\n\n", u.title)
 	}
 	for _, l := range u.lines {
 		b.WriteString(l + "\n")
@@ -98,9 +98,9 @@ func (u *UseCaseDiagram) String() string {
 }
 
 // WriteTo écrit le diagramme dans un io.Writer.
-func (u *UseCaseDiagram) WriteTo(w io.Writer) error {
-	_, err := fmt.Fprint(w, u.String())
-	return err
+func (u *UseCaseDiagram) WriteTo(w io.Writer) (int64, error) {
+	n, err := fmt.Fprint(w, u.String())
+	return int64(n), err
 }
 
 // WriteFile crée ou écrase le fichier au chemin donné avec le diagramme.
@@ -109,6 +109,7 @@ func (u *UseCaseDiagram) WriteFile(path string) error {
 	if err != nil {
 		return fmt.Errorf("uml.WriteFile: %w", err)
 	}
-	defer f.Close()
-	return u.WriteTo(f)
+	defer func() { _ = f.Close() }()
+	_, err = u.WriteTo(f)
+	return err
 }

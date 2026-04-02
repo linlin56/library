@@ -68,7 +68,7 @@ func TestFabriqueLivre_SatisfaitFabriqueOuvrage(t *testing.T) {
 func TestFabriqueLivre_CreerOuvrage_SatisfaitIOuvrage(t *testing.T) {
 	auteur := models.NewAuteur(1, "Test", "Auteur")
 	f := &fabrique.FabriqueLivre{Titre: "Test", Caution: 1.0, Isbn: "000", Auteur: auteur}
-	var _ models.IOuvrage = f.CreerOuvrage()
+	_ = f.CreerOuvrage()
 }
 
 // ===================== FabriqueRevue =====================
@@ -120,7 +120,7 @@ func TestFabriqueRevue_SatisfaitFabriqueOuvrage(t *testing.T) {
 
 func TestFabriqueRevue_CreerOuvrage_SatisfaitIOuvrage(t *testing.T) {
 	f := &fabrique.FabriqueRevue{Titre: "Test", Caution: 1.0, Numero: 1, DateParution: time.Now()}
-	var _ models.IOuvrage = f.CreerOuvrage()
+	_ = f.CreerOuvrage()
 }
 
 // ===================== Polymorphisme abstrait =====================

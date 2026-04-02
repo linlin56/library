@@ -95,7 +95,7 @@ func (s *SequenceDiagram) String() string {
 	var b strings.Builder
 	b.WriteString("@startuml\n")
 	if s.title != "" {
-		b.WriteString(fmt.Sprintf("title %s\n\n", s.title))
+		fmt.Fprintf(&b, "title %s\n\n", s.title)
 	}
 	for _, l := range s.lines {
 		b.WriteString(l + "\n")
@@ -105,9 +105,9 @@ func (s *SequenceDiagram) String() string {
 }
 
 // WriteTo écrit le diagramme dans un io.Writer.
-func (s *SequenceDiagram) WriteTo(w io.Writer) error {
-	_, err := fmt.Fprint(w, s.String())
-	return err
+func (s *SequenceDiagram) WriteTo(w io.Writer) (int64, error) {
+	n, err := fmt.Fprint(w, s.String())
+	return int64(n), err
 }
 
 // WriteFile crée (ou écrase) le fichier au chemin donné avec le diagramme.
@@ -116,6 +116,7 @@ func (s *SequenceDiagram) WriteFile(path string) error {
 	if err != nil {
 		return fmt.Errorf("uml.WriteFile: %w", err)
 	}
-	defer f.Close()
-	return s.WriteTo(f)
+	defer func() { _ = f.Close() }()
+	_, err = s.WriteTo(f)
+	return err
 }

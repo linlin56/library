@@ -41,13 +41,13 @@ err := r.dbo.QueryRow(`
 		WHERE e.code_barre = $1 LIMIT 1`, codeBarre).
 Scan(&exId, &ouvrageId, &estEmprunte, &caution, &titre)
 if errors.Is(err, sql.ErrNoRows) {
-return nil, fmt.Errorf("Code barre introuvable.")
+return nil, fmt.Errorf("code barre introuvable")
 }
 if err != nil {
-return nil, fmt.Errorf("Erreur lors de la recherche de l'exemplaire: %w", err)
+return nil, fmt.Errorf("erreur lors de la recherche de l'exemplaire: %w", err)
 }
 if estEmprunte {
-return nil, fmt.Errorf("Cet exemplaire est deja emprunte.")
+return nil, fmt.Errorf("cet exemplaire est deja emprunte")
 }
 
 	// 1.1 - Verifier aucun emprunt en retard
@@ -57,10 +57,10 @@ SELECT COUNT(*) FROM exemplaires
 WHERE emprunteur_id = $1 AND est_emprunte = TRUE AND date_fin_emprunt < $2`,
 utilisateurId, time.Now()).Scan(&nbRetard)
 if err != nil {
-return nil, fmt.Errorf("Erreur lors de la verification des emprunts en retard: %w", err)
+return nil, fmt.Errorf("erreur lors de la verification des emprunts en retard: %w", err)
 }
 if nbRetard > 0 {
-return nil, fmt.Errorf("Vous avez %d emprunt(s) en retard. Veuillez les retourner avant d'emprunter.", nbRetard)
+return nil, fmt.Errorf("vous avez %d emprunt(s) en retard, veuillez les retourner avant d'emprunter", nbRetard)
 }
 
 // 1.2 - Verifier qu'il n'emprunte pas deja un exemplaire du meme ouvrage
@@ -70,7 +70,7 @@ err = r.dbo.QueryRow(`
 		WHERE emprunteur_id = $1 AND ouvrage_id = $2 AND est_emprunte = TRUE`,
 utilisateurId, ouvrageId).Scan(&existant)
 if err != nil {
-return nil, fmt.Errorf("Erreur lors de la verification des emprunts existants: %w", err)
+return nil, fmt.Errorf("erreur lors de la verification des emprunts existants: %w", err)
 }
 if existant > 0 {
 return nil, fmt.Errorf("Vous empruntez deja un exemplaire de cet ouvrage.")

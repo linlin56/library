@@ -22,7 +22,7 @@ func (r *AuteurRepository) FindAll() ([]*models.Auteur, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var auteurs []*models.Auteur
 	for rows.Next() {

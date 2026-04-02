@@ -25,10 +25,10 @@ type AccueilStats struct {
 // @Router       /accueil [get]
 func Accueil(c *gin.Context) {
 	var stats AccueilStats
-	db.GlobalDBO.QueryRow(`SELECT COUNT(*) FROM livres`).Scan(&stats.NbLivres)
-	db.GlobalDBO.QueryRow(`SELECT COUNT(*) FROM revues`).Scan(&stats.NbRevues)
-	db.GlobalDBO.QueryRow(`SELECT COUNT(*) FROM exemplaires WHERE est_emprunte = FALSE`).Scan(&stats.NbExemplairesDisponibles)
-	db.GlobalDBO.QueryRow(`SELECT COUNT(*) FROM utilisateurs`).Scan(&stats.NbUtilisateurs)
+	_ = db.GlobalDBO.QueryRow(`SELECT COUNT(*) FROM livres`).Scan(&stats.NbLivres)
+	_ = db.GlobalDBO.QueryRow(`SELECT COUNT(*) FROM revues`).Scan(&stats.NbRevues)
+	_ = db.GlobalDBO.QueryRow(`SELECT COUNT(*) FROM exemplaires WHERE est_emprunte = FALSE`).Scan(&stats.NbExemplairesDisponibles)
+	_ = db.GlobalDBO.QueryRow(`SELECT COUNT(*) FROM utilisateurs`).Scan(&stats.NbUtilisateurs)
 
 	c.JSON(http.StatusOK, stats)
 }

@@ -50,7 +50,7 @@ func TestUtilisateurBuilder_Build_ChampsSimples(t *testing.T) {
 
 func TestUtilisateurBuilder_Build_RetournePointeurUtilisateur(t *testing.T) {
 	u := builder.NewUtilisateurBuilder().WithNom("Test").Build()
-	var _ *models.Utilisateur = u
+	_ = u
 }
 
 func TestUtilisateurBuilder_Build_ValeursParDefautVides(t *testing.T) {
@@ -99,7 +99,7 @@ func TestEtudiantBuilder_Build_ChampsComplets(t *testing.T) {
 
 func TestEtudiantBuilder_Build_RetournePointeurEtudiant(t *testing.T) {
 	e := builder.NewEtudiantBuilder().WithNom("Test").Build()
-	var _ *models.Etudiant = e
+	_ = e
 }
 
 func TestEtudiantBuilder_Build_AnneeEtudeVideParDefaut(t *testing.T) {
@@ -115,11 +115,11 @@ func TestEtudiantBuilder_HeritageUtilisateurChamps(t *testing.T) {
 		WithPrenom("Alice").
 		WithSoldeCaution(15.0).
 		Build()
-	if e.Utilisateur.Nom != "Bernard" {
-		t.Errorf("Utilisateur.Nom: attendu Bernard, obtenu %s", e.Utilisateur.Nom)
+	if e.Nom != "Bernard" {
+		t.Errorf("Nom: attendu Bernard, obtenu %s", e.Nom)
 	}
-	if e.Utilisateur.SoldeCaution != 15.0 {
-		t.Errorf("Utilisateur.SoldeCaution: attendu 15.0, obtenu %.2f", e.Utilisateur.SoldeCaution)
+	if e.SoldeCaution != 15.0 {
+		t.Errorf("Utilisateur.SoldeCaution: attendu 15.0, obtenu %.2f", e.SoldeCaution)
 	}
 }
 
@@ -161,7 +161,7 @@ func TestEnseignantBuilder_Build_AvecDepartement(t *testing.T) {
 
 func TestEnseignantBuilder_Build_RetournePointeurEnseignant(t *testing.T) {
 	ens := builder.NewEnseignantBuilder().WithNom("Test").Build()
-	var _ *models.Enseignant = ens
+	_ = ens
 }
 
 func TestEnseignantBuilder_Build_ChampsUtilisateurPropages(t *testing.T) {
