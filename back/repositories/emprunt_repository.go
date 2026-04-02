@@ -73,7 +73,7 @@ if err != nil {
 return nil, fmt.Errorf("erreur lors de la verification des emprunts existants: %w", err)
 }
 if existant > 0 {
-return nil, fmt.Errorf("Vous empruntez deja un exemplaire de cet ouvrage.")
+return nil, fmt.Errorf("vous empruntez deja un exemplaire de cet ouvrage")
 }
 
 // 1.3 - Verifier le solde caution suffisant
@@ -86,10 +86,10 @@ err = r.dbo.QueryRow(`
 		SELECT solde_caution FROM enseignants WHERE id = $1
 		LIMIT 1`, utilisateurId).Scan(&solde)
 if err != nil {
-return nil, fmt.Errorf("Utilisateur introuvable.")
+return nil, fmt.Errorf("utilisateur introuvable")
 }
 if solde < caution {
-return nil, fmt.Errorf("Solde insuffisant (%.2f EUR disponible, %.2f EUR requis).", solde, caution)
+return nil, fmt.Errorf("solde insuffisant (%.2f EUR disponible, %.2f EUR requis)", solde, caution)
 }
 
 return &PreviewEmprunt{
@@ -124,7 +124,7 @@ func (r *EmpruntRepository) GetEmprunts(utilisateurId int) ([]*EmpruntItem, erro
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	items := make([]*EmpruntItem, 0)
 	for rows.Next() {
@@ -168,7 +168,7 @@ func (r *EmpruntRepository) GetEmpruntsEnRetard() ([]*EmpruntEnRetardItem, error
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	items := make([]*EmpruntEnRetardItem, 0)
 	for rows.Next() {
@@ -195,7 +195,7 @@ var exId, delaiJours int
 err = r.dbo.QueryRow(`SELECT id, delai_emprunt_jours FROM exemplaires WHERE code_barre = $1`, codeBarre).
 Scan(&exId, &delaiJours)
 if err != nil {
-return fmt.Errorf("Exemplaire introuvable: %w", err)
+return fmt.Errorf("exemplaire introuvable: %w", err)
 }
 
 now := time.Now()

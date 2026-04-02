@@ -31,7 +31,7 @@ func (r *EmplacementRepository) FindAll() ([]*EmplacementResume, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var emplacements []*EmplacementResume
 	for rows.Next() {

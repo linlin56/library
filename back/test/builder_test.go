@@ -171,11 +171,11 @@ func TestEnseignantBuilder_Build_ChampsUtilisateurPropages(t *testing.T) {
 		WithEmail("luc@exemple.fr").
 		WithSoldeCaution(20.0).
 		Build()
-	if ens.Utilisateur.Nom != "Durand" {
-		t.Errorf("Utilisateur.Nom: attendu Durand, obtenu %s", ens.Utilisateur.Nom)
+	if ens.Nom != "Durand" {
+		t.Errorf("Utilisateur.Nom: attendu Durand, obtenu %s", ens.Nom)
 	}
-	if ens.Utilisateur.Email != "luc@exemple.fr" {
-		t.Errorf("Utilisateur.Email incorrect: %s", ens.Utilisateur.Email)
+	if ens.Email != "luc@exemple.fr" {
+		t.Errorf("Utilisateur.Email incorrect: %s", ens.Email)
 	}
 }
 
