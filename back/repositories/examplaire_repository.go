@@ -26,7 +26,7 @@ func (r *ExemplaireRepository) FindAll() ([]*models.Exemplaire, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var exemplaires []*models.Exemplaire
 	for rows.Next() {
@@ -91,7 +91,7 @@ func (r *ExemplaireRepository) FindDisponibles() ([]*models.Exemplaire, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var exemplaires []*models.Exemplaire
 	for rows.Next() {
@@ -113,7 +113,7 @@ func (r *ExemplaireRepository) FindAllByOuvrageId(ouvrageId int) ([]*models.Exem
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var result []*models.Exemplaire
 	for rows.Next() {
@@ -137,7 +137,7 @@ func (r *ExemplaireRepository) CreateForOuvrage(ouvrageId int, codeBarre string,
 		return 0, fmt.Errorf("CreateForOuvrage (vérification): %w", err)
 	}
 	if exists {
-		return 0, fmt.Errorf("Ce code-barre existe déjà.")
+		return 0, fmt.Errorf("ce code-barre existe deja")
 	}
 
 	var newID int
@@ -161,7 +161,7 @@ func (r *ExemplaireRepository) FindDisponiblesByOuvrageId(ouvrageId int) ([]*mod
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var result []*models.Exemplaire
 	for rows.Next() {

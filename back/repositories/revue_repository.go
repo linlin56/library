@@ -26,7 +26,7 @@ func (r *RevueRepository) FindAll() ([]*models.Revue, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var revues []*models.Revue
 	for rows.Next() {
@@ -66,7 +66,7 @@ func (r *RevueRepository) FindByTitre(titre string) ([]*models.Revue, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var revues []*models.Revue
 	for rows.Next() {

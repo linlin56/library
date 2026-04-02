@@ -25,7 +25,7 @@ func (r *UtilisateurRepository) FindAll() ([]*models.Utilisateur, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var utilisateurs []*models.Utilisateur
 	for rows.Next() {
@@ -132,7 +132,7 @@ func (r *UtilisateurRepository) FindEmpruntsActifs(utilisateurID int) ([]*models
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var exemplaires []*models.Exemplaire
 	for rows.Next() {
@@ -188,7 +188,7 @@ func (r *UtilisateurRepository) RechercherUtilisateurs(nom, prenom, codePostal, 
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	results := make([]*UtilisateurResume, 0)
 	for rows.Next() {
@@ -239,7 +239,7 @@ func (r *UtilisateurRepository) UpdateCautionTotale(id int, nouvelleCautionTotal
 
 	montantEmprunte := current.CautionTotale - current.SoldeCaution
 	if nouvelleCautionTotale < montantEmprunte {
-		return fmt.Errorf("La caution totale ne peut pas être inférieure au montant déjà emprunté (%.2f EUR).", montantEmprunte)
+		return fmt.Errorf("la caution totale ne peut pas etre inferieure au montant deja emprunte (%.2f EUR)", montantEmprunte)
 	}
 
 	nouveauSolde := nouvelleCautionTotale - montantEmprunte

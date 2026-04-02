@@ -210,7 +210,7 @@ n, err := r.dbo.Exec(`
 		    emprunteur_id = $3
 		WHERE id = $4`, now, fin, utilisateurId, exId)
 if err != nil || n == 0 {
-return fmt.Errorf("Impossible d'enregistrer l'emprunt.")
+return fmt.Errorf("impossible d'enregistrer l'emprunt")
 }
 
 // Deduire la caution - essaie les 3 tables (heritage natif PostgreSQL)
@@ -221,5 +221,5 @@ return fmt.Errorf("Impossible d'enregistrer l'emprunt.")
 			return nil
 		}
 	}
-	return fmt.Errorf("Impossible de deduire la caution du solde.")
+	return fmt.Errorf("impossible de deduire la caution du solde")
 }

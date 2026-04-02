@@ -27,7 +27,7 @@ func (r *EtudiantRepository) FindAll() ([]*models.Etudiant, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var etudiants []*models.Etudiant
 	for rows.Next() {

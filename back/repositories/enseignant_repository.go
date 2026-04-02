@@ -29,7 +29,7 @@ func (r *EnseignantRepository) FindAll() ([]*models.Enseignant, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var enseignants []*models.Enseignant
 	for rows.Next() {
@@ -81,7 +81,7 @@ func (r *EnseignantRepository) FindByDepartement(departementID int) ([]*models.E
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var enseignants []*models.Enseignant
 	for rows.Next() {

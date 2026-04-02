@@ -29,7 +29,7 @@ func (r *LivreRepository) FindAll() ([]*models.Livre, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var livres []*models.Livre
 	for rows.Next() {
@@ -102,7 +102,7 @@ func (r *LivreRepository) FindByAuteur(auteurID int) ([]*models.Livre, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var livres []*models.Livre
 	for rows.Next() {

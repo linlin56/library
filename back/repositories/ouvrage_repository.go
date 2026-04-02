@@ -89,7 +89,7 @@ f.Titre, f.Auteur, f.Isbn, f.CodeBarre, f.Disponible, f.CodeRevue,
 if err != nil {
 return nil, err
 }
-defer rows.Close()
+defer func() { _ = rows.Close() }()
 
 resultats := make([]OuvrageResultat, 0)
 for rows.Next() {
@@ -125,7 +125,7 @@ rows, err := r.dbo.QueryRows(`SELECT id, caution, titre FROM ouvrages ORDER BY t
 if err != nil {
 return nil, err
 }
-defer rows.Close()
+defer func() { _ = rows.Close() }()
 
 ouvrages := make([]*models.Ouvrage, 0)
 for rows.Next() {
