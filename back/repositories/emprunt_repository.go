@@ -223,3 +223,45 @@ return fmt.Errorf("impossible d'enregistrer l'emprunt")
 	}
 	return fmt.Errorf("impossible de deduire la caution du solde")
 }
+
+// RendreExemplaire marque un exemplaire comme rendu et restitue la caution à l'emprunteur.
+func (r *EmpruntRepository) RendreExemplaire(exemplaireId int) error {
+	return r.dbo.WithTx(func(tx *db.TxDBO) error {
+		// Récupérer la caution de l'ouvrage et l'id de l'emprunteur
+		var emprunteurId int
+		var caution float64
+		err := tx.QueryRow(`
+			SELECT e.emprunteur_id, o.caution
+			FROM exemplaires e
+			JOIN ouvrages o ON o.id = e.ouvrage_id
+			WHERE e.id = $1 AND e.est_emprunte = TRUE`, exemplaireId).
+			Scan(&emprunteurId, &caution)
+		if errors.Is(err, sql.ErrNoRows) {
+			return fmt.Errorf("emprunt introuvable")
+		}
+		if err != nil {
+			return fmt.Errorf("rendre exemplaire: %w", err)
+		}
+
+		// Marquer l'exemplaire comme rendu
+		if _, err = tx.Exec(`
+			UPDATE exemplaires
+			SET est_emprunte = FALSE,
+			    emprunteur_id = NULL,
+			    date_debut_emprunt = NULL,
+			    date_fin_emprunt = NULL
+			WHERE id = $1`, exemplaireId); err != nil {
+			return fmt.Errorf("rendre exemplaire (update): %w", err)
+		}
+
+		// Restituer la caution dans toutes les tables héritées
+		for _, table := range []string{"utilisateurs", "etudiants", "enseignants"} {
+			q := fmt.Sprintf(`UPDATE %s SET solde_caution = solde_caution + $1 WHERE id = $2`, table)
+			n, execErr := tx.Exec(q, caution, emprunteurId)
+			if execErr == nil && n > 0 {
+				return nil
+			}
+		}
+		return fmt.Errorf("impossible de restituer la caution")
+	})
+}

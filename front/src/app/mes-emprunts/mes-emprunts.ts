@@ -18,6 +18,7 @@ export class MesEmpruntsComponent implements OnInit {
   erreur: string | null = null;
   nomUtilisateur = '';
   caution: CautionInfo | null = null;
+  renduEnCours: Set<number> = new Set();
 
   constructor(
     private empruntService: EmpruntService,
@@ -46,5 +47,24 @@ export class MesEmpruntsComponent implements OnInit {
 
   isEnRetard(emprunt: EmpruntItem): boolean {
     return emprunt.en_retard;
+  }
+
+  declarerRendu(emprunt: EmpruntItem): void {
+    this.renduEnCours.add(emprunt.id);
+    this.empruntService.rendreLivre(emprunt.id).subscribe({
+      next: () => {
+        this.emprunts = this.emprunts.filter((e) => e.id !== emprunt.id);
+        this.renduEnCours.delete(emprunt.id);
+        const u = this.connexionService.getUtilisateurConnecte();
+        if (u) {
+          this.utilisateurService.getCaution(u.id).subscribe({
+            next: (info) => (this.caution = info),
+          });
+        }
+      },
+      error: () => {
+        this.renduEnCours.delete(emprunt.id);
+      },
+    });
   }
 }

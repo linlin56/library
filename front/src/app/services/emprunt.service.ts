@@ -82,6 +82,10 @@ export class EmpruntService {
       { code_barre: codeBarre },
     );
   }
+
+  rendreLivre(exemplaireId: number): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/${exemplaireId}`);
+  }
 }
 
 export interface EmpruntEnRetardItem {

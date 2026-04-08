@@ -56,6 +56,7 @@
               <th>Emprunté le</th>
               <th>A retourner avant le</th>
               <th>Statut</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -73,6 +74,18 @@
                   } @else {
                     <span class="badge bg-success">En cours</span>
                   }
+                </td>
+                <td>
+                  <button
+                    class="btn btn-sm btn-outline-secondary"
+                    [disabled]="renduEnCours.has(emprunt.id)"
+                    (click)="declarerRendu(emprunt)"
+                  >
+                    @if (renduEnCours.has(emprunt.id)) {
+                      <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                    }
+                    Déclarer comme rendu
+                  </button>
                 </td>
               </tr>
             }

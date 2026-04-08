@@ -53,6 +53,7 @@ func main() {
 		api.GET("/emprunts", controllers.ListerEmprunts)
 		api.GET("/emprunts/retard", controllers.ListerEmpruntsEnRetard)
 		api.POST("/emprunts", controllers.Emprunter)
+		api.DELETE("/emprunts/:id", controllers.RetournerEmprunt)
 		api.GET("/utilisateurs/rechercher", controllers.RechercherUtilisateurs)
 	}
 

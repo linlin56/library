@@ -69,3 +69,28 @@ func Emprunter(c *gin.Context) {
 	}
 	c.JSON(http.StatusCreated, gin.H{"message": "Emprunt enregistre avec succes."})
 }
+
+// RetournerEmprunt : DELETE /api/emprunts/:id
+// @Summary      Retourner un exemplaire
+// @Description  Marque l'exemplaire comme rendu et restitue la caution.
+// @Tags         Emprunts
+// @Produce      json
+// @Param        id   path      int  true  "ID exemplaire"
+// @Success      200  {object}  MessageResponse
+// @Failure      400  {object}  ErrorResponse
+// @Failure      422  {object}  ErrorResponse
+// @Router       /emprunts/{id} [delete]
+func RetournerEmprunt(c *gin.Context) {
+	exemplaireId, err := strconv.Atoi(c.Param("id"))
+	if err != nil || exemplaireId <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"erreur": "ID invalide."})
+		return
+	}
+
+	repo := repositories.NewEmpruntRepository(db.GlobalDBO)
+	if err := repo.RendreExemplaire(exemplaireId); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"erreur": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Exemplaire rendu avec succes."})
+}
