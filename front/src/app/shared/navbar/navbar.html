@@ -39,9 +39,7 @@
           <li class="nav-item">
             <a
               class="nav-link"
-              [routerLink]="
-                utilisateur.role === 'bibliothecaire' ? '/emprunts-retard' : '/mes-emprunts'
-              "
+              routerLink="/mes-emprunts"
               routerLinkActive="active"
               data-bs-dismiss="collapse"
               >Emprunts</a
@@ -84,6 +82,15 @@
                   routerLinkActive="active"
                   data-bs-dismiss="collapse"
                   >Recherche utilisateur</a
+                >
+              </li>
+              <li>
+                <a
+                  class="dropdown-item"
+                  routerLink="/emprunts-retard"
+                  routerLinkActive="active"
+                  data-bs-dismiss="collapse"
+                  >Emprunts en retard</a
                 >
               </li>
             </ul>
