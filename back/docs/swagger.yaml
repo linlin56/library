@@ -457,6 +457,33 @@ paths:
       summary: Enregistrer un emprunt
       tags:
       - Emprunts
+  /emprunts/{id}:
+    delete:
+      description: Marque l'exemplaire comme rendu et restitue la caution.
+      parameters:
+      - description: ID exemplaire
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+      summary: Retourner un exemplaire
+      tags:
+      - Emprunts
   /emprunts/retard:
     get:
       description: Retourne tous les emprunts en retard.

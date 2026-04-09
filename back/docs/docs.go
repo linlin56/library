@@ -345,6 +345,47 @@ const docTemplate = `{
                 }
             }
         },
+        "/emprunts/{id}": {
+            "delete": {
+                "description": "Marque l'exemplaire comme rendu et restitue la caution.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Emprunts"
+                ],
+                "summary": "Retourner un exemplaire",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID exemplaire",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.MessageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/livres": {
             "post": {
                 "description": "Cree un nouveau livre avec auteur existant ou nouvel auteur.",
