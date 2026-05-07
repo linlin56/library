@@ -1,0 +1,152 @@
+stages:
+  - build
+  - tests
+  - e2e
+  - swagger
+  - docs
+  - lint
+
+# ─── BUILD ────────────────────────────────────────────────────────────────────
+
+build-back:
+  stage: build
+  image: golang:1.25
+  services:
+    - name: postgres:latest
+      alias: postgres
+  variables:
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: admin_bibli
+    POSTGRES_DB: bibliotheque
+    DB_HOST: postgres
+    DB_PORT: "5432"
+    DB_USER: postgres
+    DB_PASSWORD: admin_bibli
+    DB_NAME: bibliotheque
+  script:
+    - cd back
+    - go mod download
+    - go build ./...
+
+build-front:
+  stage: build
+  image: node:22
+  cache:
+    key:
+      files:
+        - front/package-lock.json
+    paths:
+      - front/node_modules/
+  script:
+    - cd front
+    - npm ci
+    - npm run build -- --configuration production
+
+# ─── TESTS ───────────────────────────────────────────────────────────────────
+
+tests-back:
+  stage: tests
+  image: golang:1.25
+  needs: [build-back]
+  script:
+    - cd back
+    - go mod download
+    - go test ./test/...
+
+tests-tu-front:
+  stage: tests
+  image: node:22
+  needs: [build-front]
+  cache:
+    key:
+      files:
+        - front/package-lock.json
+    paths:
+      - front/node_modules/
+  script:
+    - cd front
+    - npm ci
+    - npm run test:mocha
+
+# ─── E2E ─────────────────────────────────────────────────────────────────────
+
+tests-e2e:
+  stage: e2e
+  image: golang:1.25
+  needs: [tests-back, tests-tu-front]
+  services:
+    - name: postgres:latest
+      alias: postgres
+  variables:
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: admin_bibli
+    POSTGRES_DB: bibliotheque
+    DB_HOST: postgres
+    DB_PORT: "5432"
+    DB_USER: postgres
+    DB_PASSWORD: admin_bibli
+    DB_NAME: bibliotheque
+    API_URL: http://localhost:8080
+  before_script:
+    - curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+    - apt-get install -y nodejs postgresql-client
+    - until pg_isready -h postgres -U postgres -q; do sleep 1; done
+    - PGPASSWORD=admin_bibli psql -h postgres -U postgres -d bibliotheque -f db/scripts/insert.sql
+  script:
+    - cd back && go mod download
+    - go run main.go &
+    - |
+      for i in $(seq 1 20); do
+        curl -sf http://localhost:8080/api/ouvrages && break
+        sleep 1
+      done
+    - cd $CI_PROJECT_DIR/front && npm ci && npm run test:e2e
+
+# ─── SWAGGER ─────────────────────────────────────────────────────────────────
+
+swagger:
+  stage: swagger
+  image: golang:1.25
+  needs: [tests-e2e]
+  script:
+    - cd back
+    - go mod download
+    - go install github.com/swaggo/swag/cmd/swag@latest
+    - swag init -g main.go -o docs
+    - cd $CI_PROJECT_DIR
+    - git diff --exit-code -- back/docs
+  artifacts:
+    paths:
+      - back/docs/swagger.json
+      - back/docs/swagger.yaml
+    expire_in: 1 week
+
+# ─── DOCS ────────────────────────────────────────────────────────────────────
+
+pages:
+  stage: docs
+  image: python:3.12
+  needs: [swagger]
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+  script:
+    - pip install --upgrade zensical
+    - zensical build -f zensical.toml
+    - mv site public
+  artifacts:
+    paths:
+      - public
+
+# ─── LINT ────────────────────────────────────────────────────────────────────
+
+lint:
+  stage: lint
+  image: golang:1.25
+  needs: [pages]
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+  script:
+    - cd back
+    - go mod download
+    - go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
+    - golangci-lint run ./...
