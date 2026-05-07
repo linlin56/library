@@ -1,0 +1,83 @@
+name: E2E
+
+on:
+  workflow_run:
+    workflows: ["Tests"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  tests-front:
+    name: Tests e2e (Mocha)
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: admin_bibli
+          POSTGRES_DB: bibliotheque
+        ports:
+          - 5435:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5435
+      DB_USER: postgres
+      DB_PASSWORD: admin_bibli
+      DB_NAME: bibliotheque
+      API_URL: http://localhost:8080
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: back/go.mod
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: front/package-lock.json
+
+      - name: Install Go dependencies
+        working-directory: back
+        run: go mod download
+
+      - name: Apply SQL schema & seed
+        run: |
+          until pg_isready -h 127.0.0.1 -p 5435 -U postgres -q; do sleep 1; done
+          PGPASSWORD=admin_bibli psql -h 127.0.0.1 -p 5435 -U postgres -d bibliotheque -f db/scripts/insert.sql
+
+      - name: Start backend
+        working-directory: back
+        run: go run main.go &
+
+      - name: Wait for backend
+        run: |
+          for i in $(seq 1 20); do
+            curl -sf http://localhost:8080/api/ouvrages && break
+            sleep 1
+          done
+
+      - name: Install Node dependencies
+        working-directory: front
+        run: npm ci
+
+      - name: Run tests e2e
+        working-directory: front
+        run: npm run test:e2e

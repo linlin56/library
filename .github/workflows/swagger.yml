@@ -1,0 +1,47 @@
+name: Swagger
+
+on:
+  workflow_run:
+    workflows: ["E2E"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  swagger:
+    name: Swagger (generate + verify)
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: back/go.mod
+
+      - name: Download dependencies
+        working-directory: back
+        run: go mod download
+
+      - name: Install swag CLI
+        run: go install github.com/swaggo/swag/cmd/swag@latest
+
+      - name: Generate Swagger docs
+        working-directory: back
+        run: ~/go/bin/swag init -g main.go -o docs
+
+      - name: Verify generated Swagger is committed
+        run: git diff --exit-code -- back/docs
+
+      - name: Upload Swagger artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: swagger-docs
+          path: |
+            back/docs/swagger.json
+            back/docs/swagger.yaml
