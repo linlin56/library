@@ -3,34 +3,40 @@
 ## Stack technique
 
 - Go
-- Gin (API HTTP)
-- PostgreSQL
-- Swagger
+- Gin (routeur HTTP)
+- PostgreSQL (héritage natif de tables)
+- Swagger (swaggo/swag)
 
 ## Démarrage local
-
-Depuis la racine du projet:
 
 ```bash
 make run-back
 ```
 
-Swagger local:
+L'API écoute sur `http://localhost:8080/api`.  
+L'interface Swagger est disponible sur `http://localhost:8080/swagger/index.html`.
 
-- http://localhost:8080/api
+## Variables d'environnement
 
-## Sections
+| Variable | Valeur par défaut | Description |
+|----------|------------------|-------------|
+| `DB_HOST` | `localhost` | Hôte PostgreSQL |
+| `DB_PORT` | `5432` | Port PostgreSQL |
+| `DB_USER` | `postgres` | Utilisateur PostgreSQL |
+| `DB_PASSWORD` | _(vide)_ | Mot de passe PostgreSQL |
+| `DB_NAME` | `bibliotheque` | Nom de la base |
+| `DB_SSLMODE` | `disable` | Mode SSL |
 
-- [Architecture](./architecture.md)
-- [Swagger et endpoints](./swagger.md)
-
-## Tests backend
-
-Le backend contient des tests unitaires Go dans `back/test`.
-
-Exécution:
+## Tests unitaires
 
 ```bash
 cd back
 go test ./test/...
 ```
+
+Les tests sont dans `back/test/` et ne nécessitent pas de base de données active.
+
+## Sections
+
+- [Architecture](./architecture.md)
+- [Endpoints](./swagger.md)
