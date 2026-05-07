@@ -22,9 +22,19 @@ db/         Scripts SQL (schéma + données initiales)
 ## Démarrage rapide
 
 ```bash
+make sql-start   # Démarre PostgreSQL
 make run-back    # Lance l'API sur http://localhost:8080
 make run-front   # Lance l'interface sur http://localhost:4200
 ```
+
+## Dépôts
+
+Le dépôt principal est hébergé sur GitHub. Il est automatiquement synchronisé vers GitLab à chaque push sur `main` via la GitHub Action `mirror-gitlab.yml`.
+
+- GitHub : https://github.com/linlin56/bibliotheque-gin
+- GitLab : https://gitlab.com/lin56/bibliotheque
+
+Le CI GitLab (`.gitlab-ci.yml`) s'exécute sur GitLab après chaque synchronisation et reproduit le même pipeline que GitHub Actions.
 
 ## Pipeline CI
 
