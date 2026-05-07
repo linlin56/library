@@ -11,6 +11,13 @@ definitions:
       nb_utilisateurs:
         type: integer
     type: object
+  controllers.ConflictLoginResponse:
+    properties:
+      login_existant:
+        type: string
+      message:
+        type: string
+    type: object
   controllers.ConnexionRequest:
     properties:
       login:
@@ -56,6 +63,13 @@ definitions:
       isbn:
         type: string
       titre:
+        type: string
+    type: object
+  controllers.CreerOuvrageResponse:
+    properties:
+      id:
+        type: integer
+      message:
         type: string
     type: object
   controllers.CreerRevueRequest:
@@ -557,7 +571,7 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/controllers.IDResponse'
+            $ref: '#/definitions/controllers.CreerOuvrageResponse'
         "400":
           description: Bad Request
           schema:
@@ -736,7 +750,7 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/controllers.IDResponse'
+            $ref: '#/definitions/controllers.CreerOuvrageResponse'
         "400":
           description: Bad Request
           schema:
@@ -774,9 +788,7 @@ paths:
         "409":
           description: Conflict
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/controllers.ConflictLoginResponse'
         "500":
           description: Internal Server Error
           schema:

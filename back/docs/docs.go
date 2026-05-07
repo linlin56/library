@@ -414,7 +414,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/controllers.IDResponse"
+                            "$ref": "#/definitions/controllers.CreerOuvrageResponse"
                         }
                     },
                     "400": {
@@ -684,7 +684,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/controllers.IDResponse"
+                            "$ref": "#/definitions/controllers.CreerOuvrageResponse"
                         }
                     },
                     "400": {
@@ -742,10 +742,7 @@ const docTemplate = `{
                     "409": {
                         "description": "Conflict",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/controllers.ConflictLoginResponse"
                         }
                     },
                     "500": {
@@ -929,6 +926,17 @@ const docTemplate = `{
                 }
             }
         },
+        "controllers.ConflictLoginResponse": {
+            "type": "object",
+            "properties": {
+                "login_existant": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "controllers.ConnexionRequest": {
             "type": "object",
             "required": [
@@ -997,6 +1005,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "titre": {
+                    "type": "string"
+                }
+            }
+        },
+        "controllers.CreerOuvrageResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "message": {
                     "type": "string"
                 }
             }
