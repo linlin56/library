@@ -16,5 +16,5 @@ jobs:
 
       - name: Push to GitLab
         run: |
-          git remote add gitlab https://oauth2:${{ secrets.GITLAB_TOKEN }}@gitlab.com/${{ secrets.GITLAB_NAMESPACE }}/bibliotheque.git
+          git remote add gitlab https://oauth2:${{ secrets.GITLAB_TOKEN }}@gitlab.com/lin56/bibliotheque.git
           git push gitlab --mirror
