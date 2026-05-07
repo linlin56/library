@@ -63,7 +63,7 @@ type CreerLivreRequest struct {
 // @Accept       json
 // @Produce      json
 // @Param        payload  body      CreerLivreRequest  true  "Donnees du livre"
-// @Success      201      {object}  IDResponse
+// @Success      201      {object}  CreerOuvrageResponse
 // @Failure      400      {object}  ErrorResponse
 // @Failure      500      {object}  ErrorResponse
 // @Router       /livres [post]
@@ -131,7 +131,7 @@ type CreerRevueRequest struct {
 // @Accept       json
 // @Produce      json
 // @Param        payload  body      CreerRevueRequest  true  "Donnees de la revue"
-// @Success      201      {object}  IDResponse
+// @Success      201      {object}  CreerOuvrageResponse
 // @Failure      400      {object}  ErrorResponse
 // @Failure      500      {object}  ErrorResponse
 // @Router       /revues [post]

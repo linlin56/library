@@ -63,7 +63,7 @@ func GetDepartements(c *gin.Context) {
 // @Param        payload  body      CreerUtilisateurRequest  true  "Donnees utilisateur"
 // @Success      201      {object}  CreerUtilisateurResponse
 // @Failure      400      {object}  ErrorResponse
-// @Failure      409      {object}  map[string]string
+// @Failure      409      {object}  ConflictLoginResponse
 // @Failure      500      {object}  ErrorResponse
 // @Router       /utilisateurs [post]
 func CreerUtilisateur(c *gin.Context) {
