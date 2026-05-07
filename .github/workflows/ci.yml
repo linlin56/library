@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+
+  tests:
+    needs: build
+    uses: ./.github/workflows/tests.yml
+
+  e2e:
+    needs: tests
+    uses: ./.github/workflows/e2e.yml
+
+  swagger:
+    needs: e2e
+    uses: ./.github/workflows/swagger.yml
+
+  docs:
+    needs: swagger
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/docs.yml
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+  lint:
+    needs: docs
+    uses: ./.github/workflows/lint.yml

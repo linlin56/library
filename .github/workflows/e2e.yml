@@ -1,18 +1,12 @@
 name: E2E
 
 on:
-  workflow_run:
-    workflows: ["Tests"]
-    types: [completed]
-
-permissions:
-  contents: read
+  workflow_call:
 
 jobs:
   tests-front:
     name: Tests e2e (Mocha)
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     services:
       postgres:
@@ -39,8 +33,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Setup Go
         uses: actions/setup-go@v5

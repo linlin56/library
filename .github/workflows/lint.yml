@@ -1,26 +1,18 @@
 name: Lint
 
 on:
-  workflow_run:
-    workflows: ["Documentation"]
-    types: [completed]
-
-permissions:
-  contents: read
+  workflow_call:
 
 jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     defaults:
       run:
         working-directory: back
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
       - uses: actions/setup-go@v5
         with:
           go-version-file: back/go.mod
