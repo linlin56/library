@@ -21,11 +21,24 @@ db/         Scripts SQL (schéma + données initiales)
 
 ## Démarrage rapide
 
+**Mode développement** (Go + Angular en live reload) :
+
 ```bash
 make sql-start   # Démarre PostgreSQL
 make run-back    # Lance l'API sur http://localhost:8080
 make run-front   # Lance l'interface sur http://localhost:4200
 ```
+
+**Mode Docker** (images buildées localement, tout-en-un) :
+
+```bash
+make docker-start   # Build et lance les 3 containers (db, back, front)
+make docker-stop    # Arrête et supprime les containers
+```
+
+- Front : http://localhost
+- API : http://localhost:8080
+- La base de données est persistée dans un volume Docker (`postgres_data`).
 
 ## Dépôts
 
@@ -49,6 +62,7 @@ Le CI est découpé en six workflows enchaînés via `workflow_call` :
 | `swagger.yml` | appelé après e2e | Génération + vérification de la spec Swagger |
 | `docs.yml` | appelé après swagger (main uniquement) | Déploiement GitHub Pages via Zensical |
 | `lint.yml` | appelé après docs | Lint Go avec golangci-lint |
+| `docker.yml` | après succès du CI sur `main` | Build et push des images vers GHCR |
 
 ## Sections
 

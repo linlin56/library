@@ -1,4 +1,4 @@
-.PHONY: run-back run-front mg sql-start sql-stop uml restart docs
+.PHONY: run-back run-front mg sql-start sql-stop uml restart docs docker-start docker-stop
 
 run-back:
 	@echo "API REST dispo sur http://localhost:8080"
@@ -37,3 +37,11 @@ docs:
 	@echo "Documentation locale sur http://localhost:4173"
 	@echo "Lancement Zensical..."
 	@cd docs && zensical serve -f ../zensical.toml --dev-addr localhost:4173
+
+docker-start:
+	@echo "Front dispo sur http://localhost"
+	@echo "API dispo sur http://localhost:8080"
+	DOCKER_BUILDKIT=0 COMPOSE_DOCKER_CLI_BUILD=0 docker-compose up -d --build
+
+docker-stop:
+	docker-compose down
