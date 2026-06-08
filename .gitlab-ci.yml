@@ -153,7 +153,8 @@ docker-publish:
   before_script:
     - echo "$CI_JOB_TOKEN" | docker login -u gitlab-ci-token --password-stdin registry.gitlab.com
     - docker run --privileged --rm tonistiigi/binfmt --install all
-    - docker buildx create --use
+    - docker context create tls-env --docker "host=tcp://docker:2376,ca=${DOCKER_TLS_CERTDIR}/client/ca.pem,cert=${DOCKER_TLS_CERTDIR}/client/cert.pem,key=${DOCKER_TLS_CERTDIR}/client/key.pem"
+    - docker buildx create --use tls-env
   script:
     - docker buildx build --platform linux/amd64,linux/arm64 --push
         -t registry.gitlab.com/$CI_PROJECT_PATH/back:latest
