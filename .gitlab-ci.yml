@@ -152,13 +152,17 @@ docker-publish:
   needs: [lint]
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_TOKEN $CI_REGISTRY
+    - docker run --privileged --rm tonistiigi/binfmt --install all
+    - docker buildx create --use
   script:
-    - docker build -t $CI_REGISTRY_IMAGE/back:latest -t $CI_REGISTRY_IMAGE/back:$CI_COMMIT_SHORT_SHA ./back
-    - docker push $CI_REGISTRY_IMAGE/back:latest
-    - docker push $CI_REGISTRY_IMAGE/back:$CI_COMMIT_SHORT_SHA
-    - docker build -t $CI_REGISTRY_IMAGE/front:latest -t $CI_REGISTRY_IMAGE/front:$CI_COMMIT_SHORT_SHA ./front
-    - docker push $CI_REGISTRY_IMAGE/front:latest
-    - docker push $CI_REGISTRY_IMAGE/front:$CI_COMMIT_SHORT_SHA
+    - docker buildx build --platform linux/amd64,linux/arm64 --push
+        -t $CI_REGISTRY_IMAGE/back:latest
+        -t $CI_REGISTRY_IMAGE/back:$CI_COMMIT_SHORT_SHA
+        ./back
+    - docker buildx build --platform linux/amd64,linux/arm64 --push
+        -t $CI_REGISTRY_IMAGE/front:latest
+        -t $CI_REGISTRY_IMAGE/front:$CI_COMMIT_SHORT_SHA
+        ./front
 
 # ─── LINT ────────────────────────────────────────────────────────────────────
 

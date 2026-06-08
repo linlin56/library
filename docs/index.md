@@ -29,12 +29,21 @@ make run-back    # Lance l'API sur http://localhost:8080
 make run-front   # Lance l'interface sur http://localhost:4200
 ```
 
-**Mode Docker** (images buildées localement, tout-en-un) :
+**Mode Docker — build local** :
 
 ```bash
-make docker-start   # Build et lance les 3 containers (db, back, front)
-make docker-stop    # Arrête et supprime les containers
+make docker-start              # Build les images localement et lance les 3 containers
+make docker-stop               # Arrête et supprime les containers
 ```
+
+**Mode Docker — images publiées** :
+
+```bash
+make docker-start-from-github  # Pull depuis GitHub Container Registry (ghcr.io) et lance
+make docker-start-from-gitlab  # Pull depuis GitLab Container Registry et lance
+```
+
+Les deux commandes déclenchent un `docker login` interactif avant le pull. Un Personal Access Token avec le scope `read:packages` est requis.
 
 - Front : http://localhost
 - API : http://localhost:8080

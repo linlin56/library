@@ -1,4 +1,4 @@
-.PHONY: run-back run-front mg sql-start sql-stop uml restart docs docker-start docker-stop docker-start-remote
+.PHONY: run-back run-front mg sql-start sql-stop uml restart docs docker-start docker-stop docker-start-from-github docker-start-from-gitlab
 
 run-back:
 	@echo "API REST dispo sur http://localhost:8080"
@@ -46,9 +46,19 @@ docker-start:
 docker-stop:
 	docker-compose down
 
-docker-start-remote:
-	docker login ghcr.io
+docker-start-from-github:
 	@echo "Front dispo sur http://localhost"
 	@echo "API dispo sur http://localhost:8080"
 	docker-compose pull back front
+	docker-compose up -d
+
+docker-start-from-gitlab:
+	docker login registry.gitlab.com
+	@echo "Front dispo sur http://localhost"
+	@echo "API dispo sur http://localhost:8080"
+	BACK_IMAGE=registry.gitlab.com/lin56/bibliotheque/back:latest \
+	FRONT_IMAGE=registry.gitlab.com/lin56/bibliotheque/front:latest \
+	docker-compose pull back front
+	BACK_IMAGE=registry.gitlab.com/lin56/bibliotheque/back:latest \
+	FRONT_IMAGE=registry.gitlab.com/lin56/bibliotheque/front:latest \
 	docker-compose up -d
