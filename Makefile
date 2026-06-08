@@ -1,4 +1,4 @@
-.PHONY: run-back run-front mg sql-start sql-stop uml restart docs docker-start docker-stop
+.PHONY: run-back run-front mg sql-start sql-stop uml restart docs docker-start docker-stop docker-start-remote
 
 run-back:
 	@echo "API REST dispo sur http://localhost:8080"
@@ -45,3 +45,10 @@ docker-start:
 
 docker-stop:
 	docker-compose down
+
+docker-start-remote:
+	docker login ghcr.io
+	@echo "Front dispo sur http://localhost"
+	@echo "API dispo sur http://localhost:8080"
+	docker-compose pull back front
+	docker-compose up -d

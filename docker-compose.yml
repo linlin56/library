@@ -14,7 +14,7 @@ services:
       retries: 10
 
   back:
-    image: ghcr.io/linlin56/bibliotheque-back:latest
+    image: ghcr.io/eadl-jaffre/bibliotheque-back:latest
     build: ./back
     environment:
       DB_HOST: db
@@ -31,7 +31,7 @@ services:
         condition: service_healthy
 
   front:
-    image: ghcr.io/linlin56/bibliotheque-front:latest
+    image: ghcr.io/eadl-jaffre/bibliotheque-front:latest
     build: ./front
     ports:
       - "80:80"
