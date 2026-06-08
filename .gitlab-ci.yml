@@ -147,21 +147,23 @@ docker-publish:
     - docker:dind
   variables:
     DOCKER_TLS_CERTDIR: "/certs"
+    REGISTRY: "registry.gitlab.com"
+    REGISTRY_IMAGE: "registry.gitlab.com/$CI_PROJECT_PATH"
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
   needs: [lint]
   before_script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_TOKEN $CI_REGISTRY
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_TOKEN $REGISTRY
     - docker run --privileged --rm tonistiigi/binfmt --install all
     - docker buildx create --use
   script:
     - docker buildx build --platform linux/amd64,linux/arm64 --push
-        -t $CI_REGISTRY_IMAGE/back:latest
-        -t $CI_REGISTRY_IMAGE/back:$CI_COMMIT_SHORT_SHA
+        -t $REGISTRY_IMAGE/back:latest
+        -t $REGISTRY_IMAGE/back:$CI_COMMIT_SHORT_SHA
         ./back
     - docker buildx build --platform linux/amd64,linux/arm64 --push
-        -t $CI_REGISTRY_IMAGE/front:latest
-        -t $CI_REGISTRY_IMAGE/front:$CI_COMMIT_SHORT_SHA
+        -t $REGISTRY_IMAGE/front:latest
+        -t $REGISTRY_IMAGE/front:$CI_COMMIT_SHORT_SHA
         ./front
 
 # ─── LINT ────────────────────────────────────────────────────────────────────

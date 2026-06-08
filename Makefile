@@ -1,3 +1,5 @@
+ARCH = $(shell uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
+
 .PHONY: run-back run-front mg sql-start sql-stop uml restart docs docker-start docker-stop docker-start-from-github docker-start-from-gitlab
 
 run-back:
@@ -41,7 +43,7 @@ docs:
 docker-start:
 	@echo "Front dispo sur http://localhost"
 	@echo "API dispo sur http://localhost:8080"
-	DOCKER_BUILDKIT=0 COMPOSE_DOCKER_CLI_BUILD=0 docker-compose up -d --build
+	DOCKER_BUILDKIT=0 COMPOSE_DOCKER_CLI_BUILD=0 DOCKER_DEFAULT_PLATFORM=linux/$(ARCH) docker-compose up -d --build
 
 docker-stop:
 	docker-compose down
@@ -53,7 +55,6 @@ docker-start-from-github:
 	docker-compose up -d
 
 docker-start-from-gitlab:
-	docker login registry.gitlab.com
 	@echo "Front dispo sur http://localhost"
 	@echo "API dispo sur http://localhost:8080"
 	BACK_IMAGE=registry.gitlab.com/lin56/bibliotheque/back:latest \
