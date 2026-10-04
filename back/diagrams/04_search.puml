@@ -1,0 +1,45 @@
+@startuml
+title Searching for items
+
+actor "Client" as C
+participant "ItemsController" as CTL
+participant "ItemRepository" as IR
+participant "PostgreSQL" as DB
+
+note over CTL : Optional parameters:\ntitle, author, isbn,\nbarcode, issue_number, available
+C -> CTL : GET /api/items
+activate CTL
+alt No parameter (initial load)
+CTL -> IR : FindAll()
+activate IR
+IR -> DB : SELECT items (books + journals) ORDER BY title
+activate DB
+DB --> IR : []Item
+deactivate DB
+IR --> CTL : []Item, nil
+deactivate IR
+alt Results found
+CTL --> C : 200 [items]
+else No item in the database
+CTL --> C : 204 No Content
+end
+else "available" alone (no other criterion)
+CTL --> C : 400 Bad Request\n{"error": "Please fill in at least one field."}
+else At least one criterion among title / author / isbn / barcode / issue_number
+CTL -> IR : Search(title, author, isbn, barcode, issue_number, available)
+activate IR
+note right of IR : The SQL query filters\non the provided criteria
+IR -> DB : SELECT books+authors UNION ALL journals\nWHERE <filters> ORDER BY title
+activate DB
+DB --> IR : []ItemResult
+deactivate DB
+IR --> CTL : []ItemResult, nil
+deactivate IR
+alt Results found
+CTL --> C : 200 [{id, title, type, author, isbn,\nissue_number, publication_date, deposit, available_copies, location}]
+else No result
+CTL --> C : 204 No Content
+end
+end
+deactivate CTL
+@enduml

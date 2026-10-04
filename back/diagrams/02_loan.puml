@@ -1,0 +1,44 @@
+@startuml
+title Borrowing a copy
+
+actor "Client (logged-in user)" as C
+participant "LoanController" as CTL
+participant "LoanRepository" as LR
+participant "PostgreSQL" as DB
+
+== Step 1 - Check ==
+C -> CTL : GET /api/loans/check?barcode=X&user_id=Y
+activate CTL
+CTL -> LR : Check(userId, barcode)
+activate LR
+LR -> DB : SELECT copy + business checks
+activate DB
+alt Every check passes
+DB --> LR : LoanPreview
+deactivate DB
+LR --> CTL : LoanPreview, nil
+deactivate LR
+CTL --> C : 200 {title, barcode, deposit, current_balance, new_balance}
+else Copy already on loan
+CTL --> C : 422 This copy is already on loan
+else Overdue loans
+CTL --> C : 422 You have overdue loans
+else Insufficient deposit balance
+CTL --> C : 422 Insufficient deposit balance
+end
+deactivate CTL
+
+== Step 2 - Record ==
+C -> CTL : POST /api/loans\n{barcode, user_id}
+activate CTL
+CTL -> LR : Borrow(userId, barcode)
+activate LR
+LR -> DB : UPDATE copies SET is_borrowed=true, borrower_id, dates
+activate DB
+LR -> DB : UPDATE users SET deposit_balance -= deposit
+deactivate DB
+LR --> CTL : nil
+deactivate LR
+CTL --> C : 201 {message: Loan registered successfully}
+deactivate CTL
+@enduml

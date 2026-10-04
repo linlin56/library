@@ -1,0 +1,60 @@
+<div class="container py-5">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <h2 class="fw-bold mb-0">{{ 'overdue.title' | t }}</h2>
+    @if (loans.length > 0) {
+      <button type="button" class="btn btn-warning" (click)="sendReminders()">
+        {{ 'overdue.sendReminders' | t }}
+      </button>
+    }
+  </div>
+
+  @if (notification) {
+    <div class="alert alert-success d-flex align-items-center gap-2 mb-4">
+      <span>✅ {{ notification }}</span>
+    </div>
+  }
+
+  @if (error) {
+    <div class="alert alert-danger mb-4">{{ error }}</div>
+  }
+
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status"></div>
+    </div>
+  } @else if (loans.length === 0) {
+    <div class="alert alert-success">{{ 'overdue.none' | t }}</div>
+  } @else {
+    <p class="text-muted small mb-3">{{ 'overdue.count' | t: { count: loans.length } }}</p>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead class="table-danger">
+          <tr>
+            <th>{{ 'overdue.borrower' | t }}</th>
+            <th>{{ 'overdue.phone' | t }}</th>
+            <th>{{ 'loans.item' | t }}</th>
+            <th>{{ 'loans.barcode' | t }}</th>
+            <th>{{ 'overdue.dueDate' | t }}</th>
+            <th>{{ 'overdue.delay' | t }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (loan of loans; track loan.id) {
+            <tr class="table-danger">
+              <td class="fw-semibold">{{ loan.last_name }} {{ loan.first_name }}</td>
+              <td>{{ loan.phone_number || '—' }}</td>
+              <td>{{ loan.title }}</td>
+              <td>
+                <code>{{ loan.barcode }}</code>
+              </td>
+              <td>{{ loan.due_date }}</td>
+              <td>
+                <span class="badge bg-danger">{{ 'loans.overdue' | t }}</span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

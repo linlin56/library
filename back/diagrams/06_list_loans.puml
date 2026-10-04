@@ -1,0 +1,26 @@
+@startuml
+title Active loans
+
+actor "Client (user)" as C
+participant "LoanController" as CTL
+participant "LoanRepository" as LR
+participant "PostgreSQL" as DB
+
+C -> CTL : GET /api/loans?user_id=X
+activate CTL
+note right of CTL : Validation: user_id > 0
+CTL -> LR : GetLoans(userId)
+activate LR
+LR -> DB : SELECT c.*, i.title\nFROM copies c JOIN items i ON i.id = c.item_id\nWHERE c.borrower_id = $1 AND c.is_borrowed = TRUE
+activate DB
+DB --> LR : []LoanSummary
+deactivate DB
+LR --> CTL : []LoanSummary, nil
+deactivate LR
+alt Loans found
+CTL --> C : 200 [{id, barcode, title, start_date, due_date, overdue}]
+else No active loan
+CTL --> C : 204 No Content
+end
+deactivate CTL
+@enduml

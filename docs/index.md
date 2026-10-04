@@ -1,77 +1,77 @@
-# Bibliotheque — Documentation
+# Library — Documentation
 
-Application de gestion de bibliothèque universitaire. Elle couvre la recherche d'ouvrages, la gestion des emprunts, le suivi des cautions et l'administration des utilisateurs.
+University library management application. It covers item search, loan management, deposit tracking and user administration. The interface is available in English (default) and French.
 
-## Profils utilisateur
+## User profiles
 
-Deux rôles distincts :
+Two distinct roles:
 
-- **Utilisateur** (étudiant, enseignant, particulier) : recherche, emprunt, consultation de ses emprunts, solde caution
-- **Bibliothécaire** : création d'utilisateurs et d'ouvrages, gestion des exemplaires, consultation des emprunts de tous les utilisateurs, suivi des retards, mise à jour des cautions
+- **User** (student, teacher, individual): search, borrow, view their loans and deposit balance
+- **Librarian**: create users and items, manage copies, view every user's loans, track overdue loans, update deposits
 
-## Structure du projet
+## Project structure
 
 ```
-back/       API REST Go
-front/      Application Angular
-docs/       Documentation (ce dossier)
-db/         Scripts SQL (schéma + données initiales)
-.github/    Pipelines CI
+back/       Go REST API
+front/      Angular application
+docs/       Documentation (this folder)
+db/         SQL scripts (schema + initial data)
+.github/    CI pipelines
 ```
 
-## Démarrage rapide
+## Quick start
 
-**Mode développement** (Go + Angular en live reload) :
+**Development mode** (Go + Angular with live reload):
 
 ```bash
-make sql-start   # Démarre PostgreSQL
-make run-back    # Lance l'API sur http://localhost:8080
-make run-front   # Lance l'interface sur http://localhost:4200
+make sql-start   # Starts PostgreSQL
+make run-back    # Starts the API on http://localhost:8080
+make run-front   # Starts the UI on http://localhost:4200
 ```
 
-**Mode Docker — build local** :
+**Docker mode — local build**:
 
 ```bash
-make docker-start              # Build les images localement et lance les 3 containers
-make docker-stop               # Arrête et supprime les containers
+make docker-start              # Builds the images locally and starts the 3 containers
+make docker-stop               # Stops and removes the containers
 ```
 
-**Mode Docker — images publiées** :
+**Docker mode — published images**:
 
 ```bash
-make docker-start-from-github  # Pull depuis GitHub Container Registry (ghcr.io) et lance
-make docker-start-from-gitlab  # Pull depuis GitLab Container Registry et lance
+make docker-start-from-github  # Pulls from GitHub Container Registry (ghcr.io) and starts
+make docker-start-from-gitlab  # Pulls from GitLab Container Registry and starts
 ```
 
-Les deux commandes déclenchent un `docker login` interactif avant le pull. Un Personal Access Token avec le scope `read:packages` est requis.
+Both commands trigger an interactive `docker login` before the pull. A Personal Access Token with the `read:packages` scope is required.
 
-- Front : http://localhost
-- API : http://localhost:8080
-- La base de données est persistée dans un volume Docker (`postgres_data`).
+- Front end: http://localhost
+- API: http://localhost:8080
+- The database is persisted in a Docker volume (`postgres_data`).
 
-## Dépôts
+## Repositories
 
-Le dépôt principal est hébergé sur GitHub. Il est automatiquement synchronisé vers GitLab à chaque push sur `main` via la GitHub Action `mirror-gitlab.yml`.
+The main repository is hosted on GitHub. It is automatically mirrored to GitLab on every push to `main` by the `mirror-gitlab.yml` GitHub Action.
 
-- GitHub : https://github.com/linlin56/bibliotheque-gin
-- GitLab : https://gitlab.com/lin56/bibliotheque
+- GitHub: https://github.com/linlin56/library
+- GitLab: https://gitlab.com/lin56/library
 
-Le CI GitLab (`.gitlab-ci.yml`) s'exécute sur GitLab après chaque synchronisation et reproduit le même pipeline que GitHub Actions.
+The GitLab CI (`.gitlab-ci.yml`) runs on GitLab after each sync and reproduces the same pipeline as GitHub Actions.
 
-## Pipeline CI
+## CI pipeline
 
-Le CI est découpé en six workflows enchaînés via `workflow_call` :
+The CI is split into workflows chained with `workflow_call`:
 
-| Workflow | Déclencheur | Contenu |
-|----------|-------------|---------|
-| `ci.yml` | push / PR sur `main` | Orchestrateur — appelle les autres dans l'ordre |
-| `build.yml` | appelé par ci | Build Go + build Angular |
-| `tests.yml` | appelé après build | Tests unitaires Go + tests Mocha |
-| `e2e.yml` | appelé après tests | Tests e2e Mocha contre l'API réelle |
-| `swagger.yml` | appelé après e2e | Génération + vérification de la spec Swagger |
-| `docs.yml` | appelé après swagger (main uniquement) | Déploiement GitHub Pages via Zensical |
-| `lint.yml` | appelé après docs | Lint Go avec golangci-lint |
-| `docker.yml` | après succès du CI sur `main` | Build et push des images vers GHCR |
+| Workflow | Trigger | Content |
+|----------|---------|---------|
+| `ci.yml` | push / PR on `main` | Orchestrator — calls the others in order |
+| `build.yml` | called by ci | Go build + Angular build |
+| `tests.yml` | called after build | Go unit tests + Mocha tests |
+| `e2e.yml` | called after tests | Mocha e2e tests against the real API |
+| `swagger.yml` | called after e2e | Generates + checks the Swagger spec |
+| `docs.yml` | called after swagger (main only) | GitHub Pages deployment with Zensical |
+| `lint.yml` | called after docs | Go lint with golangci-lint |
+| `docker.yml` | after a successful CI on `main` | Builds and pushes the images to GHCR |
 
 ## Sections
 

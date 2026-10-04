@@ -1,0 +1,243 @@
+<div class="container py-5">
+  <div class="d-flex align-items-center gap-3 mb-4">
+    @if (step !== 'search') {
+      <button type="button" class="btn btn-outline-secondary btn-sm" (click)="backToSearch()">
+        {{ 'common.back' | t }}
+      </button>
+    }
+    <h2 class="fw-bold mb-0">
+      @if (step === 'search') {
+        {{ 'librarian.titleSearch' | t }}
+      }
+      @if (step === 'select') {
+        {{ 'librarian.titleSelect' | t: { count: users.length } }}
+      }
+      @if (step === 'loans' && selectedUser) {
+        {{
+          'librarian.titleLoans'
+            | t: { name: selectedUser.first_name + ' ' + selectedUser.last_name }
+        }}
+      }
+    </h2>
+  </div>
+
+  @if (error) {
+    <div class="alert alert-danger d-flex align-items-center gap-2 mb-4">
+      <span>{{ error }}</span>
+      <button type="button" class="btn-close ms-auto" (click)="error = null"></button>
+    </div>
+  }
+
+  <!-- STEP 1: search form -->
+  @if (step === 'search') {
+    <div class="card border-0 shadow-sm" style="max-width: 520px">
+      <div class="card-body p-4">
+        <p class="text-muted small mb-4">
+          {{ 'librarian.hint' | t }}
+        </p>
+        <div class="mb-3">
+          <label for="lastName" class="form-label fw-semibold">{{
+            'createUser.lastName' | t
+          }}</label>
+          <input
+            id="lastName"
+            type="text"
+            class="form-control"
+            [(ngModel)]="lastName"
+            (keyup.enter)="searchUser()"
+            [placeholder]="'common.example' | t: { value: 'Martin' }"
+          />
+        </div>
+        <div class="mb-3">
+          <label for="firstName" class="form-label fw-semibold">{{
+            'createUser.firstName' | t
+          }}</label>
+          <input
+            id="firstName"
+            type="text"
+            class="form-control"
+            [(ngModel)]="firstName"
+            (keyup.enter)="searchUser()"
+            [placeholder]="'common.example' | t: { value: 'Alice' }"
+          />
+        </div>
+        <div class="mb-3">
+          <label for="postalCode" class="form-label fw-semibold">{{
+            'createUser.postalCode' | t
+          }}</label>
+          <input
+            id="postalCode"
+            type="text"
+            class="form-control"
+            [(ngModel)]="postalCode"
+            (keyup.enter)="searchUser()"
+            [placeholder]="'common.example' | t: { value: '75001' }"
+          />
+        </div>
+        <div class="mb-4">
+          <label for="phoneNumber" class="form-label fw-semibold">{{
+            'createUser.phone' | t
+          }}</label>
+          <input
+            id="phoneNumber"
+            type="text"
+            class="form-control"
+            [(ngModel)]="phoneNumber"
+            (keyup.enter)="searchUser()"
+            [placeholder]="'common.example' | t: { value: '0601020304' }"
+          />
+        </div>
+        <button
+          type="button"
+          class="btn btn-primary w-100"
+          (click)="searchUser()"
+          [disabled]="loading || !canSearch()"
+        >
+          @if (loading) {
+            <span class="spinner-border spinner-border-sm me-2"></span>
+          }
+          {{ 'search.submit' | t }}
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- STEP 2: selection list when there are several results -->
+  @if (step === 'select') {
+    <div class="list-group" style="max-width: 600px">
+      @for (user of users; track user.id) {
+        <button
+          type="button"
+          class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+          (click)="selectUser(user)"
+        >
+          <div>
+            <span class="fw-semibold">{{ user.last_name }} {{ user.first_name }}</span>
+            <br />
+            <small class="text-muted">{{ user.phone_number || ('librarian.noPhone' | t) }}</small>
+          </div>
+          <span class="badge bg-secondary">{{ formatRole(user.role) }}</span>
+        </button>
+      }
+    </div>
+  }
+
+  <!-- STEP 3: list of loans -->
+  @if (step === 'loans') {
+    @if (loading) {
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+      </div>
+    } @else {
+      <!-- Deposit -->
+      @if (deposit) {
+        <div class="d-flex gap-3 mb-4 align-items-start flex-wrap">
+          <div class="card border-0 shadow-sm text-center py-3 px-4">
+            <div class="text-muted small mb-1">{{ 'loans.totalDeposit' | t }}</div>
+            <div class="fw-bold fs-5">{{ deposit.total_deposit | amount }}</div>
+          </div>
+          <div class="card border-0 shadow-sm text-center py-3 px-4">
+            <div class="text-muted small mb-1">{{ 'loans.currentDeposit' | t }}</div>
+            <div
+              class="fw-bold fs-5"
+              [class.text-success]="deposit.deposit_balance === deposit.total_deposit"
+              [class.text-warning]="
+                deposit.deposit_balance < deposit.total_deposit && deposit.deposit_balance > 0
+              "
+              [class.text-danger]="deposit.deposit_balance <= 0"
+            >
+              {{ deposit.deposit_balance | amount }}
+            </div>
+          </div>
+          @if (!editingDeposit) {
+            <div class="d-flex flex-column justify-content-center ms-2">
+              @if (depositSaved) {
+                <span class="badge bg-success mb-2">{{ 'librarian.depositUpdated' | t }}</span>
+              }
+              <button
+                type="button"
+                class="btn btn-outline-primary btn-sm"
+                (click)="openDepositEditing()"
+              >
+                {{ 'librarian.editDeposit' | t }}
+              </button>
+            </div>
+          } @else {
+            <div class="d-flex align-items-center gap-2 ms-2 flex-wrap">
+              <input
+                type="number"
+                min="0"
+                step="0.5"
+                class="form-control form-control-sm"
+                style="width: 120px"
+                [(ngModel)]="newTotalDeposit"
+                [placeholder]="'librarian.amountPlaceholder' | t"
+              />
+              <button
+                type="button"
+                class="btn btn-success btn-sm"
+                (click)="saveDeposit()"
+                [disabled]="savingDeposit || newTotalDeposit === null"
+              >
+                @if (savingDeposit) {
+                  <span class="spinner-border spinner-border-sm me-1"></span>
+                }
+                {{ 'common.save' | t }}
+              </button>
+              <button
+                type="button"
+                class="btn btn-outline-secondary btn-sm"
+                (click)="cancelDepositEditing()"
+              >
+                {{ 'common.cancel' | t }}
+              </button>
+              @if (depositError) {
+                <span class="text-danger small">{{ depositError }}</span>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      @if (loans.length === 0) {
+        <div class="alert alert-info">{{ 'librarian.noLoans' | t }}</div>
+      } @else {
+        <p class="text-muted small mb-3">{{ 'loans.count' | t: { count: loans.length } }}</p>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>{{ 'loans.item' | t }}</th>
+                <th>{{ 'loans.barcode' | t }}</th>
+                <th>{{ 'loans.borrowedOn' | t }}</th>
+                <th>{{ 'loans.dueBy' | t }}</th>
+                <th>{{ 'loans.status' | t }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (loan of loans; track loan.id) {
+                <tr [class.table-danger]="loan.overdue">
+                  <td class="fw-semibold">{{ loan.title }}</td>
+                  <td>
+                    <code>{{ loan.barcode }}</code>
+                  </td>
+                  <td>{{ loan.start_date }}</td>
+                  <td>{{ loan.due_date }}</td>
+                  <td>
+                    @if (loan.overdue) {
+                      <span class="badge bg-danger">{{ 'loans.overdue' | t }}</span>
+                    } @else {
+                      <span class="badge bg-success">{{ 'loans.ongoing' | t }}</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+    <!-- end @else (loading) -->
+  }
+  <!-- end @if (step === 'loans') -->
+</div>

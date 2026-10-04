@@ -1,100 +1,100 @@
 import { expect } from 'chai';
 import { describe, it } from 'mocha';
 
-import { buildFiltresParams, estBibliothecaire, parseUtilisateur } from '../src/utils';
+import { buildSearchParams, isLibrarian, parseUser } from '../src/utils';
 
-// ─── buildFiltresParams ───────────────────────────────────────────────────────
+// ─── buildSearchParams ────────────────────────────────────────────────────────
 
-describe('buildFiltresParams', () => {
-  it('retourne un objet vide pour des filtres vides', () => {
-    expect(buildFiltresParams({})).to.deep.equal({});
+describe('buildSearchParams', () => {
+  it('returns an empty object for empty filters', () => {
+    expect(buildSearchParams({})).to.deep.equal({});
   });
 
-  it('inclut le titre quand il est renseigné', () => {
-    expect(buildFiltresParams({ titre: 'Le Petit Prince' })).to.deep.equal({
-      titre: 'Le Petit Prince',
+  it('includes the title when it is set', () => {
+    expect(buildSearchParams({ title: 'Le Petit Prince' })).to.deep.equal({
+      title: 'Le Petit Prince',
     });
   });
 
-  it('supprime les espaces en début/fin de titre', () => {
-    expect(buildFiltresParams({ titre: '  Dune  ' })).to.deep.equal({ titre: 'Dune' });
+  it('trims spaces around the title', () => {
+    expect(buildSearchParams({ title: '  Dune  ' })).to.deep.equal({ title: 'Dune' });
   });
 
-  it("exclut le titre s'il ne contient que des espaces", () => {
-    expect(buildFiltresParams({ titre: '   ' })).to.deep.equal({});
+  it('leaves the title out if it only contains spaces', () => {
+    expect(buildSearchParams({ title: '   ' })).to.deep.equal({});
   });
 
-  it('inclut disponible=true quand la valeur est true', () => {
-    expect(buildFiltresParams({ disponible: true })).to.deep.equal({ disponible: 'true' });
+  it('includes available=true when the value is true', () => {
+    expect(buildSearchParams({ available: true })).to.deep.equal({ available: 'true' });
   });
 
-  it("n'inclut pas disponible quand la valeur est false", () => {
-    expect(buildFiltresParams({ disponible: false })).to.deep.equal({});
+  it('leaves available out when the value is false', () => {
+    expect(buildSearchParams({ available: false })).to.deep.equal({});
   });
 
-  it('mappe codeBarre vers code_barre', () => {
-    expect(buildFiltresParams({ codeBarre: '0012345' })).to.deep.equal({
-      code_barre: '0012345',
+  it('keeps barcode as barcode', () => {
+    expect(buildSearchParams({ barcode: '0012345' })).to.deep.equal({
+      barcode: '0012345',
     });
   });
 
-  it('mappe codeRevue vers code_revue', () => {
-    expect(buildFiltresParams({ codeRevue: 'REV42' })).to.deep.equal({ code_revue: 'REV42' });
+  it('maps issueNumber to issue_number', () => {
+    expect(buildSearchParams({ issueNumber: '42' })).to.deep.equal({ issue_number: '42' });
   });
 
-  it('inclut tous les champs renseignés simultanément', () => {
+  it('includes every field set at the same time', () => {
     expect(
-      buildFiltresParams({
-        titre: 'Le Monde',
-        auteur: 'Dupont',
+      buildSearchParams({
+        title: 'Le Monde',
+        author: 'Dupont',
         isbn: '978-3-16-148410-0',
-        disponible: true,
+        available: true,
       }),
     ).to.deep.equal({
-      titre: 'Le Monde',
-      auteur: 'Dupont',
+      title: 'Le Monde',
+      author: 'Dupont',
       isbn: '978-3-16-148410-0',
-      disponible: 'true',
+      available: 'true',
     });
   });
 });
 
-// ─── parseUtilisateur ─────────────────────────────────────────────────────────
+// ─── parseUser ────────────────────────────────────────────────────────────────
 
-describe('parseUtilisateur', () => {
-  it('retourne null pour un JSON invalide', () => {
-    expect(parseUtilisateur('not-json')).to.be.null;
+describe('parseUser', () => {
+  it('returns null for invalid JSON', () => {
+    expect(parseUser('not-json')).to.be.null;
   });
 
-  it('retourne null pour une chaîne vide', () => {
-    expect(parseUtilisateur('')).to.be.null;
+  it('returns null for an empty string', () => {
+    expect(parseUser('')).to.be.null;
   });
 
-  it('désérialise un utilisateur valide', () => {
-    const user = { id: 1, nom: 'Durand', prenom: 'Alice', role: 'etudiant', message: 'ok' };
-    expect(parseUtilisateur(JSON.stringify(user))).to.deep.equal(user);
+  it('deserializes a valid user', () => {
+    const user = { id: 1, last_name: 'Durand', first_name: 'Alice', role: 'user', message: 'ok' };
+    expect(parseUser(JSON.stringify(user))).to.deep.equal(user);
   });
 });
 
-// ─── estBibliothecaire ────────────────────────────────────────────────────────
+// ─── isLibrarian ──────────────────────────────────────────────────────────────
 
-describe('estBibliothecaire', () => {
-  it('retourne false pour null', () => {
-    expect(estBibliothecaire(null)).to.be.false;
+describe('isLibrarian', () => {
+  it('returns false for null', () => {
+    expect(isLibrarian(null)).to.be.false;
   });
 
-  it("retourne false pour un utilisateur avec le rôle 'etudiant'", () => {
-    expect(estBibliothecaire({ id: 1, nom: 'A', prenom: 'B', role: 'etudiant', message: '' })).to.be
-      .false;
-  });
-
-  it("retourne false pour un utilisateur avec le rôle 'enseignant'", () => {
-    expect(estBibliothecaire({ id: 2, nom: 'C', prenom: 'D', role: 'enseignant', message: '' })).to
+  it("returns false for a user with the 'student' role", () => {
+    expect(isLibrarian({ id: 1, last_name: 'A', first_name: 'B', role: 'student', message: '' })).to
       .be.false;
   });
 
-  it("retourne true pour un utilisateur avec le rôle 'bibliothecaire'", () => {
-    expect(estBibliothecaire({ id: 3, nom: 'E', prenom: 'F', role: 'bibliothecaire', message: '' }))
+  it("returns false for a user with the 'teacher' role", () => {
+    expect(isLibrarian({ id: 2, last_name: 'C', first_name: 'D', role: 'teacher', message: '' })).to
+      .be.false;
+  });
+
+  it("returns true for a user with the 'librarian' role", () => {
+    expect(isLibrarian({ id: 3, last_name: 'E', first_name: 'F', role: 'librarian', message: '' }))
       .to.be.true;
   });
 });

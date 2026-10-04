@@ -1,151 +1,151 @@
 -- =============================================================================
--- BIBLIOTHÈQUE — Script SQL PostgreSQL
--- Héritage natif PostgreSQL :
---   - livres    INHERITS ouvrages
---   - revues    INHERITS ouvrages
---   - etudiants INHERITS utilisateurs
---   - enseignants INHERITS utilisateurs
+-- LIBRARY — PostgreSQL script
+-- Native PostgreSQL inheritance:
+--   - books    INHERITS items
+--   - journals INHERITS items
+--   - students INHERITS users
+--   - teachers INHERITS users
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------
--- NETTOYAGE (ordre inverse des dépendances)
+-- CLEANUP (reverse dependency order)
 -- -----------------------------------------------------------------------------
-DROP TABLE IF EXISTS enseignants    CASCADE;
-DROP TABLE IF EXISTS etudiants      CASCADE;
-DROP TABLE IF EXISTS utilisateurs   CASCADE;
-DROP TABLE IF EXISTS bibliothecaires CASCADE;
-DROP TABLE IF EXISTS exemplaires    CASCADE;
-DROP TABLE IF EXISTS livres         CASCADE;
-DROP TABLE IF EXISTS revues         CASCADE;
-DROP TABLE IF EXISTS ouvrages       CASCADE;
-DROP TABLE IF EXISTS auteurs        CASCADE;
-DROP TABLE IF EXISTS emplacements   CASCADE;
-DROP TABLE IF EXISTS categories     CASCADE;
-DROP TABLE IF EXISTS adresses       CASCADE;
-DROP TABLE IF EXISTS departements_ecole CASCADE;
+DROP TABLE IF EXISTS teachers    CASCADE;
+DROP TABLE IF EXISTS students    CASCADE;
+DROP TABLE IF EXISTS users       CASCADE;
+DROP TABLE IF EXISTS librarians  CASCADE;
+DROP TABLE IF EXISTS copies      CASCADE;
+DROP TABLE IF EXISTS books       CASCADE;
+DROP TABLE IF EXISTS journals    CASCADE;
+DROP TABLE IF EXISTS items       CASCADE;
+DROP TABLE IF EXISTS authors     CASCADE;
+DROP TABLE IF EXISTS locations   CASCADE;
+DROP TABLE IF EXISTS categories  CASCADE;
+DROP TABLE IF EXISTS addresses   CASCADE;
+DROP TABLE IF EXISTS departments CASCADE;
 
 
 -- =============================================================================
--- TABLES INDÉPENDANTES
+-- INDEPENDENT TABLES
 -- =============================================================================
 
-CREATE TABLE auteurs (
-    id     SERIAL PRIMARY KEY,
-    nom    VARCHAR(100) NOT NULL,
-    prenom VARCHAR(100) NOT NULL
+CREATE TABLE authors (
+    id         SERIAL PRIMARY KEY,
+    last_name  VARCHAR(100) NOT NULL,
+    first_name VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE categories (
-    id  SERIAL PRIMARY KEY,
-    nom VARCHAR(100) NOT NULL
+    id   SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL
 );
 
-CREATE TABLE emplacements (
-    id               SERIAL PRIMARY KEY,
-    numero_travee    INT NOT NULL,
-    numero_etagere   INT NOT NULL,
-    niveau           INT NOT NULL,
-    categorie_id     INT REFERENCES categories(id)
-);
-
-CREATE TABLE adresses (
-    id          SERIAL PRIMARY KEY,
-    ville       VARCHAR(100) NOT NULL,
-    code_postal VARCHAR(10)  NOT NULL,
-    nom_rue     VARCHAR(200) NOT NULL,
-    numero_rue  VARCHAR(10)  NOT NULL
-);
-
-CREATE TABLE departements_ecole (
-    id  SERIAL PRIMARY KEY,
-    nom VARCHAR(100) NOT NULL
-);
-
-CREATE TABLE bibliothecaires (
-    id          SERIAL PRIMARY KEY,
-    nom         VARCHAR(100) NOT NULL,
-    prenom      VARCHAR(100) NOT NULL,
-    login       VARCHAR(50)  NOT NULL UNIQUE,
-    mot_de_passe VARCHAR(255) NOT NULL
-);
-
-
--- =============================================================================
--- OUVRAGE (table parente — livre et revue héritent de celle-ci)
--- =============================================================================
-
-CREATE TABLE ouvrages (
+CREATE TABLE locations (
     id           SERIAL PRIMARY KEY,
-    titre        VARCHAR(255) NOT NULL,
-    caution      DOUBLE PRECISION NOT NULL DEFAULT 0.0
+    bay_number   INT NOT NULL,
+    shelf_number INT NOT NULL,
+    level        INT NOT NULL,
+    category_id  INT REFERENCES categories(id)
 );
 
--- Livre hérite d'ouvrage
-CREATE TABLE livres (
-    isbn         VARCHAR(20)  NOT NULL,
-    auteur_id    INT          NOT NULL REFERENCES auteurs(id)
-) INHERITS (ouvrages);
+CREATE TABLE addresses (
+    id            SERIAL PRIMARY KEY,
+    city          VARCHAR(100) NOT NULL,
+    postal_code   VARCHAR(10)  NOT NULL,
+    street_name   VARCHAR(200) NOT NULL,
+    street_number VARCHAR(10)  NOT NULL
+);
 
--- Revue hérite d'ouvrage
-CREATE TABLE revues (
-    numero INT NOT NULL
-) INHERITS (ouvrages);
+CREATE TABLE departments (
+    id   SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL
+);
 
-
--- =============================================================================
--- EXEMPLAIRE (lié à un ouvrage, se trouve à un emplacement)
--- =============================================================================
-
-CREATE TABLE exemplaires (
-    id                  SERIAL PRIMARY KEY,
-    est_emprunte        BOOLEAN          NOT NULL DEFAULT FALSE,
-    date_debut_emprunt  DATE,
-    date_fin_emprunt    DATE,
-    code_barre          VARCHAR(50)      NOT NULL UNIQUE,
-    delai_emprunt_jours INT              NOT NULL DEFAULT 14,
-    ouvrage_id          INT              NOT NULL,  -- référence logique (héritage)
-    emplacement_id      INT              REFERENCES emplacements(id),
-    emprunteur_id       INT              -- FK vers utilisateurs (logique)
+CREATE TABLE librarians (
+    id         SERIAL PRIMARY KEY,
+    last_name  VARCHAR(100) NOT NULL,
+    first_name VARCHAR(100) NOT NULL,
+    login      VARCHAR(50)  NOT NULL UNIQUE,
+    password   VARCHAR(255) NOT NULL
 );
 
 
 -- =============================================================================
--- UTILISATEUR (table parente — etudiant et enseignant héritent de celle-ci)
+-- ITEM (parent table — book and journal inherit from it)
 -- =============================================================================
 
-CREATE TABLE utilisateurs (
+CREATE TABLE items (
+    id      SERIAL PRIMARY KEY,
+    title   VARCHAR(255) NOT NULL,
+    deposit DOUBLE PRECISION NOT NULL DEFAULT 0.0
+);
+
+-- Book inherits from item
+CREATE TABLE books (
+    isbn      VARCHAR(20) NOT NULL,
+    author_id INT         NOT NULL REFERENCES authors(id)
+) INHERITS (items);
+
+-- Journal inherits from item
+CREATE TABLE journals (
+    issue_number INT NOT NULL
+) INHERITS (items);
+
+
+-- =============================================================================
+-- COPY (linked to an item, stored at a location)
+-- =============================================================================
+
+CREATE TABLE copies (
     id               SERIAL PRIMARY KEY,
-    nom              VARCHAR(100)     NOT NULL,
-    prenom           VARCHAR(100)     NOT NULL,
-    numero_telephone VARCHAR(20),
-    solde_caution    DOUBLE PRECISION NOT NULL DEFAULT 0.0,
-    caution_totale   DOUBLE PRECISION NOT NULL DEFAULT 20.0,
-    login            VARCHAR(50)      NOT NULL UNIQUE,
-    mot_de_passe     VARCHAR(255)     NOT NULL,
-    date_de_naissance DATE,
-    email            VARCHAR(150)     NOT NULL UNIQUE,
-    adresse_id       INT              REFERENCES adresses(id)
+    is_borrowed      BOOLEAN     NOT NULL DEFAULT FALSE,
+    loan_start_date  DATE,
+    loan_due_date    DATE,
+    barcode          VARCHAR(50) NOT NULL UNIQUE,
+    loan_period_days INT         NOT NULL DEFAULT 14,
+    item_id          INT         NOT NULL,  -- logical reference (inheritance)
+    location_id      INT         REFERENCES locations(id),
+    borrower_id      INT                    -- logical FK to users
 );
 
--- Etudiant hérite d'utilisateur
-CREATE TABLE etudiants (
-    annee_etude VARCHAR(20) NOT NULL
-) INHERITS (utilisateurs);
 
--- Enseignant hérite d'utilisateur
-CREATE TABLE enseignants (
-    departement_id INT NOT NULL REFERENCES departements_ecole(id)
-) INHERITS (utilisateurs);
+-- =============================================================================
+-- USER (parent table — student and teacher inherit from it)
+-- =============================================================================
+
+CREATE TABLE users (
+    id              SERIAL PRIMARY KEY,
+    last_name       VARCHAR(100)     NOT NULL,
+    first_name      VARCHAR(100)     NOT NULL,
+    phone_number    VARCHAR(20),
+    deposit_balance DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+    total_deposit   DOUBLE PRECISION NOT NULL DEFAULT 20.0,
+    login           VARCHAR(50)      NOT NULL UNIQUE,
+    password        VARCHAR(255)     NOT NULL,
+    birth_date      DATE,
+    email           VARCHAR(150)     NOT NULL UNIQUE,
+    address_id      INT              REFERENCES addresses(id)
+);
+
+-- Student inherits from user
+CREATE TABLE students (
+    study_year VARCHAR(20) NOT NULL
+) INHERITS (users);
+
+-- Teacher inherits from user
+CREATE TABLE teachers (
+    department_id INT NOT NULL REFERENCES departments(id)
+) INHERITS (users);
 
 
 -- =============================================================================
--- INSERT — DONNÉES DE TEST
+-- INSERT — TEST DATA
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------
--- Catégories
+-- Categories
 -- -----------------------------------------------------------------------------
-INSERT INTO categories (nom) VALUES
+INSERT INTO categories (name) VALUES
     ('Informatique'),
     ('Sciences'),
     ('Littérature'),
@@ -153,9 +153,9 @@ INSERT INTO categories (nom) VALUES
     ('Mathématiques');
 
 -- -----------------------------------------------------------------------------
--- Emplacements
+-- Locations
 -- -----------------------------------------------------------------------------
-INSERT INTO emplacements (numero_travee, numero_etagere, niveau, categorie_id) VALUES
+INSERT INTO locations (bay_number, shelf_number, level, category_id) VALUES
     (1, 1, 1, 1),  -- Informatique
     (1, 2, 1, 1),  -- Informatique
     (2, 1, 1, 2),  -- Sciences
@@ -164,9 +164,9 @@ INSERT INTO emplacements (numero_travee, numero_etagere, niveau, categorie_id) V
     (3, 2, 2, 5);  -- Mathématiques
 
 -- -----------------------------------------------------------------------------
--- Auteurs
+-- Authors
 -- -----------------------------------------------------------------------------
-INSERT INTO auteurs (nom, prenom) VALUES
+INSERT INTO authors (last_name, first_name) VALUES
     ('Kernighan', 'Brian'),
     ('Ritchie',   'Dennis'),
     ('Donovan',   'Alan'),
@@ -177,9 +177,9 @@ INSERT INTO auteurs (nom, prenom) VALUES
     ('Cormen',    'Thomas H.');
 
 -- -----------------------------------------------------------------------------
--- Ouvrages — Livres (INSERT direct dans livres, héritage auto dans ouvrages)
+-- Items — Books (inserted directly into books, automatically inherited in items)
 -- -----------------------------------------------------------------------------
-INSERT INTO livres (titre, caution, isbn, auteur_id) VALUES
+INSERT INTO books (title, deposit, isbn, author_id) VALUES
     ('The C Programming Language',       5.00, '978-0131103627', 1),
     ('The Go Programming Language',      5.00, '978-0134190440', 3),
     ('Clean Code',                       5.00, '978-0132350884', 5),
@@ -188,18 +188,18 @@ INSERT INTO livres (titre, caution, isbn, auteur_id) VALUES
     ('Les Misérables',                    3.00, '978-2070409228', 7);
 
 -- -----------------------------------------------------------------------------
--- Ouvrages — Revues
+-- Items — Journals
 -- -----------------------------------------------------------------------------
-INSERT INTO revues (titre, caution, numero) VALUES
+INSERT INTO journals (title, deposit, issue_number) VALUES
     ('Linux Magazine',      2.00,  258),
     ('Pour la Science',     2.50,  551),
     ('L''Histoire',         2.00,  512),
     ('Programmez!',         2.00,   95);
 
 -- -----------------------------------------------------------------------------
--- Adresses
+-- Addresses
 -- -----------------------------------------------------------------------------
-INSERT INTO adresses (ville, code_postal, nom_rue, numero_rue) VALUES
+INSERT INTO addresses (city, postal_code, street_name, street_number) VALUES
     ('Paris',      '75001', 'Rue de Rivoli',       '10'),
     ('Lyon',       '69001', 'Rue de la République','25'),
     ('Nantes',     '44000', 'Rue du Général de Gaulle', '7'),
@@ -208,9 +208,9 @@ INSERT INTO adresses (ville, code_postal, nom_rue, numero_rue) VALUES
     ('Toulouse',   '31000', 'Rue du Taur',          '15');
 
 -- -----------------------------------------------------------------------------
--- Départements
+-- Departments
 -- -----------------------------------------------------------------------------
-INSERT INTO departements_ecole (nom) VALUES
+INSERT INTO departments (name) VALUES
     ('Informatique'),
     ('Mathématiques'),
     ('Physique'),
@@ -218,92 +218,92 @@ INSERT INTO departements_ecole (nom) VALUES
     ('Sciences Humaines');
 
 -- -----------------------------------------------------------------------------
--- Bibliothécaires
+-- Librarians
 -- -----------------------------------------------------------------------------
-INSERT INTO bibliothecaires (nom, prenom, login, mot_de_passe) VALUES
-    ('Dupont',  'Marie',   'mdupont',  'mdp'),
-    ('Lambert', 'Jacques', 'jlambert', 'mdp');
+INSERT INTO librarians (last_name, first_name, login, password) VALUES
+    ('Dupont',  'Marie',   'mdupont',  'password'),
+    ('Lambert', 'Jacques', 'jlambert', 'password');
 
 -- -----------------------------------------------------------------------------
--- Utilisateurs — Etudiants (INSERT direct dans etudiants)
+-- Users — Students (inserted directly into students)
 -- -----------------------------------------------------------------------------
-INSERT INTO etudiants (nom, prenom, numero_telephone, solde_caution, login, mot_de_passe, date_de_naissance, email, adresse_id, annee_etude) VALUES
-    ('Martin',   'Alice',   '0601020304', 0.00, 'amartin',   'mdp', '2002-03-15', 'alice.martin@etud.fr',   1, 'L3'),
-    ('Bernard',  'Lucas',   '0605060708', 0.00, 'lbernard',  'mdp', '2001-07-22', 'lucas.bernard@etud.fr',  2, 'M1'),
-    ('Petit',    'Emma',    '0609101112', 5.00, 'epetit',    'mdp', '2003-01-10', 'emma.petit@etud.fr',     3, 'L2'),
-    ('Robert',   'Noah',    '0613141516', 0.00, 'nrobert',   'mdp', '2000-11-05', 'noah.robert@etud.fr',    4, 'M2'),
-    ('Leroy',    'Chloé',   '0617181920', 2.50, 'cleroy',    'mdp', '2002-09-30', 'chloe.leroy@etud.fr',    5, 'L1');
+INSERT INTO students (last_name, first_name, phone_number, deposit_balance, login, password, birth_date, email, address_id, study_year) VALUES
+    ('Martin',   'Alice',   '0601020304', 0.00, 'amartin',   'password', '2002-03-15', 'alice.martin@etud.fr',   1, 'L3'),
+    ('Bernard',  'Lucas',   '0605060708', 0.00, 'lbernard',  'password', '2001-07-22', 'lucas.bernard@etud.fr',  2, 'M1'),
+    ('Petit',    'Emma',    '0609101112', 5.00, 'epetit',    'password', '2003-01-10', 'emma.petit@etud.fr',     3, 'L2'),
+    ('Robert',   'Noah',    '0613141516', 0.00, 'nrobert',   'password', '2000-11-05', 'noah.robert@etud.fr',    4, 'M2'),
+    ('Leroy',    'Chloé',   '0617181920', 2.50, 'cleroy',    'password', '2002-09-30', 'chloe.leroy@etud.fr',    5, 'L1');
 
 -- -----------------------------------------------------------------------------
--- Utilisateurs — Enseignants (INSERT direct dans enseignants)
+-- Users — Teachers (inserted directly into teachers)
 -- -----------------------------------------------------------------------------
-INSERT INTO enseignants (nom, prenom, numero_telephone, solde_caution, login, mot_de_passe, date_de_naissance, email, adresse_id, departement_id) VALUES
-    ('Moreau',   'Julien',  '0621222324', 0.00, 'jmoreau',   'mdp', '1978-04-12', 'julien.moreau@univ.fr',  6, 1),
-    ('Simon',    'Claire',  '0625262728', 0.00, 'csimon',    'mdp', '1985-08-19', 'claire.simon@univ.fr',   1, 2),
-    ('Girard',   'Pierre',  '0629303132', 0.00, 'pgirard',   'mdp', '1972-12-03', 'pierre.girard@univ.fr',  2, 3);
+INSERT INTO teachers (last_name, first_name, phone_number, deposit_balance, login, password, birth_date, email, address_id, department_id) VALUES
+    ('Moreau',   'Julien',  '0621222324', 0.00, 'jmoreau',   'password', '1978-04-12', 'julien.moreau@univ.fr',  6, 1),
+    ('Simon',    'Claire',  '0625262728', 0.00, 'csimon',    'password', '1985-08-19', 'claire.simon@univ.fr',   1, 2),
+    ('Girard',   'Pierre',  '0629303132', 0.00, 'pgirard',   'password', '1972-12-03', 'pierre.girard@univ.fr',  2, 3);
 
 -- -----------------------------------------------------------------------------
--- Exemplaires
--- (ouvrage_id référence logiquement les ids insérés dans livres/revues)
--- On récupère les ids via sous-requête sur le titre
+-- Copies
+-- (item_id logically references the ids inserted into books/journals)
+-- The ids are retrieved with a sub-query
 -- -----------------------------------------------------------------------------
-INSERT INTO exemplaires (est_emprunte, code_barre, delai_emprunt_jours, ouvrage_id, emplacement_id) VALUES
-    -- The C Programming Language (2 exemplaires)
-    (FALSE, 'EX-0001', 14, (SELECT id FROM livres WHERE isbn = '978-0131103627'), 1),
-    (FALSE, 'EX-0002', 14, (SELECT id FROM livres WHERE isbn = '978-0131103627'), 1),
+INSERT INTO copies (is_borrowed, barcode, loan_period_days, item_id, location_id) VALUES
+    -- The C Programming Language (2 copies)
+    (FALSE, 'EX-0001', 14, (SELECT id FROM books WHERE isbn = '978-0131103627'), 1),
+    (FALSE, 'EX-0002', 14, (SELECT id FROM books WHERE isbn = '978-0131103627'), 1),
     -- The Go Programming Language
-    (FALSE, 'EX-0003', 14, (SELECT id FROM livres WHERE isbn = '978-0134190440'), 2),
+    (FALSE, 'EX-0003', 14, (SELECT id FROM books WHERE isbn = '978-0134190440'), 2),
     -- Clean Code
-    (FALSE, 'EX-0004', 21, (SELECT id FROM livres WHERE isbn = '978-0132350884'), 2),
+    (FALSE, 'EX-0004', 21, (SELECT id FROM books WHERE isbn = '978-0132350884'), 2),
     -- Introduction to Algorithms
-    (FALSE, 'EX-0005', 21, (SELECT id FROM livres WHERE isbn = '978-0262033848'), 6),
+    (FALSE, 'EX-0005', 21, (SELECT id FROM books WHERE isbn = '978-0262033848'), 6),
     -- Germinal
-    (FALSE, 'EX-0006', 14, (SELECT id FROM livres WHERE isbn = '978-2070408597'), 4),
+    (FALSE, 'EX-0006', 14, (SELECT id FROM books WHERE isbn = '978-2070408597'), 4),
     -- Les Misérables
-    (FALSE, 'EX-0007', 14, (SELECT id FROM livres WHERE isbn = '978-2070409228'), 4),
-    -- Linux Magazine (2 exemplaires)
-    (FALSE, 'EX-0008',  7, (SELECT id FROM revues WHERE numero = 258), 1),
-    (FALSE, 'EX-0009',  7, (SELECT id FROM revues WHERE numero = 258), 1),
+    (FALSE, 'EX-0007', 14, (SELECT id FROM books WHERE isbn = '978-2070409228'), 4),
+    -- Linux Magazine (2 copies)
+    (FALSE, 'EX-0008',  7, (SELECT id FROM journals WHERE issue_number = 258), 1),
+    (FALSE, 'EX-0009',  7, (SELECT id FROM journals WHERE issue_number = 258), 1),
     -- Pour la Science
-    (FALSE, 'EX-0010',  7, (SELECT id FROM revues WHERE numero = 551), 3),
+    (FALSE, 'EX-0010',  7, (SELECT id FROM journals WHERE issue_number = 551), 3),
     -- L'Histoire
-    (FALSE, 'EX-0011',  7, (SELECT id FROM revues WHERE numero = 512), 5),
+    (FALSE, 'EX-0011',  7, (SELECT id FROM journals WHERE issue_number = 512), 5),
     -- Programmez!
-    (FALSE, 'EX-0012',  7, (SELECT id FROM revues WHERE numero = 95),  1);
+    (FALSE, 'EX-0012',  7, (SELECT id FROM journals WHERE issue_number = 95),  1);
 
 -- -----------------------------------------------------------------------------
--- Simulation d'un emprunt (Alice emprunte "The Go Programming Language")
+-- Simulated loan (Alice borrows "The Go Programming Language")
 -- -----------------------------------------------------------------------------
-UPDATE exemplaires
+UPDATE copies
 SET
-    est_emprunte       = TRUE,
-    date_debut_emprunt = CURRENT_DATE,
-    date_fin_emprunt   = CURRENT_DATE + INTERVAL '14 days',
-    emprunteur_id      = (SELECT id FROM etudiants WHERE login = 'amartin')
-WHERE code_barre = 'EX-0003';
+    is_borrowed     = TRUE,
+    loan_start_date = CURRENT_DATE,
+    loan_due_date   = CURRENT_DATE + INTERVAL '14 days',
+    borrower_id     = (SELECT id FROM students WHERE login = 'amartin')
+WHERE barcode = 'EX-0003';
 
 
 -- =============================================================================
--- VÉRIFICATIONS RAPIDES
+-- QUICK CHECKS
 -- =============================================================================
-SELECT 'auteurs'          AS table_name, COUNT(*) FROM auteurs
+SELECT 'authors'     AS table_name, COUNT(*) FROM authors
 UNION ALL
-SELECT 'livres',           COUNT(*) FROM livres
+SELECT 'books',       COUNT(*) FROM books
 UNION ALL
-SELECT 'revues',           COUNT(*) FROM revues
+SELECT 'journals',    COUNT(*) FROM journals
 UNION ALL
-SELECT 'exemplaires',      COUNT(*) FROM exemplaires
+SELECT 'copies',      COUNT(*) FROM copies
 UNION ALL
-SELECT 'etudiants',        COUNT(*) FROM etudiants
+SELECT 'students',    COUNT(*) FROM students
 UNION ALL
-SELECT 'enseignants',      COUNT(*) FROM enseignants
+SELECT 'teachers',    COUNT(*) FROM teachers
 UNION ALL
-SELECT 'bibliothecaires',  COUNT(*) FROM bibliothecaires
+SELECT 'librarians',  COUNT(*) FROM librarians
 UNION ALL
-SELECT 'departements',     COUNT(*) FROM departements_ecole
+SELECT 'departments', COUNT(*) FROM departments
 UNION ALL
-SELECT 'categories',       COUNT(*) FROM categories
+SELECT 'categories',  COUNT(*) FROM categories
 UNION ALL
-SELECT 'emplacements',     COUNT(*) FROM emplacements
+SELECT 'locations',   COUNT(*) FROM locations
 UNION ALL
-SELECT 'adresses',         COUNT(*) FROM adresses;
+SELECT 'addresses',   COUNT(*) FROM addresses;

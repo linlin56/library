@@ -1,0 +1,57 @@
+@startuml
+title Creating a user
+
+actor "Client (librarian)" as C
+participant "CreateUserController" as CTL
+participant "DepartmentRepository" as DR
+participant "UserRepository" as UR
+participant "StudentRepo | TeacherRepo" as SR
+participant "PostgreSQL" as DB
+
+== Loading the form ==
+C -> CTL : GET /api/departments
+activate CTL
+CTL -> DR : FindAll()
+activate DR
+DR -> DB : SELECT * FROM departments ORDER BY name
+activate DB
+DB --> DR : []Department
+deactivate DB
+DR --> CTL : []Department, nil
+deactivate DR
+CTL --> C : 200 [departments]
+deactivate CTL
+
+== Submitting the form ==
+C -> CTL : POST /api/users\n{last_name, first_name, phone_number, birth_date,\nemail, status, study_year?, department_id?, address}
+activate CTL
+note right of CTL : Validation: 10-digit phone number,\nvalid date, status in {student,teacher,individual}
+
+CTL -> UR : LoginExists(login)
+activate UR
+UR -> DB : SELECT COUNT(*) FROM users/librarians WHERE login = $1
+activate DB
+DB --> UR : count
+deactivate DB
+UR --> CTL : bool, nil
+deactivate UR
+
+alt Login already taken
+CTL --> C : 409 An account already exists with this login
+else Login available
+CTL -> DB : INSERT INTO addresses(...) RETURNING id
+activate DB
+DB --> CTL : addressId
+deactivate DB
+CTL -> SR : Create(*Student | *Teacher | *Individual)
+activate SR
+SR -> DB : INSERT INTO students|teachers|users(...) RETURNING id
+activate DB
+DB --> SR : newId
+deactivate DB
+SR --> CTL : newId, nil
+deactivate SR
+CTL --> C : 201 {login, password, message}
+end
+deactivate CTL
+@enduml

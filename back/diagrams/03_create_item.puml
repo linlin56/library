@@ -1,0 +1,83 @@
+@startuml
+title Creating an item (book or journal)
+
+actor "Client (librarian)" as C
+participant "CreateItemController" as CTL
+participant "ItemFactory" as FAC
+participant "ItemRepository" as IR
+participant "AuthorRepository" as AR
+participant "LocationRepository" as LOR
+participant "PostgreSQL" as DB
+
+== Loading the form ==
+C -> CTL : GET /api/authors
+activate CTL
+CTL -> AR : FindAll()
+activate AR
+AR -> DB : SELECT id, last_name, first_name FROM authors ORDER BY last_name
+activate DB
+DB --> AR : []Author
+deactivate DB
+AR --> CTL : []Author, nil
+deactivate AR
+CTL --> C : 200 [authors]
+
+C -> CTL : GET /api/locations
+CTL -> LOR : FindAll()
+activate LOR
+LOR -> DB : SELECT locations JOIN categories
+activate DB
+DB --> LOR : []LocationSummary
+deactivate DB
+LOR --> CTL : []LocationSummary, nil
+deactivate LOR
+CTL --> C : 200 [locations]
+deactivate CTL
+
+== Submit - Book ==
+C -> CTL : POST /api/books\n{title, isbn, deposit, author_id?, author_last_name?, author_first_name?, location_id}
+activate CTL
+note right of CTL : Validation: title, isbn required\nlocation_id > 0, deposit >= 0
+alt New author (author_id = 0)
+CTL -> AR : Create(&Author{last_name, first_name})
+activate AR
+AR -> DB : INSERT INTO authors(last_name, first_name) RETURNING id
+activate DB
+DB --> AR : authorId
+deactivate DB
+AR --> CTL : authorId, nil
+deactivate AR
+end
+CTL -> FAC : BookFactory{}.CreateItem()
+activate FAC
+FAC --> CTL : *Book (id=0)
+deactivate FAC
+CTL -> IR : CreateBook(title, deposit, isbn, authorId, locationId)
+activate IR
+IR -> DB : INSERT INTO books(title, deposit, isbn, author_id, location_id) RETURNING id
+activate DB
+note right of DB : PostgreSQL inheritance:\nthe row is also visible in items
+deactivate DB
+IR --> CTL : newId, nil
+deactivate IR
+CTL --> C : 201 {id, message: Book created successfully}
+deactivate CTL
+
+== Submit - Journal ==
+C -> CTL : POST /api/journals\n{title, issue_number, publication_date, deposit, location_id}
+activate CTL
+note right of CTL : Validation: title, issue_number, publication_date required\nlocation_id > 0
+CTL -> FAC : JournalFactory{}.CreateItem()
+activate FAC
+FAC --> CTL : *Journal (id=0)
+deactivate FAC
+CTL -> IR : CreateJournal(title, deposit, issueNumber, publicationDate, locationId)
+activate IR
+IR -> DB : INSERT INTO journals(title, deposit, issue_number, publication_date, location_id) RETURNING id
+activate DB
+deactivate DB
+IR --> CTL : newId, nil
+deactivate IR
+CTL --> C : 201 {id, message: Journal created successfully}
+deactivate CTL
+@enduml

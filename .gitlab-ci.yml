@@ -17,13 +17,13 @@ build-back:
       alias: postgres
   variables:
     POSTGRES_USER: postgres
-    POSTGRES_PASSWORD: admin_bibli
-    POSTGRES_DB: bibliotheque
+    POSTGRES_PASSWORD: admin_library
+    POSTGRES_DB: library
     DB_HOST: postgres
     DB_PORT: "5432"
     DB_USER: postgres
-    DB_PASSWORD: admin_bibli
-    DB_NAME: bibliotheque
+    DB_PASSWORD: admin_library
+    DB_NAME: library
   script:
     - cd back
     - go mod download
@@ -80,25 +80,25 @@ tests-e2e:
       alias: postgres
   variables:
     POSTGRES_USER: postgres
-    POSTGRES_PASSWORD: admin_bibli
-    POSTGRES_DB: bibliotheque
+    POSTGRES_PASSWORD: admin_library
+    POSTGRES_DB: library
     DB_HOST: postgres
     DB_PORT: "5432"
     DB_USER: postgres
-    DB_PASSWORD: admin_bibli
-    DB_NAME: bibliotheque
+    DB_PASSWORD: admin_library
+    DB_NAME: library
     API_URL: http://localhost:8080
   before_script:
     - curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
     - apt-get install -y nodejs postgresql-client
     - until pg_isready -h postgres -U postgres -q; do sleep 1; done
-    - PGPASSWORD=admin_bibli psql -h postgres -U postgres -d bibliotheque -f db/scripts/insert.sql
+    - PGPASSWORD=admin_library psql -h postgres -U postgres -d library -f db/scripts/insert.sql
   script:
     - cd back && go mod download
     - go run main.go &
     - |
       for i in $(seq 1 20); do
-        curl -sf http://localhost:8080/api/ouvrages && break
+        curl -sf http://localhost:8080/api/items && break
         sleep 1
       done
     - cd $CI_PROJECT_DIR/front && npm ci && npm run test:e2e

@@ -1,50 +1,54 @@
 # Frontend
 
-## Stack technique
+## Tech stack
 
 - Angular (standalone components)
 - TypeScript
 - Bootstrap
 - RxJS
 
-## Démarrage local
+## Running locally
 
 ```bash
 make run-front
 ```
 
-L'application est disponible sur `http://localhost:4200`.  
-Elle attend le backend sur `http://localhost:8080/api`.
+The application is available at `http://localhost:4200`.  
+It expects the backend at `http://localhost:8080/api`.
+
+## Languages
+
+The interface is available in English (default) and French, with a switch in the navigation bar. The choice is remembered in `localStorage` and sent to the API in the `Accept-Language` header. Translations live in `front/src/app/i18n/translations.ts`.
 
 ## Tests
 
-### Unitaires (Mocha)
+### Unit (Mocha)
 
-Teste le rendu du composant racine sans backend.
+Tests the pure utility functions and the translation dictionaries, without a backend.
 
 ```bash
 cd front
 npm run test:mocha
 ```
 
-### E2E (Mocha + API réelle)
+### E2E (Mocha + real API)
 
-Teste les scénarios complets contre l'API en cours d'exécution. Nécessite le backend et la base de données.
+Tests the full scenarios against the running API. Requires the backend and the database.
 
 ```bash
 cd front
 npm run test:e2e
 ```
 
-Scénarios couverts :
+Covered scenarios:
 
-- Connexion utilisateur et bibliothécaire
-- Statistiques d'accueil
-- Recherche d'ouvrages (titre, auteur, ISBN)
-- Création utilisateur (étudiant, enseignant, particulier)
-- Création livre et revue avec exemplaires
-- Consultation des emprunts d'un utilisateur
-- Consultation et mise à jour de la caution
+- User and librarian login
+- Home statistics
+- Item search (title, author, ISBN)
+- User creation (student, teacher, individual)
+- Book and journal creation with copies
+- Viewing a user's loans
+- Viewing and updating the deposit
 
 ## Sections
 

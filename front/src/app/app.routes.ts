@@ -1,41 +1,41 @@
 import { Routes } from '@angular/router';
-import { AccueilComponent } from './accueil/accueil';
-import { ConnexionComponent } from './connexion/connexion';
-import { CreerOuvrageComponent } from './creer-ouvrage/creer-ouvrage';
-import { CreerUtilisateurComponent } from './creer-utilisateur/creer-utilisateur';
-import { EmpruntsBibliothecaireComponent } from './emprunts-bibliothecaire/emprunts-bibliothecaire';
-import { EmpruntsRetardComponent } from './emprunts-retard/emprunts-retard';
+import { CreateItemComponent } from './create-item/create-item';
+import { CreateUserComponent } from './create-user/create-user';
 import { authGuard } from './guards/auth.guard';
-import { bibliothecaireGuard } from './guards/bibliothecaire.guard';
-import { connexionGuard } from './guards/connexion.guard';
-import { MesEmpruntsComponent } from './mes-emprunts/mes-emprunts';
-import { RechercheComponent } from './recherche/recherche';
+import { guestGuard } from './guards/guest.guard';
+import { librarianGuard } from './guards/librarian.guard';
+import { HomeComponent } from './home/home';
+import { LoginComponent } from './login/login';
+import { MyLoansComponent } from './my-loans/my-loans';
+import { OverdueLoansComponent } from './overdue-loans/overdue-loans';
+import { SearchComponent } from './search/search';
+import { UserLoansComponent } from './user-loans/user-loans';
 
-// Déclaration des routes de l'application et des guards de protection associés.
+// Application routes and the guards that protect them.
 export const routes: Routes = [
-  { path: '', component: AccueilComponent },
-  { path: 'connexion', component: ConnexionComponent, canActivate: [connexionGuard] },
+  { path: '', component: HomeComponent },
+  { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
   {
-    path: 'creer-utilisateur',
-    component: CreerUtilisateurComponent,
-    canActivate: [bibliothecaireGuard],
+    path: 'create-user',
+    component: CreateUserComponent,
+    canActivate: [librarianGuard],
   },
   {
-    path: 'creer-ouvrage',
-    component: CreerOuvrageComponent,
-    canActivate: [bibliothecaireGuard],
+    path: 'create-item',
+    component: CreateItemComponent,
+    canActivate: [librarianGuard],
   },
-  { path: 'recherche', component: RechercheComponent },
-  { path: 'mes-emprunts', component: MesEmpruntsComponent, canActivate: [authGuard] },
+  { path: 'search', component: SearchComponent },
+  { path: 'my-loans', component: MyLoansComponent, canActivate: [authGuard] },
   {
-    path: 'emprunts-bibliothecaire',
-    component: EmpruntsBibliothecaireComponent,
-    canActivate: [bibliothecaireGuard],
+    path: 'user-loans',
+    component: UserLoansComponent,
+    canActivate: [librarianGuard],
   },
   {
-    path: 'emprunts-retard',
-    component: EmpruntsRetardComponent,
-    canActivate: [bibliothecaireGuard],
+    path: 'overdue-loans',
+    component: OverdueLoansComponent,
+    canActivate: [librarianGuard],
   },
   { path: '**', redirectTo: '' },
 ];

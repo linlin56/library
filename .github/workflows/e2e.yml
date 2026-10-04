@@ -5,7 +5,7 @@ on:
 
 jobs:
   tests-front:
-    name: Tests e2e (Mocha)
+    name: E2E tests (Mocha)
     runs-on: ubuntu-latest
 
     services:
@@ -13,8 +13,8 @@ jobs:
         image: postgres:latest
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: admin_bibli
-          POSTGRES_DB: bibliotheque
+          POSTGRES_PASSWORD: admin_library
+          POSTGRES_DB: library
         ports:
           - 5435:5432
         options: >-
@@ -27,8 +27,8 @@ jobs:
       DB_HOST: 127.0.0.1
       DB_PORT: 5435
       DB_USER: postgres
-      DB_PASSWORD: admin_bibli
-      DB_NAME: bibliotheque
+      DB_PASSWORD: admin_library
+      DB_NAME: library
       API_URL: http://localhost:8080
 
     steps:
@@ -53,7 +53,7 @@ jobs:
       - name: Apply SQL schema & seed
         run: |
           until pg_isready -h 127.0.0.1 -p 5435 -U postgres -q; do sleep 1; done
-          PGPASSWORD=admin_bibli psql -h 127.0.0.1 -p 5435 -U postgres -d bibliotheque -f db/scripts/insert.sql
+          PGPASSWORD=admin_library psql -h 127.0.0.1 -p 5435 -U postgres -d library -f db/scripts/insert.sql
 
       - name: Start backend
         working-directory: back
@@ -62,7 +62,7 @@ jobs:
       - name: Wait for backend
         run: |
           for i in $(seq 1 20); do
-            curl -sf http://localhost:8080/api/ouvrages && break
+            curl -sf http://localhost:8080/api/items && break
             sleep 1
           done
 
@@ -70,6 +70,6 @@ jobs:
         working-directory: front
         run: npm ci
 
-      - name: Run tests e2e
+      - name: Run e2e tests
         working-directory: front
         run: npm run test:e2e

@@ -1,172 +1,132 @@
 basePath: /api
 definitions:
-  controllers.AccueilStats:
+  controllers.CopyDetail:
     properties:
-      nb_exemplaires_disponibles:
-        type: integer
-      nb_livres:
-        type: integer
-      nb_revues:
-        type: integer
-      nb_utilisateurs:
-        type: integer
-    type: object
-  controllers.ConflictLoginResponse:
-    properties:
-      login_existant:
+      barcode:
         type: string
-      message:
-        type: string
-    type: object
-  controllers.ConnexionRequest:
-    properties:
-      login:
-        type: string
-      mot_de_passe:
-        type: string
-    required:
-    - login
-    - mot_de_passe
-    type: object
-  controllers.ConnexionResponse:
-    properties:
       id:
         type: integer
-      message:
-        type: string
-      nom:
-        type: string
-      prenom:
-        type: string
-      role:
+      is_borrowed:
+        type: boolean
+      loan_due_date:
         type: string
     type: object
-  controllers.CreerExemplaireRequest:
+  controllers.CopySummary:
     properties:
-      code_barre:
+      barcode:
         type: string
-      delai_emprunt_jours:
+      id:
         type: integer
     type: object
-  controllers.CreerLivreRequest:
+  controllers.CreateBookRequest:
     properties:
-      auteur_id:
+      author_first_name:
+        type: string
+      author_id:
         type: integer
-      auteur_nom:
+      author_last_name:
         type: string
-      auteur_prenom:
-        type: string
-      caution:
+      deposit:
         type: number
-      emplacement_id:
-        type: integer
       isbn:
         type: string
-      titre:
+      location_id:
+        type: integer
+      title:
         type: string
     type: object
-  controllers.CreerOuvrageResponse:
+  controllers.CreateCopyRequest:
+    properties:
+      barcode:
+        type: string
+      loan_period_days:
+        type: integer
+    type: object
+  controllers.CreateItemResponse:
     properties:
       id:
         type: integer
       message:
         type: string
     type: object
-  controllers.CreerRevueRequest:
+  controllers.CreateJournalRequest:
     properties:
-      caution:
+      deposit:
         type: number
-      date_parution:
+      issue_number:
+        type: integer
+      location_id:
+        type: integer
+      publication_date:
         type: string
-      emplacement_id:
-        type: integer
-      numero:
-        type: integer
-      titre:
+      title:
         type: string
     type: object
-  controllers.CreerUtilisateurRequest:
+  controllers.CreateUserRequest:
     properties:
-      annee_etude:
+      birth_date:
         type: string
-      code_postal:
+      city:
         type: string
-      date_naissance:
-        type: string
-      departement_id:
+      department_id:
         type: integer
       email:
         type: string
-      nom:
+      first_name:
         type: string
-      nom_rue:
+      last_name:
         type: string
-      numero_rue:
+      phone_number:
         type: string
-      numero_telephone:
+      postal_code:
         type: string
-      prenom:
-        type: string
-      statut:
+      status:
         enum:
-        - etudiant
-        - enseignant
-        - particulier
+        - student
+        - teacher
+        - individual
         type: string
-      ville:
+      street_name:
+        type: string
+      street_number:
+        type: string
+      study_year:
         type: string
     required:
-    - code_postal
-    - date_naissance
+    - birth_date
+    - city
     - email
-    - nom
-    - nom_rue
-    - numero_rue
-    - numero_telephone
-    - prenom
-    - statut
-    - ville
+    - first_name
+    - last_name
+    - phone_number
+    - postal_code
+    - status
+    - street_name
+    - street_number
     type: object
-  controllers.CreerUtilisateurResponse:
+  controllers.CreateUserResponse:
     properties:
       login:
         type: string
       message:
         type: string
-      mot_de_passe:
+      password:
         type: string
-    type: object
-  controllers.EmpruntRequest:
-    properties:
-      code_barre:
-        type: string
-      utilisateur_id:
-        type: integer
-    required:
-    - code_barre
-    - utilisateur_id
     type: object
   controllers.ErrorResponse:
     properties:
-      erreur:
+      error:
         type: string
     type: object
-  controllers.ExemplaireDetail:
+  controllers.HomeStats:
     properties:
-      code_barre:
-        type: string
-      date_fin_emprunt:
-        type: string
-      est_emprunte:
-        type: boolean
-      id:
+      available_copy_count:
         type: integer
-    type: object
-  controllers.ExemplaireResume:
-    properties:
-      code_barre:
-        type: string
-      id:
+      book_count:
+        type: integer
+      journal_count:
+        type: integer
+      user_count:
         type: integer
     type: object
   controllers.IDResponse:
@@ -174,129 +134,178 @@ definitions:
       id:
         type: integer
     type: object
+  controllers.LoanRequest:
+    properties:
+      barcode:
+        type: string
+      user_id:
+        type: integer
+    required:
+    - barcode
+    - user_id
+    type: object
+  controllers.LoginConflictResponse:
+    properties:
+      existing_login:
+        type: string
+      message:
+        type: string
+    type: object
+  controllers.LoginRequest:
+    properties:
+      login:
+        type: string
+      password:
+        type: string
+    required:
+    - login
+    - password
+    type: object
+  controllers.LoginResponse:
+    properties:
+      first_name:
+        type: string
+      id:
+        type: integer
+      last_name:
+        type: string
+      message:
+        type: string
+      role:
+        type: string
+    type: object
   controllers.MessageResponse:
     properties:
       message:
         type: string
     type: object
-  controllers.UpdateCautionRequest:
+  controllers.UpdateDepositRequest:
     properties:
-      caution_totale:
+      total_deposit:
         type: number
     type: object
-  models.Auteur:
+  models.Author:
+    properties:
+      first_name:
+        type: string
+      id:
+        type: integer
+      last_name:
+        type: string
+    type: object
+  models.Department:
     properties:
       id:
         type: integer
-      nom:
-        type: string
-      prenom:
+      name:
         type: string
     type: object
-  models.DepartementEcole:
+  repositories.DepositInfo:
     properties:
-      id:
-        type: integer
-      nom:
-        type: string
-    type: object
-  repositories.CautionInfo:
-    properties:
-      caution_totale:
+      deposit_balance:
         type: number
-      solde_caution:
+      total_deposit:
         type: number
     type: object
-  repositories.EmplacementResume:
+  repositories.ItemLocation:
     properties:
-      categorie_nom:
-        type: string
-      id:
+      bay_number:
         type: integer
-      niveau:
+      level:
         type: integer
-      numero_etagere:
-        type: integer
-      numero_travee:
+      shelf_number:
         type: integer
     type: object
-  repositories.EmpruntEnRetardItem:
+  repositories.ItemResult:
     properties:
-      code_barre:
+      author:
         type: string
-      date_fin:
-        type: string
-      id:
+      available_copies:
         type: integer
-      nom:
-        type: string
-      numero_telephone:
-        type: string
-      prenom:
-        type: string
-      titre:
-        type: string
-    type: object
-  repositories.EmpruntItem:
-    properties:
-      code_barre:
-        type: string
-      date_debut:
-        type: string
-      date_fin:
-        type: string
-      en_retard:
-        type: boolean
-      id:
-        type: integer
-      titre:
-        type: string
-    type: object
-  repositories.OuvrageResultat:
-    properties:
-      auteur:
-        type: string
-      caution:
+      deposit:
         type: number
-      date_parution:
-        type: string
-      emplacement:
-        type: string
-      exemplaires_disponibles:
-        type: integer
       id:
         type: integer
       isbn:
         type: string
-      numero:
+      issue_number:
         type: integer
-      titre:
+      location:
+        $ref: '#/definitions/repositories.ItemLocation'
+      publication_date:
+        type: string
+      title:
         type: string
       type:
         type: string
     type: object
-  repositories.PreviewEmprunt:
+  repositories.LoanPreview:
     properties:
-      caution:
-        type: number
-      code_barre:
+      barcode:
         type: string
-      nouveau_solde:
+      current_balance:
         type: number
-      solde_actuel:
+      deposit:
         type: number
-      titre:
+      new_balance:
+        type: number
+      title:
         type: string
     type: object
-  repositories.UtilisateurResume:
+  repositories.LoanSummary:
     properties:
+      barcode:
+        type: string
+      due_date:
+        type: string
       id:
         type: integer
-      nom:
+      overdue:
+        type: boolean
+      start_date:
         type: string
-      numero_telephone:
+      title:
         type: string
-      prenom:
+    type: object
+  repositories.LocationSummary:
+    properties:
+      bay_number:
+        type: integer
+      category_name:
+        type: string
+      id:
+        type: integer
+      level:
+        type: integer
+      shelf_number:
+        type: integer
+    type: object
+  repositories.OverdueLoan:
+    properties:
+      barcode:
+        type: string
+      due_date:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: integer
+      last_name:
+        type: string
+      phone_number:
+        type: string
+      title:
+        type: string
+    type: object
+  repositories.UserSummary:
+    properties:
+      first_name:
+        type: string
+      id:
+        type: integer
+      last_name:
+        type: string
+      phone_number:
         type: string
       role:
         type: string
@@ -304,26 +313,13 @@ definitions:
 host: localhost:8080
 info:
   contact: {}
-  description: API REST de gestion de bibliothèque universitaire.
-  title: Bibliothèque API
+  description: REST API for managing a university library.
+  title: Library API
   version: "1.0"
 paths:
-  /accueil:
+  /authors:
     get:
-      description: Retourne les statistiques globales de la bibliothèque.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/controllers.AccueilStats'
-      summary: Statistiques d'accueil
-      tags:
-      - Accueil
-  /auteurs:
-    get:
-      description: Retourne la liste des auteurs disponibles.
+      description: Returns the list of available authors.
       produces:
       - application/json
       responses:
@@ -331,176 +327,48 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.Auteur'
+              $ref: '#/definitions/models.Author'
             type: array
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/controllers.ErrorResponse'
-      summary: Lister les auteurs
+      summary: List authors
       tags:
-      - Ouvrages
-  /connexion:
+      - Items
+  /books:
     post:
       consumes:
       - application/json
-      description: Authentifie un utilisateur (etudiant/enseignant/particulier) ou
-        un bibliothecaire.
+      description: Creates a new book with an existing author or a new one.
       parameters:
-      - description: Identifiants de connexion
-        in: body
-        name: credentials
-        required: true
-        schema:
-          $ref: '#/definitions/controllers.ConnexionRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/controllers.ConnexionResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/controllers.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/controllers.ErrorResponse'
-      summary: Connexion utilisateur
-      tags:
-      - Auth
-  /departements:
-    get:
-      description: Retourne la liste des departements d'ecole.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.DepartementEcole'
-            type: array
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/controllers.ErrorResponse'
-      summary: Lister les departements
-      tags:
-      - Utilisateurs
-  /emplacements:
-    get:
-      description: Retourne la liste des emplacements disponibles.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/repositories.EmplacementResume'
-            type: array
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/controllers.ErrorResponse'
-      summary: Lister les emplacements
-      tags:
-      - Ouvrages
-  /emprunts:
-    get:
-      description: Retourne les emprunts actifs pour un utilisateur donne.
-      parameters:
-      - description: ID utilisateur
-        in: query
-        name: utilisateur_id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/repositories.EmpruntItem'
-            type: array
-        "204":
-          description: No Content
-          schema:
-            type: string
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/controllers.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/controllers.ErrorResponse'
-      summary: Lister les emprunts d'un utilisateur
-      tags:
-      - Emprunts
-    post:
-      consumes:
-      - application/json
-      description: Enregistre l'emprunt d'un exemplaire pour un utilisateur.
-      parameters:
-      - description: Demande d'emprunt
+      - description: Book data
         in: body
         name: payload
         required: true
         schema:
-          $ref: '#/definitions/controllers.EmpruntRequest'
+          $ref: '#/definitions/controllers.CreateBookRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/controllers.MessageResponse'
+            $ref: '#/definitions/controllers.CreateItemResponse'
         "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/controllers.ErrorResponse'
-        "422":
-          description: Unprocessable Entity
+        "500":
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/controllers.ErrorResponse'
-      summary: Enregistrer un emprunt
+      summary: Create a book
       tags:
-      - Emprunts
-  /emprunts/{id}:
-    delete:
-      description: Marque l'exemplaire comme rendu et restitue la caution.
-      parameters:
-      - description: ID exemplaire
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/controllers.MessageResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/controllers.ErrorResponse'
-        "422":
-          description: Unprocessable Entity
-          schema:
-            $ref: '#/definitions/controllers.ErrorResponse'
-      summary: Retourner un exemplaire
-      tags:
-      - Emprunts
-  /emprunts/retard:
+      - Items
+  /departments:
     get:
-      description: Retourne tous les emprunts en retard.
+      description: Returns the list of school departments.
       produces:
       - application/json
       responses:
@@ -508,109 +376,56 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/repositories.EmpruntEnRetardItem'
+              $ref: '#/definitions/models.Department'
             type: array
-        "204":
-          description: No Content
-          schema:
-            type: string
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/controllers.ErrorResponse'
-      summary: Lister les emprunts en retard
+      summary: List departments
       tags:
-      - Emprunts
-  /emprunts/verifier:
+      - Users
+  /home:
     get:
-      description: Verifie la possibilite d'emprunt et retourne un apercu.
-      parameters:
-      - description: ID utilisateur
-        in: query
-        name: utilisateur_id
-        required: true
-        type: integer
-      - description: Code barre exemplaire
-        in: query
-        name: code_barre
-        required: true
-        type: string
+      description: Returns global statistics about the library.
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/repositories.PreviewEmprunt'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/controllers.ErrorResponse'
-        "422":
-          description: Unprocessable Entity
-          schema:
-            $ref: '#/definitions/controllers.ErrorResponse'
-      summary: Verifier un emprunt
+            $ref: '#/definitions/controllers.HomeStats'
+      summary: Home statistics
       tags:
-      - Emprunts
-  /livres:
-    post:
-      consumes:
-      - application/json
-      description: Cree un nouveau livre avec auteur existant ou nouvel auteur.
-      parameters:
-      - description: Donnees du livre
-        in: body
-        name: payload
-        required: true
-        schema:
-          $ref: '#/definitions/controllers.CreerLivreRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/controllers.CreerOuvrageResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/controllers.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/controllers.ErrorResponse'
-      summary: Creer un livre
-      tags:
-      - Ouvrages
-  /ouvrages:
+      - Home
+  /items:
     get:
-      description: Recherche avancee des ouvrages (livres/revues) ou liste initiale
-        sans filtres.
+      description: Advanced search for items (books/journals), or initial list without
+        filters.
       parameters:
-      - description: Titre
+      - description: Title
         in: query
-        name: titre
+        name: title
         type: string
-      - description: Auteur
+      - description: Author
         in: query
-        name: auteur
+        name: author
         type: string
       - description: ISBN
         in: query
         name: isbn
         type: string
-      - description: Code barre
+      - description: Barcode
         in: query
-        name: code_barre
+        name: barcode
         type: string
-      - description: Numero revue
+      - description: Journal issue number
         in: query
-        name: code_revue
+        name: issue_number
         type: string
-      - description: Filtrer disponibles
+      - description: Available only
         in: query
-        name: disponible
+        name: available
         type: boolean
       produces:
       - application/json
@@ -619,7 +434,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/repositories.OuvrageResultat'
+              $ref: '#/definitions/repositories.ItemResult'
             type: array
         "204":
           description: No Content
@@ -633,14 +448,14 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/controllers.ErrorResponse'
-      summary: Rechercher des ouvrages
+      summary: Search items
       tags:
-      - Ouvrages
-  /ouvrages/{id}/exemplaires:
+      - Items
+  /items/{id}/copies:
     get:
-      description: Retourne les exemplaires non empruntes pour un ouvrage.
+      description: Returns the copies of an item that are not on loan.
       parameters:
-      - description: ID ouvrage
+      - description: Item ID
         in: path
         name: id
         required: true
@@ -652,7 +467,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/controllers.ExemplaireResume'
+              $ref: '#/definitions/controllers.CopySummary'
             type: array
         "204":
           description: No Content
@@ -666,25 +481,25 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/controllers.ErrorResponse'
-      summary: Lister les exemplaires disponibles
+      summary: List available copies
       tags:
-      - Exemplaires
+      - Copies
     post:
       consumes:
       - application/json
-      description: Cree un exemplaire pour un ouvrage donne.
+      description: Creates a copy of a given item.
       parameters:
-      - description: ID ouvrage
+      - description: Item ID
         in: path
         name: id
         required: true
         type: integer
-      - description: Donnees exemplaire
+      - description: Copy data
         in: body
         name: payload
         required: true
         schema:
-          $ref: '#/definitions/controllers.CreerExemplaireRequest'
+          $ref: '#/definitions/controllers.CreateCopyRequest'
       produces:
       - application/json
       responses:
@@ -696,14 +511,14 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/controllers.ErrorResponse'
-      summary: Creer un exemplaire
+      summary: Create a copy
       tags:
-      - Exemplaires
-  /ouvrages/{id}/exemplaires/tous:
+      - Copies
+  /items/{id}/copies/all:
     get:
-      description: Retourne tous les exemplaires d'un ouvrage.
+      description: Returns every copy of an item.
       parameters:
-      - description: ID ouvrage
+      - description: Item ID
         in: path
         name: id
         required: true
@@ -715,7 +530,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/controllers.ExemplaireDetail'
+              $ref: '#/definitions/controllers.CopyDetail'
             type: array
         "204":
           description: No Content
@@ -729,28 +544,28 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/controllers.ErrorResponse'
-      summary: Lister tous les exemplaires
+      summary: List all copies
       tags:
-      - Exemplaires
-  /revues:
+      - Copies
+  /journals:
     post:
       consumes:
       - application/json
-      description: Cree une nouvelle revue.
+      description: Creates a new journal issue.
       parameters:
-      - description: Donnees de la revue
+      - description: Journal data
         in: body
         name: payload
         required: true
         schema:
-          $ref: '#/definitions/controllers.CreerRevueRequest'
+          $ref: '#/definitions/controllers.CreateJournalRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/controllers.CreerOuvrageResponse'
+            $ref: '#/definitions/controllers.CreateItemResponse'
         "400":
           description: Bad Request
           schema:
@@ -759,48 +574,76 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/controllers.ErrorResponse'
-      summary: Creer une revue
+      summary: Create a journal
       tags:
-      - Ouvrages
-  /utilisateurs:
-    post:
-      consumes:
-      - application/json
-      description: Cree un etudiant, un enseignant ou un particulier.
-      parameters:
-      - description: Donnees utilisateur
-        in: body
-        name: payload
-        required: true
-        schema:
-          $ref: '#/definitions/controllers.CreerUtilisateurRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/controllers.CreerUtilisateurResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/controllers.ErrorResponse'
-        "409":
-          description: Conflict
-          schema:
-            $ref: '#/definitions/controllers.ConflictLoginResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/controllers.ErrorResponse'
-      summary: Creer un utilisateur
-      tags:
-      - Utilisateurs
-  /utilisateurs/{id}/caution:
+      - Items
+  /loans:
     get:
-      description: Retourne le solde de caution disponible et la caution totale.
+      description: Returns the active loans of a given user.
       parameters:
-      - description: ID utilisateur
+      - description: User ID
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/repositories.LoanSummary'
+            type: array
+        "204":
+          description: No Content
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+      summary: List a user's loans
+      tags:
+      - Loans
+    post:
+      consumes:
+      - application/json
+      description: Records the loan of a copy for a user.
+      parameters:
+      - description: Loan request
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.LoanRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/controllers.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+      summary: Record a loan
+      tags:
+      - Loans
+  /loans/{id}:
+    delete:
+      description: Marks the copy as returned and refunds the deposit.
+      parameters:
+      - description: Copy ID
         in: path
         name: id
         required: true
@@ -811,7 +654,172 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/repositories.CautionInfo'
+            $ref: '#/definitions/controllers.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+      summary: Return a copy
+      tags:
+      - Loans
+  /loans/check:
+    get:
+      description: Checks whether a copy can be borrowed and returns a preview.
+      parameters:
+      - description: User ID
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      - description: Copy barcode
+        in: query
+        name: barcode
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/repositories.LoanPreview'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+      summary: Check a loan
+      tags:
+      - Loans
+  /loans/overdue:
+    get:
+      description: Returns every overdue loan.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/repositories.OverdueLoan'
+            type: array
+        "204":
+          description: No Content
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+      summary: List overdue loans
+      tags:
+      - Loans
+  /locations:
+    get:
+      description: Returns the list of available locations.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/repositories.LocationSummary'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+      summary: List locations
+      tags:
+      - Items
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user (student/teacher/individual) or a librarian.
+      parameters:
+      - description: Login credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+      summary: User login
+      tags:
+      - Auth
+  /users:
+    post:
+      consumes:
+      - application/json
+      description: Creates a student, a teacher or an individual.
+      parameters:
+      - description: User data
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/controllers.CreateUserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/controllers.LoginConflictResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+      summary: Create a user
+      tags:
+      - Users
+  /users/{id}/deposit:
+    get:
+      description: Returns the available deposit balance and the total deposit.
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/repositories.DepositInfo'
         "400":
           description: Bad Request
           schema:
@@ -820,60 +828,58 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/controllers.ErrorResponse'
-      summary: Consulter la caution d'un utilisateur
+      summary: Get a user's deposit
       tags:
-      - Utilisateurs
+      - Users
     put:
       consumes:
       - application/json
-      description: Met a jour la caution totale d'un utilisateur et recalcule son
-        solde.
+      description: Updates a user's total deposit and recomputes their balance.
       parameters:
-      - description: ID utilisateur
+      - description: User ID
         in: path
         name: id
         required: true
         type: integer
-      - description: Nouvelle caution
+      - description: New deposit
         in: body
         name: payload
         required: true
         schema:
-          $ref: '#/definitions/controllers.UpdateCautionRequest'
+          $ref: '#/definitions/controllers.UpdateDepositRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/repositories.CautionInfo'
+            $ref: '#/definitions/repositories.DepositInfo'
         "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/controllers.ErrorResponse'
-      summary: Mettre a jour la caution totale
+      summary: Update the total deposit
       tags:
-      - Utilisateurs
-  /utilisateurs/rechercher:
+      - Users
+  /users/search:
     get:
-      description: Recherche des utilisateurs par nom, prenom, code postal ou numero
-        de telephone.
+      description: Searches users by last name, first name, postal code or phone number.
       parameters:
-      - description: Nom
+      - description: Last name
         in: query
-        name: nom
+        name: last_name
         type: string
-      - description: Prenom
+      - description: First name
         in: query
-        name: prenom
+        name: first_name
         type: string
-      - description: Code postal
+      - description: Postal code
         in: query
-        name: code_postal
+        name: postal_code
         type: string
-      - description: Numero de telephone
+      - description: Phone number
         in: query
-        name: numero_telephone
+        name: phone_number
         type: string
       produces:
       - application/json
@@ -882,7 +888,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/repositories.UtilisateurResume'
+              $ref: '#/definitions/repositories.UserSummary'
             type: array
         "204":
           description: No Content
@@ -896,7 +902,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/controllers.ErrorResponse'
-      summary: Rechercher des utilisateurs
+      summary: Search users
       tags:
-      - Utilisateurs
+      - Users
 swagger: "2.0"

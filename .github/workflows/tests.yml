@@ -5,7 +5,7 @@ on:
 
 jobs:
   tests-back:
-    name: Tests unitaires (Go)
+    name: Unit tests (Go)
     runs-on: ubuntu-latest
 
     steps:
@@ -20,12 +20,12 @@ jobs:
         working-directory: back
         run: go mod download
 
-      - name: Run tests unitaires
+      - name: Run unit tests
         working-directory: back
         run: go test ./test/...
 
   tests-tu-front:
-    name: Tests unitaires (Mocha)
+    name: Unit tests (Mocha)
     runs-on: ubuntu-latest
 
     steps:
@@ -42,6 +42,6 @@ jobs:
         working-directory: front
         run: npm ci
 
-      - name: Run tests unitaires Mocha
+      - name: Run Mocha unit tests
         working-directory: front
         run: npm run test:mocha

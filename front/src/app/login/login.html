@@ -1,0 +1,71 @@
+<section class="login-shell py-5">
+  <div class="container">
+    <div class="row justify-content-center align-items-center g-4">
+      <div class="col-lg-5">
+        <div class="login-intro text-white">
+          <span class="badge rounded-pill text-bg-light text-primary fw-semibold mb-3">{{
+            'login.badge' | t
+          }}</span>
+          <h1 class="display-5 fw-bold mb-3">{{ 'login.title' | t }}</h1>
+          <p class="lead mb-0">
+            {{ 'login.intro' | t }}
+          </p>
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        <div class="card border-0 shadow-lg login-card">
+          <div class="card-body p-4 p-md-5">
+            <h2 class="h3 fw-bold mb-2">{{ 'login.cardTitle' | t }}</h2>
+            <p class="text-muted mb-4">{{ 'login.cardSubtitle' | t }}</p>
+
+            <div *ngIf="error" class="alert alert-danger" role="alert">
+              {{ error }}
+            </div>
+
+            <div *ngIf="success" class="alert alert-success" role="alert">
+              {{ success }}
+            </div>
+
+            <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+              <div class="mb-3">
+                <label for="login" class="form-label fw-semibold">{{ 'login.username' | t }}</label>
+                <input
+                  id="login"
+                  type="text"
+                  class="form-control form-control-lg"
+                  formControlName="login"
+                  placeholder="amartin"
+                  [class.is-invalid]="form.controls.login.touched && form.controls.login.invalid"
+                />
+                <div class="invalid-feedback">{{ 'login.usernameRequired' | t }}</div>
+              </div>
+
+              <div class="mb-4">
+                <label for="password" class="form-label fw-semibold">{{
+                  'login.password' | t
+                }}</label>
+                <input
+                  id="password"
+                  type="password"
+                  class="form-control form-control-lg"
+                  formControlName="password"
+                  [placeholder]="'login.passwordPlaceholder' | t"
+                  [class.is-invalid]="
+                    form.controls.password.touched && form.controls.password.invalid
+                  "
+                />
+                <div class="invalid-feedback">{{ 'login.passwordRequired' | t }}</div>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-lg w-100" [disabled]="submitting">
+                <span *ngIf="!submitting">{{ 'login.submit' | t }}</span>
+                <span *ngIf="submitting">{{ 'login.checking' | t }}</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

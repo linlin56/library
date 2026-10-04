@@ -1,0 +1,56 @@
+@startuml
+!pragma layout smetana
+title PERT chart - Library project
+left to right direction
+
+skinparam rectangle {
+  RoundCorner 6
+}
+
+rectangle "A\nNeeds analysis\n+ existing sources" as A #LightYellow
+rectangle "B\nRequirements\nspecification" as B #LightYellow
+rectangle "C\nDatabase schema\n(CREATE tables)" as C #LightBlue
+rectangle "D\nClass diagram\n(Visual Paradigm)" as D #Wheat
+rectangle "E\nSequence diagrams\n(PlantUML)" as E #Wheat
+rectangle "F\nUse case\ndiagram" as F #Wheat
+rectangle "G\nBackend setup\nGo / Gin" as G #LightGreen
+rectangle "H\nModels +\nFactory, Builder" as H #LightGreen
+rectangle "I\nRepositories\n+ SQL queries" as I #LightGreen
+rectangle "J\nINSERT script\n(seed data)" as J #LightGreen
+rectangle "K\nControllers\nREST API" as K #LightGreen
+rectangle "L\nFrontend setup\nAngular" as L #LightCoral
+rectangle "M\nGuards + services" as M #LightCoral
+rectangle "N\nScreens\nHTML / CSS" as N #LightCoral
+rectangle "O\nIntegration tests\n(DBeaver + frontend)" as O #Plum
+rectangle "P\nPeer review\n(Lucas's project)" as P #LightGray
+rectangle "Q\nFixes\n(location integration)" as Q #LightGray
+rectangle "R\nFinal report\nwriting" as R #Gold
+
+note bottom of A : Study of the Lorient media library\n+ reading of official documents
+note bottom of O : DBeaver + frontend tests
+note bottom of P : Reading Lucas's project\n+ mutual feedback
+
+A --> B
+B --> C
+B --> G
+B --> L
+B --> D
+B --> E
+B --> F
+C --> H
+C --> J
+G --> H
+H --> I
+I --> K
+K --> O
+J --> O
+L --> M
+M --> N
+N --> O
+O --> P
+P --> Q
+Q --> R
+D --> R
+E --> R
+F --> R
+@enduml

@@ -1,0 +1,97 @@
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold mb-1">{{ 'loans.myLoans' | t }}</h2>
+      @if (userName) {
+        <p class="text-muted mb-0">{{ userName }}</p>
+      }
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status"></div>
+      <p class="mt-3 text-muted">{{ 'loans.loading' | t }}</p>
+    </div>
+  }
+
+  @if (error) {
+    <div class="alert alert-danger">{{ error }}</div>
+  }
+
+  @if (!loading && !error) {
+    @if (deposit) {
+      <div class="d-flex gap-3 mb-4">
+        <div class="card border-0 shadow-sm flex-fill text-center py-3">
+          <div class="text-muted small mb-1">{{ 'loans.totalDeposit' | t }}</div>
+          <div class="fw-bold fs-5">{{ deposit.total_deposit | amount }}</div>
+        </div>
+        <div class="card border-0 shadow-sm flex-fill text-center py-3">
+          <div class="text-muted small mb-1">{{ 'loans.currentDeposit' | t }}</div>
+          <div
+            class="fw-bold fs-5"
+            [class.text-success]="deposit.deposit_balance === deposit.total_deposit"
+            [class.text-warning]="
+              deposit.deposit_balance < deposit.total_deposit && deposit.deposit_balance > 0
+            "
+            [class.text-danger]="deposit.deposit_balance <= 0"
+          >
+            {{ deposit.deposit_balance | amount }}
+          </div>
+        </div>
+      </div>
+    }
+    @if (loans.length === 0) {
+      <div class="alert alert-info text-center">
+        <p class="mb-0">{{ 'loans.none' | t }}</p>
+      </div>
+    } @else {
+      <p class="text-muted small mb-3">{{ 'loans.count' | t: { count: loans.length } }}</p>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>{{ 'loans.item' | t }}</th>
+              <th>{{ 'loans.barcode' | t }}</th>
+              <th>{{ 'loans.borrowedOn' | t }}</th>
+              <th>{{ 'loans.dueBy' | t }}</th>
+              <th>{{ 'loans.status' | t }}</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (loan of loans; track loan.id) {
+              <tr [class.table-danger]="loan.overdue">
+                <td class="fw-semibold">{{ loan.title }}</td>
+                <td>
+                  <code>{{ loan.barcode }}</code>
+                </td>
+                <td>{{ loan.start_date }}</td>
+                <td>{{ loan.due_date }}</td>
+                <td>
+                  @if (loan.overdue) {
+                    <span class="badge bg-danger">{{ 'loans.overdue' | t }}</span>
+                  } @else {
+                    <span class="badge bg-success">{{ 'loans.ongoing' | t }}</span>
+                  }
+                </td>
+                <td>
+                  <button
+                    class="btn btn-sm btn-outline-secondary"
+                    [disabled]="returning.has(loan.id)"
+                    (click)="markReturned(loan)"
+                  >
+                    @if (returning.has(loan.id)) {
+                      <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                    }
+                    {{ 'loans.markReturned' | t }}
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+</div>

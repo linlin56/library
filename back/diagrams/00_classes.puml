@@ -2,48 +2,48 @@
 namespace back {
 }
 namespace builder {
-    class "EnseignantBuilder" << (S,Aquamarine) >> {
-        - departement *models.DepartementEcole
+    class "StudentBuilder" << (S,Aquamarine) >> {
+        - studyYear string
 
-        + WithNom(nom string) *EnseignantBuilder
-        + WithPrenom(prenom string) *EnseignantBuilder
-        + WithLogin(login string) *EnseignantBuilder
-        + WithMotDePasse(mdp string) *EnseignantBuilder
-        + WithEmail(email string) *EnseignantBuilder
-        + WithNumeroTelephone(tel string) *EnseignantBuilder
-        + WithSoldeCaution(solde float64) *EnseignantBuilder
-        + WithDateDeNaissance(date time.Time) *EnseignantBuilder
-        + WithDepartement(dept *models.DepartementEcole) *EnseignantBuilder
-        + Build() *models.Enseignant
-
-    }
-    class "EtudiantBuilder" << (S,Aquamarine) >> {
-        - anneeEtude string
-
-        + WithNom(nom string) *EtudiantBuilder
-        + WithPrenom(prenom string) *EtudiantBuilder
-        + WithLogin(login string) *EtudiantBuilder
-        + WithMotDePasse(mdp string) *EtudiantBuilder
-        + WithEmail(email string) *EtudiantBuilder
-        + WithNumeroTelephone(tel string) *EtudiantBuilder
-        + WithSoldeCaution(solde float64) *EtudiantBuilder
-        + WithDateDeNaissance(date time.Time) *EtudiantBuilder
-        + WithAnneeEtude(annee string) *EtudiantBuilder
-        + Build() *models.Etudiant
+        + WithLastName(lastName string) *StudentBuilder
+        + WithFirstName(firstName string) *StudentBuilder
+        + WithLogin(login string) *StudentBuilder
+        + WithPassword(password string) *StudentBuilder
+        + WithEmail(email string) *StudentBuilder
+        + WithPhoneNumber(phone string) *StudentBuilder
+        + WithDepositBalance(balance float64) *StudentBuilder
+        + WithBirthDate(date time.Time) *StudentBuilder
+        + WithStudyYear(year string) *StudentBuilder
+        + Build() *models.Student
 
     }
-    class "UtilisateurBuilder" << (S,Aquamarine) >> {
-        - u models.Utilisateur
+    class "TeacherBuilder" << (S,Aquamarine) >> {
+        - department *models.Department
 
-        + WithNom(nom string) *UtilisateurBuilder
-        + WithPrenom(prenom string) *UtilisateurBuilder
-        + WithLogin(login string) *UtilisateurBuilder
-        + WithMotDePasse(mdp string) *UtilisateurBuilder
-        + WithEmail(email string) *UtilisateurBuilder
-        + WithNumeroTelephone(tel string) *UtilisateurBuilder
-        + WithSoldeCaution(solde float64) *UtilisateurBuilder
-        + WithDateDeNaissance(date time.Time) *UtilisateurBuilder
-        + Build() *models.Utilisateur
+        + WithLastName(lastName string) *TeacherBuilder
+        + WithFirstName(firstName string) *TeacherBuilder
+        + WithLogin(login string) *TeacherBuilder
+        + WithPassword(password string) *TeacherBuilder
+        + WithEmail(email string) *TeacherBuilder
+        + WithPhoneNumber(phone string) *TeacherBuilder
+        + WithDepositBalance(balance float64) *TeacherBuilder
+        + WithBirthDate(date time.Time) *TeacherBuilder
+        + WithDepartment(dept *models.Department) *TeacherBuilder
+        + Build() *models.Teacher
+
+    }
+    class "UserBuilder" << (S,Aquamarine) >> {
+        - u models.User
+
+        + WithLastName(lastName string) *UserBuilder
+        + WithFirstName(firstName string) *UserBuilder
+        + WithLogin(login string) *UserBuilder
+        + WithPassword(password string) *UserBuilder
+        + WithEmail(email string) *UserBuilder
+        + WithPhoneNumber(phone string) *UserBuilder
+        + WithDepositBalance(balance float64) *UserBuilder
+        + WithBirthDate(date time.Time) *UserBuilder
+        + Build() *models.User
 
     }
 }
@@ -52,80 +52,111 @@ namespace cmd {
     }
 }
 namespace controllers {
-    class "AccueilStats" << (S,Aquamarine) >> {
-        + NbLivres int
-        + NbRevues int
-        + NbExemplairesDisponibles int
-        + NbUtilisateurs int
-
-    }
-    class "ConnexionRequest" << (S,Aquamarine) >> {
-        + Login string
-        + MotDePasse string
-
-    }
-    class "ConnexionResponse" << (S,Aquamarine) >> {
+    class "CopyDetail" << (S,Aquamarine) >> {
         + Id int
-        + Nom string
-        + Prenom string
+        + Barcode string
+        + IsBorrowed bool
+        + DueDate string
+
+    }
+    class "CopySummary" << (S,Aquamarine) >> {
+        + Id int
+        + Barcode string
+
+    }
+    class "CreateBookRequest" << (S,Aquamarine) >> {
+        + Title string
+        + Deposit float64
+        + Isbn string
+        + AuthorId int
+        + AuthorLastName string
+        + AuthorFirstName string
+        + LocationId int
+
+    }
+    class "CreateCopyRequest" << (S,Aquamarine) >> {
+        + Barcode string
+        + LoanPeriodDays int
+
+    }
+    class "CreateItemResponse" << (S,Aquamarine) >> {
+        + ID int
+        + Message string
+
+    }
+    class "CreateJournalRequest" << (S,Aquamarine) >> {
+        + Title string
+        + Deposit float64
+        + IssueNumber int
+        + PublicationDate string
+        + LocationId int
+
+    }
+    class "CreateUserRequest" << (S,Aquamarine) >> {
+        + LastName string
+        + FirstName string
+        + PhoneNumber string
+        + BirthDate string
+        + Email string
+        + Status string
+        + StudyYear string
+        + DepartmentId int
+        + StreetNumber string
+        + StreetName string
+        + PostalCode string
+        + City string
+
+    }
+    class "CreateUserResponse" << (S,Aquamarine) >> {
+        + Login string
+        + Password string
+        + Message string
+
+    }
+    class "ErrorResponse" << (S,Aquamarine) >> {
+        + Error string
+
+    }
+    class "HomeStats" << (S,Aquamarine) >> {
+        + BookCount int
+        + JournalCount int
+        + AvailableCopyCount int
+        + UserCount int
+
+    }
+    class "IDResponse" << (S,Aquamarine) >> {
+        + ID int
+
+    }
+    class "LoanRequest" << (S,Aquamarine) >> {
+        + UserId int
+        + Barcode string
+
+    }
+    class "LoginConflictResponse" << (S,Aquamarine) >> {
+        + Message string
+        + ExistingLogin string
+
+    }
+    class "LoginRequest" << (S,Aquamarine) >> {
+        + Login string
+        + Password string
+
+    }
+    class "LoginResponse" << (S,Aquamarine) >> {
+        + Id int
+        + LastName string
+        + FirstName string
         + Role string
         + Message string
 
     }
-    class "CreerLivreRequest" << (S,Aquamarine) >> {
-        + Titre string
-        + Caution float64
-        + Isbn string
-        + AuteurId int
-        + AuteurNom string
-        + AuteurPrenom string
-        + EmplacementId int
-
-    }
-    class "CreerRevueRequest" << (S,Aquamarine) >> {
-        + Titre string
-        + Caution float64
-        + Numero int
-        + DateParution string
-        + EmplacementId int
-
-    }
-    class "CreerUtilisateurRequest" << (S,Aquamarine) >> {
-        + Nom string
-        + Prenom string
-        + NumeroTelephone string
-        + DateNaissance string
-        + Email string
-        + Statut string
-        + AnneeEtude string
-        + DepartementId int
-        + NumeroRue string
-        + NomRue string
-        + CodePostal string
-        + Ville string
-
-    }
-    class "CreerUtilisateurResponse" << (S,Aquamarine) >> {
-        + Login string
-        + MotDePasse string
+    class "MessageResponse" << (S,Aquamarine) >> {
         + Message string
 
     }
-    class "EmpruntRequest" << (S,Aquamarine) >> {
-        + UtilisateurId int
-        + CodeBarre string
-
-    }
-    class "ExemplaireDetail" << (S,Aquamarine) >> {
-        + Id int
-        + CodeBarre string
-        + EstEmprunte bool
-        + DateFin string
-
-    }
-    class "ExemplaireResume" << (S,Aquamarine) >> {
-        + Id int
-        + CodeBarre string
+    class "UpdateDepositRequest" << (S,Aquamarine) >> {
+        + TotalDeposit float64
 
     }
 }
@@ -164,318 +195,338 @@ namespace db {
 
     }
 }
-namespace fabrique {
-    class "FabriqueLivre" << (S,Aquamarine) >> {
-        + Titre string
-        + Caution float64
+namespace docs {
+}
+namespace factory {
+    class "BookFactory" << (S,Aquamarine) >> {
+        + Title string
+        + Deposit float64
         + Isbn string
-        + Auteur *models.Auteur
+        + Author *models.Author
 
-        + CreerOuvrage() models.IOuvrage
-
-    }
-    interface "FabriqueOuvrage"  {
-        + CreerOuvrage() models.IOuvrage
+        + CreateItem() models.IItem
 
     }
-    class "FabriqueRevue" << (S,Aquamarine) >> {
-        + Titre string
-        + Caution float64
-        + Numero int
-        + DateParution time.Time
+    interface "ItemFactory"  {
+        + CreateItem() models.IItem
 
-        + CreerOuvrage() models.IOuvrage
+    }
+    class "JournalFactory" << (S,Aquamarine) >> {
+        + Title string
+        + Deposit float64
+        + IssueNumber int
+        + PublicationDate time.Time
+
+        + CreateItem() models.IItem
 
     }
 }
+namespace i18n {
+    class "Error" << (S,Aquamarine) >> {
+        + Key string
+        + Args []any
+
+        + Error() string
+
+    }
+    class "i18n.Lang" << (T, #FF7700) >>  {
+    }
+}
 namespace models {
-    class "Auteur" << (S,Aquamarine) >> {
+    class "Author" << (S,Aquamarine) >> {
         + Id int
-        + Nom string
-        + Prenom string
+        + LastName string
+        + FirstName string
 
     }
-    class "Bibliothecaire" << (S,Aquamarine) >> {
-        + Id int
-        + Nom string
-        + Prenom string
-        + Login string
-        + MotDePasse string
-
-    }
-    class "DepartementEcole" << (S,Aquamarine) >> {
-        + Id int
-        + Nom string
-
-    }
-    class "Enseignant" << (S,Aquamarine) >> {
-        + DepartementId int
-        + Departement *DepartementEcole
-
-    }
-    class "Etudiant" << (S,Aquamarine) >> {
-        + AnneeEtude string
-
-    }
-    class "Exemplaire" << (S,Aquamarine) >> {
-        + Id int
-        + EstEmprunte bool
-        + DateDebutEmprunt time.Time
-        + DateFinEmprunt time.Time
-        + DelaiEmpruntJours int
-        + CodeBarre string
-        + EmprunteurId int
-        + Emprunteur *Utilisateur
-
-    }
-    interface "IOuvrage"  {
-        + GetId() int
-        + GetTitre() string
-        + GetCaution() float64
-
-    }
-    class "Livre" << (S,Aquamarine) >> {
-        + AuteurId int
-        + Auteur *Auteur
+    class "Book" << (S,Aquamarine) >> {
+        + AuthorId int
+        + Author *Author
         + Isbn string
 
     }
-    class "Ouvrage" << (S,Aquamarine) >> {
+    class "Copy" << (S,Aquamarine) >> {
         + Id int
-        + Caution float64
-        + Titre string
-        + Exemplaires int
+        + IsBorrowed bool
+        + LoanStartDate time.Time
+        + LoanDueDate time.Time
+        + LoanPeriodDays int
+        + Barcode string
+        + BorrowerId int
+        + Borrower *User
+
+    }
+    class "Department" << (S,Aquamarine) >> {
+        + Id int
+        + Name string
+
+    }
+    interface "IItem"  {
+        + GetId() int
+        + GetTitle() string
+        + GetDeposit() float64
+
+    }
+    class "Item" << (S,Aquamarine) >> {
+        + Id int
+        + Deposit float64
+        + Title string
+        + Copies int
 
         + GetId() int
-        + GetTitre() string
-        + GetCaution() float64
+        + GetTitle() string
+        + GetDeposit() float64
 
     }
-    class "Revue" << (S,Aquamarine) >> {
-        + Numero int
-        + DateParution time.Time
+    class "Journal" << (S,Aquamarine) >> {
+        + IssueNumber int
+        + PublicationDate time.Time
 
     }
-    class "Utilisateur" << (S,Aquamarine) >> {
+    class "Librarian" << (S,Aquamarine) >> {
         + Id int
-        + Nom string
-        + Prenom string
-        + NumeroTelephone string
-        + SoldeCaution float64
-        + CautionTotale float64
+        + LastName string
+        + FirstName string
         + Login string
-        + MotDePasse string
-        + DateDeNaissance time.Time
+        + Password string
+
+    }
+    class "Student" << (S,Aquamarine) >> {
+        + StudyYear string
+
+    }
+    class "Teacher" << (S,Aquamarine) >> {
+        + DepartmentId int
+        + Department *Department
+
+    }
+    class "User" << (S,Aquamarine) >> {
+        + Id int
+        + LastName string
+        + FirstName string
+        + PhoneNumber string
+        + DepositBalance float64
+        + TotalDeposit float64
+        + Login string
+        + Password string
+        + BirthDate time.Time
         + Email string
-        + AdresseId *int
-        + Emprunts []*Exemplaire
+        + AddressId *int
+        + Loans []*Copy
 
     }
 }
 namespace repositories {
-    class "AuteurRepository" << (S,Aquamarine) >> {
+    class "AuthorRepository" << (S,Aquamarine) >> {
         - dbo *db.DBO
 
-        + FindAll() ([]*models.Auteur, error)
-        + FindByID(id int) (*models.Auteur, error)
-        + Create(a *models.Auteur) (int, error)
-        + Update(a *models.Auteur) error
+        + FindAll() ([]*models.Author, error)
+        + FindByID(id int) (*models.Author, error)
+        + Create(a *models.Author) (int, error)
+        + Update(a *models.Author) error
         + Delete(id int) error
 
     }
-    class "BibliothécaireRepository" << (S,Aquamarine) >> {
+    class "BookRepository" << (S,Aquamarine) >> {
         - dbo *db.DBO
 
-        + FindAll() ([]*models.Bibliothecaire, error)
-        + FindByID(id int) (*models.Bibliothecaire, error)
-        + FindByLogin(login string) (*models.Bibliothecaire, error)
-        + Create(b *models.Bibliothecaire) (int, error)
-        + Update(b *models.Bibliothecaire) error
+        + FindAll() ([]*models.Book, error)
+        + FindByID(id int) (*models.Book, error)
+        + FindByIsbn(isbn string) (*models.Book, error)
+        + FindByAuthor(authorID int) ([]*models.Book, error)
+        + Create(b *models.Book) (int, error)
+        + Update(b *models.Book) error
         + Delete(id int) error
 
     }
-    class "CautionInfo" << (S,Aquamarine) >> {
-        + SoldeCaution float64
-        + CautionTotale float64
-
-    }
-    class "DepartementEcoleRepository" << (S,Aquamarine) >> {
+    class "CopyRepository" << (S,Aquamarine) >> {
         - dbo *db.DBO
 
-        + FindAll() ([]*models.DepartementEcole, error)
-        + FindByID(id int) (*models.DepartementEcole, error)
-        + Create(d *models.DepartementEcole) (int, error)
-        + Update(d *models.DepartementEcole) error
+        + FindAll() ([]*models.Copy, error)
+        + FindByID(id int) (*models.Copy, error)
+        + FindByBarcode(barcode string) (*models.Copy, error)
+        + FindAvailable() ([]*models.Copy, error)
+        + FindAllByItemId(itemId int) ([]*models.Copy, error)
+        + CreateForItem(itemId int, barcode string, periodDays int) (int, error)
+        + FindAvailableByItemId(itemId int) ([]*models.Copy, error)
+        + Create(c *models.Copy) (int, error)
+        + Update(c *models.Copy) error
+        + Borrow(copyID int, borrowerID int, periodDays int) error
+        + Return(copyID int) error
         + Delete(id int) error
 
     }
-    class "EmplacementRepository" << (S,Aquamarine) >> {
+    class "DepartmentRepository" << (S,Aquamarine) >> {
         - dbo *db.DBO
 
-        + FindAll() ([]*EmplacementResume, error)
+        + FindAll() ([]*models.Department, error)
+        + FindByID(id int) (*models.Department, error)
+        + Create(d *models.Department) (int, error)
+        + Update(d *models.Department) error
+        + Delete(id int) error
 
     }
-    class "EmplacementResume" << (S,Aquamarine) >> {
+    class "DepositInfo" << (S,Aquamarine) >> {
+        + DepositBalance float64
+        + TotalDeposit float64
+
+    }
+    class "ItemLocation" << (S,Aquamarine) >> {
+        + BayNumber int
+        + ShelfNumber int
+        + Level int
+
+    }
+    class "ItemRepository" << (S,Aquamarine) >> {
+        - dbo *db.DBO
+
+        + Search(f SearchFilters) ([]ItemResult, error)
+        + FindAll() ([]*models.Item, error)
+        + FindByID(id int) (*models.Item, error)
+        + Create(i *models.Item) (int, error)
+        + Update(i *models.Item) error
+        + Delete(id int) error
+        + CreateBook(title string, deposit float64, isbn string, authorId int, locationId int) (int, error)
+        + CreateJournal(title string, deposit float64, issueNumber int, publicationDate string, locationId int) (int, error)
+
+    }
+    class "ItemResult" << (S,Aquamarine) >> {
         + Id int
-        + NumeroTravee int
-        + NumeroEtagere int
-        + Niveau int
-        + CategorieNom string
-
-    }
-    class "EmpruntEnRetardItem" << (S,Aquamarine) >> {
-        + Id int
-        + CodeBarre string
-        + Titre string
-        + DateFin string
-        + Nom string
-        + Prenom string
-        + NumeroTelephone string
-
-    }
-    class "EmpruntItem" << (S,Aquamarine) >> {
-        + Id int
-        + CodeBarre string
-        + Titre string
-        + DateDebut string
-        + DateFin string
-        + EnRetard bool
-
-    }
-    class "EmpruntRepository" << (S,Aquamarine) >> {
-        - dbo *db.DBO
-
-        + Verifier(utilisateurId int, codeBarre string) (*PreviewEmprunt, error)
-        + GetEmprunts(utilisateurId int) ([]*EmpruntItem, error)
-        + GetEmpruntsEnRetard() ([]*EmpruntEnRetardItem, error)
-        + Emprunter(utilisateurId int, codeBarre string) error
-
-    }
-    class "EnseignantRepository" << (S,Aquamarine) >> {
-        - dbo *db.DBO
-
-        + FindAll() ([]*models.Enseignant, error)
-        + FindByID(id int) (*models.Enseignant, error)
-        + FindByDepartement(departementID int) ([]*models.Enseignant, error)
-        + Create(en *models.Enseignant) (int, error)
-        + Update(en *models.Enseignant) error
-        + Delete(id int) error
-
-    }
-    class "EtudiantRepository" << (S,Aquamarine) >> {
-        - dbo *db.DBO
-
-        + FindAll() ([]*models.Etudiant, error)
-        + FindByID(id int) (*models.Etudiant, error)
-        + Create(et *models.Etudiant) (int, error)
-        + Update(et *models.Etudiant) error
-        + Delete(id int) error
-
-    }
-    class "ExemplaireRepository" << (S,Aquamarine) >> {
-        - dbo *db.DBO
-
-        + FindAll() ([]*models.Exemplaire, error)
-        + FindByID(id int) (*models.Exemplaire, error)
-        + FindByCodeBarre(codeBarre string) (*models.Exemplaire, error)
-        + FindDisponibles() ([]*models.Exemplaire, error)
-        + FindAllByOuvrageId(ouvrageId int) ([]*models.Exemplaire, error)
-        + CreateForOuvrage(ouvrageId int, codeBarre string, delai int) (int, error)
-        + FindDisponiblesByOuvrageId(ouvrageId int) ([]*models.Exemplaire, error)
-        + Create(e *models.Exemplaire) (int, error)
-        + Update(e *models.Exemplaire) error
-        + Emprunter(exemplaireID int, emprunteurID int, delaiJours int) error
-        + Retourner(exemplaireID int) error
-        + Delete(id int) error
-
-    }
-    class "FiltresRecherche" << (S,Aquamarine) >> {
-        + Titre string
-        + Auteur string
-        + Isbn string
-        + CodeBarre string
-        + CodeRevue string
-        + Disponible bool
-
-    }
-    class "LivreRepository" << (S,Aquamarine) >> {
-        - dbo *db.DBO
-
-        + FindAll() ([]*models.Livre, error)
-        + FindByID(id int) (*models.Livre, error)
-        + FindByIsbn(isbn string) (*models.Livre, error)
-        + FindByAuteur(auteurID int) ([]*models.Livre, error)
-        + Create(l *models.Livre) (int, error)
-        + Update(l *models.Livre) error
-        + Delete(id int) error
-
-    }
-    class "OuvrageRepository" << (S,Aquamarine) >> {
-        - dbo *db.DBO
-
-        + Rechercher(f FiltresRecherche) ([]OuvrageResultat, error)
-        + FindAll() ([]*models.Ouvrage, error)
-        + FindByID(id int) (*models.Ouvrage, error)
-        + Create(o *models.Ouvrage) (int, error)
-        + Update(o *models.Ouvrage) error
-        + Delete(id int) error
-        + CreateLivre(titre string, caution float64, isbn string, auteurId int, emplacementId int) (int, error)
-        + CreateRevue(titre string, caution float64, numero int, dateParution string, emplacementId int) (int, error)
-
-    }
-    class "OuvrageResultat" << (S,Aquamarine) >> {
-        + Id int
-        + Titre string
-        + Caution float64
+        + Title string
+        + Deposit float64
         + Type string
         + Isbn string
-        + Auteur string
-        + Numero *int
-        + DateParution string
-        + ExemplairesDisponibles int
-        + Emplacement string
+        + Author string
+        + IssueNumber *int
+        + PublicationDate string
+        + AvailableCopies int
+        + Location *ItemLocation
 
     }
-    class "PreviewEmprunt" << (S,Aquamarine) >> {
-        + Titre string
-        + CodeBarre string
-        + Caution float64
-        + SoldeActuel float64
-        + NouveauSolde float64
-
-    }
-    class "RevueRepository" << (S,Aquamarine) >> {
+    class "JournalRepository" << (S,Aquamarine) >> {
         - dbo *db.DBO
 
-        + FindAll() ([]*models.Revue, error)
-        + FindByID(id int) (*models.Revue, error)
-        + FindByTitre(titre string) ([]*models.Revue, error)
-        + Create(rv *models.Revue) (int, error)
-        + Update(rv *models.Revue) error
+        + FindAll() ([]*models.Journal, error)
+        + FindByID(id int) (*models.Journal, error)
+        + FindByTitle(title string) ([]*models.Journal, error)
+        + Create(j *models.Journal) (int, error)
+        + Update(j *models.Journal) error
         + Delete(id int) error
 
     }
-    class "UtilisateurRepository" << (S,Aquamarine) >> {
+    class "LibrarianRepository" << (S,Aquamarine) >> {
         - dbo *db.DBO
 
-        + FindAll() ([]*models.Utilisateur, error)
-        + FindByID(id int) (*models.Utilisateur, error)
-        + FindByLogin(login string) (*models.Utilisateur, error)
-        + Create(u *models.Utilisateur) (int, error)
-        + Update(u *models.Utilisateur) error
+        + FindAll() ([]*models.Librarian, error)
+        + FindByID(id int) (*models.Librarian, error)
+        + FindByLogin(login string) (*models.Librarian, error)
+        + Create(l *models.Librarian) (int, error)
+        + Update(l *models.Librarian) error
         + Delete(id int) error
-        + FindEmpruntsActifs(utilisateurID int) ([]*models.Exemplaire, error)
-        + RechercherUtilisateurs(nom string, prenom string, codePostal string, numeroTelephone string) ([]*UtilisateurResume, error)
-        + GetCaution(id int) (*CautionInfo, error)
-        + UpdateCautionTotale(id int, nouvelleCautionTotale float64) error
+
+    }
+    class "LoanPreview" << (S,Aquamarine) >> {
+        + Title string
+        + Barcode string
+        + Deposit float64
+        + CurrentBalance float64
+        + NewBalance float64
+
+    }
+    class "LoanRepository" << (S,Aquamarine) >> {
+        - dbo *db.DBO
+
+        + Check(userId int, barcode string) (*LoanPreview, error)
+        + GetLoans(userId int) ([]*LoanSummary, error)
+        + GetOverdueLoans() ([]*OverdueLoan, error)
+        + Borrow(userId int, barcode string) error
+        + ReturnCopy(copyId int) error
+
+    }
+    class "LoanSummary" << (S,Aquamarine) >> {
+        + Id int
+        + Barcode string
+        + Title string
+        + StartDate string
+        + DueDate string
+        + Overdue bool
+
+    }
+    class "LocationRepository" << (S,Aquamarine) >> {
+        - dbo *db.DBO
+
+        + FindAll() ([]*LocationSummary, error)
+
+    }
+    class "LocationSummary" << (S,Aquamarine) >> {
+        + Id int
+        + BayNumber int
+        + ShelfNumber int
+        + Level int
+        + CategoryName string
+
+    }
+    class "OverdueLoan" << (S,Aquamarine) >> {
+        + Id int
+        + Barcode string
+        + Title string
+        + DueDate string
+        + LastName string
+        + FirstName string
+        + PhoneNumber string
+
+    }
+    class "SearchFilters" << (S,Aquamarine) >> {
+        + Title string
+        + Author string
+        + Isbn string
+        + Barcode string
+        + IssueNumber string
+        + Available bool
+
+    }
+    class "StudentRepository" << (S,Aquamarine) >> {
+        - dbo *db.DBO
+
+        + FindAll() ([]*models.Student, error)
+        + FindByID(id int) (*models.Student, error)
+        + Create(s *models.Student) (int, error)
+        + Update(s *models.Student) error
+        + Delete(id int) error
+
+    }
+    class "TeacherRepository" << (S,Aquamarine) >> {
+        - dbo *db.DBO
+
+        + FindAll() ([]*models.Teacher, error)
+        + FindByID(id int) (*models.Teacher, error)
+        + FindByDepartment(departmentID int) ([]*models.Teacher, error)
+        + Create(t *models.Teacher) (int, error)
+        + Update(t *models.Teacher) error
+        + Delete(id int) error
+
+    }
+    class "UserRepository" << (S,Aquamarine) >> {
+        - dbo *db.DBO
+
+        + FindAll() ([]*models.User, error)
+        + FindByID(id int) (*models.User, error)
+        + FindByLogin(login string) (*models.User, error)
+        + Create(u *models.User) (int, error)
+        + Update(u *models.User) error
+        + Delete(id int) error
+        + FindActiveLoans(userID int) ([]*models.Copy, error)
+        + SearchUsers(lastName string, firstName string, postalCode string, phoneNumber string) ([]*UserSummary, error)
+        + GetDeposit(id int) (*DepositInfo, error)
+        + UpdateTotalDeposit(id int, newTotalDeposit float64) error
         + LoginExists(login string) (bool, error)
 
     }
-    class "UtilisateurResume" << (S,Aquamarine) >> {
+    class "UserSummary" << (S,Aquamarine) >> {
         + Id int
-        + Nom string
-        + Prenom string
-        + NumeroTelephone string
+        + LastName string
+        + FirstName string
+        + PhoneNumber string
         + Role string
 
     }
@@ -507,7 +558,7 @@ namespace uml {
         + Separator(label string) *SequenceDiagram
         + Blank() *SequenceDiagram
         + String() string
-        + WriteTo(w io.Writer) error
+        + WriteTo(w io.Writer) (int64, error)
         + WriteFile(path string) error
 
     }
@@ -528,21 +579,22 @@ namespace uml {
         + Extend(from string, to string) *UseCaseDiagram
         + Blank() *UseCaseDiagram
         + String() string
-        + WriteTo(w io.Writer) error
+        + WriteTo(w io.Writer) (int64, error)
         + WriteFile(path string) error
 
     }
 }
-"builder.UtilisateurBuilder" *-- "builder.EnseignantBuilder"
-"builder.UtilisateurBuilder" *-- "builder.EtudiantBuilder"
-"models.Utilisateur" *-- "models.Enseignant"
-"models.Utilisateur" *-- "models.Etudiant"
-"models.Ouvrage" *-- "models.Livre"
-"models.Ouvrage" *-- "models.Revue"
+"__builtin__.string" #.. "i18n.Lang"
+"builder.UserBuilder" *-- "builder.StudentBuilder"
+"builder.UserBuilder" *-- "builder.TeacherBuilder"
+"models.Item" *-- "models.Book"
+"models.Item" *-- "models.Journal"
+"models.User" *-- "models.Student"
+"models.User" *-- "models.Teacher"
 
-"fabrique.FabriqueOuvrage" <|-- "fabrique.FabriqueLivre"
-"fabrique.FabriqueOuvrage" <|-- "fabrique.FabriqueRevue"
-"models.IOuvrage" <|-- "models.Ouvrage"
+"factory.ItemFactory" <|-- "factory.BookFactory"
+"factory.ItemFactory" <|-- "factory.JournalFactory"
+"models.IItem" <|-- "models.Item"
 "uml.Diagram" <|-- "uml.SequenceDiagram"
 "uml.Diagram" <|-- "uml.UseCaseDiagram"
 

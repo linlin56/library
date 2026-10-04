@@ -8,26 +8,26 @@ import (
 )
 
 /**
- * Notes : pour gérer la connexion à la base de données, j'ai décidé d'utiliser un BDO
- * Il y a un ORM pour Go qui s'appelle GORM, mais il ne gère pas l'héritage PostgreSQL
- * J'ai commencé par faire la BDD et je trouve l'héritage très utile
- * donc j'ai préféré utiliser un DBO et des repositories
+ * Notes: to manage the database connection, I chose to use a DBO.
+ * There is an ORM for Go called GORM, but it does not support PostgreSQL inheritance.
+ * I started by designing the database and I find inheritance very useful,
+ * so I preferred to use a DBO and repositories.
  */
 
-// DBO global accessible depuis tout le projet
-// C'est un singleton
+// Global DBO, available from the whole project
+// It is a singleton
 var GlobalDBO *DBO
 
-// Init charge le fichier db.env et initialise le DBO global
+// Init loads the db.env file and initializes the global DBO
 func Init() {
-	// godotenv permet de charger un .env
+	// godotenv loads a .env file
 	if err := godotenv.Load("db/db.env"); err != nil {
-		log.Println(" Fichier db/db.env non trouvé, utilisation des variables d'environnement système")
+		log.Println("db/db.env file not found, using system environment variables")
 	}
 
 	port, err := strconv.Atoi(getEnv("DB_PORT", "5432"))
 	if err != nil {
-		log.Fatalf("DB_PORT invalide: %v", err)
+		log.Fatalf("Invalid DB_PORT: %v", err)
 	}
 
 	cfg := Config{
@@ -35,18 +35,18 @@ func Init() {
 		Port:     port,
 		User:     getEnv("DB_USER", "postgres"),
 		Password: getEnv("DB_PASSWORD", ""),
-		DBName:   getEnv("DB_NAME", "bibliotheque"),
+		DBName:   getEnv("DB_NAME", "library"),
 		SSLMode:  getEnv("DB_SSLMODE", "disable"),
 	}
 
 	dbo, err := NewDBO(cfg)
 	if err != nil {
-		log.Fatalf("Impossible de se connecter à la base de données: %v", err)
+		log.Fatalf("Unable to connect to the database: %v", err)
 	}
 
 	GlobalDBO = dbo
 
 	if err := GlobalDBO.SeedIfEmpty("db/scripts/insert.sql"); err != nil {
-		log.Fatalf("Erreur peuplement base de données: %v", err)
+		log.Fatalf("Error while seeding the database: %v", err)
 	}
 }

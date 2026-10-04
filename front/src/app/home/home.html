@@ -1,0 +1,52 @@
+<section class="hero-section text-white py-5 mb-5">
+  <div class="container text-center">
+    <h1 class="display-4 fw-bold">{{ 'home.title' | t }}</h1>
+    <p class="lead mt-2">{{ 'home.subtitle' | t }}</p>
+    <a routerLink="/search" class="btn btn-light btn-lg mt-3 fw-semibold">
+      {{ 'home.searchCta' | t }}
+    </a>
+  </div>
+</section>
+
+<section class="container mb-5">
+  <div *ngIf="error" class="alert alert-warning text-center">
+    {{ 'home.statsError' | t }}
+  </div>
+
+  <div class="row g-4" *ngIf="stats">
+    <div class="col-sm-6 col-lg-3">
+      <div class="card stat-card h-100 border-0 shadow-sm text-center p-4">
+        <h2 class="fw-bold display-6 text-primary">{{ stats.book_count }}</h2>
+        <p class="text-muted mb-0">{{ 'home.books' | t }}</p>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="card stat-card h-100 border-0 shadow-sm text-center p-4">
+        <h2 class="fw-bold display-6 text-success">{{ stats.journal_count }}</h2>
+        <p class="text-muted mb-0">{{ 'home.journals' | t }}</p>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="card stat-card h-100 border-0 shadow-sm text-center p-4">
+        <h2 class="fw-bold display-6 text-warning">{{ stats.available_copy_count }}</h2>
+        <p class="text-muted mb-0">{{ 'home.availableCopies' | t }}</p>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="card stat-card h-100 border-0 shadow-sm text-center p-4">
+        <h2 class="fw-bold display-6 text-danger">{{ stats.user_count }}</h2>
+        <p class="text-muted mb-0">{{ 'home.registeredUsers' | t }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="container mb-5 text-center" *ngIf="!isLoggedIn">
+  <div class="card border-0 shadow-sm p-5 cta-card">
+    <h2 class="fw-bold mb-2">{{ 'home.ctaTitle' | t }}</h2>
+    <p class="text-muted mb-4">
+      {{ 'home.ctaText' | t }}
+    </p>
+    <a routerLink="/login" class="btn btn-primary btn-lg">{{ 'nav.login' | t }}</a>
+  </div>
+</section>

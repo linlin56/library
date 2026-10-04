@@ -1,313 +1,313 @@
 package test
 
 import (
-	"bibliotheque/models"
+	"library/models"
 	"testing"
 	"time"
 )
 
-// Ces tests vérifient que les constructeurs ont le comportement attendu
-// ===================== Auteur =====================
+// These tests check that the constructors behave as expected
+// ===================== Author =====================
 
-func TestNewAuteur_ChampsInitialises(t *testing.T) {
-	a := models.NewAuteur(1, "Hugo", "Victor")
+func TestNewAuthor_FieldsInitialized(t *testing.T) {
+	a := models.NewAuthor(1, "Hugo", "Victor")
 	if a.Id != 1 {
-		t.Errorf("Id: attendu 1, obtenu %d", a.Id)
+		t.Errorf("Id: expected 1, got %d", a.Id)
 	}
-	if a.Nom != "Hugo" {
-		t.Errorf("Nom: attendu Hugo, obtenu %s", a.Nom)
+	if a.LastName != "Hugo" {
+		t.Errorf("LastName: expected Hugo, got %s", a.LastName)
 	}
-	if a.Prenom != "Victor" {
-		t.Errorf("Prenom: attendu Victor, obtenu %s", a.Prenom)
-	}
-}
-
-func TestNewAuteur_NomVide(t *testing.T) {
-	a := models.NewAuteur(0, "", "")
-	if a.Nom != "" {
-		t.Errorf("Nom vide attendu, obtenu %s", a.Nom)
+	if a.FirstName != "Victor" {
+		t.Errorf("FirstName: expected Victor, got %s", a.FirstName)
 	}
 }
 
-// ===================== Ouvrage =====================
-
-func TestNewOuvrage_ChampsInitialises(t *testing.T) {
-	o := models.NewOuvrage(10, 3.50, "Les Miserables", 5)
-	if o.Id != 10 {
-		t.Errorf("Id: attendu 10, obtenu %d", o.Id)
-	}
-	if o.Caution != 3.50 {
-		t.Errorf("Caution: attendu 3.50, obtenu %.2f", o.Caution)
-	}
-	if o.Titre != "Les Miserables" {
-		t.Errorf("Titre incorrect: %s", o.Titre)
-	}
-	if o.Exemplaires != 5 {
-		t.Errorf("Exemplaires: attendu 5, obtenu %d", o.Exemplaires)
+func TestNewAuthor_EmptyName(t *testing.T) {
+	a := models.NewAuthor(0, "", "")
+	if a.LastName != "" {
+		t.Errorf("Empty LastName expected, got %s", a.LastName)
 	}
 }
 
-func TestOuvrage_GetId(t *testing.T) {
-	o := models.NewOuvrage(42, 0, "", 0)
-	if o.GetId() != 42 {
-		t.Errorf("GetId: attendu 42, obtenu %d", o.GetId())
+// ===================== Item =====================
+
+func TestNewItem_FieldsInitialized(t *testing.T) {
+	i := models.NewItem(10, 3.50, "Les Miserables", 5)
+	if i.Id != 10 {
+		t.Errorf("Id: expected 10, got %d", i.Id)
+	}
+	if i.Deposit != 3.50 {
+		t.Errorf("Deposit: expected 3.50, got %.2f", i.Deposit)
+	}
+	if i.Title != "Les Miserables" {
+		t.Errorf("Wrong title: %s", i.Title)
+	}
+	if i.Copies != 5 {
+		t.Errorf("Copies: expected 5, got %d", i.Copies)
 	}
 }
 
-func TestOuvrage_GetTitre(t *testing.T) {
-	o := models.NewOuvrage(0, 0, "Titre Test", 0)
-	if o.GetTitre() != "Titre Test" {
-		t.Errorf("GetTitre: attendu Titre Test, obtenu %s", o.GetTitre())
+func TestItem_GetId(t *testing.T) {
+	i := models.NewItem(42, 0, "", 0)
+	if i.GetId() != 42 {
+		t.Errorf("GetId: expected 42, got %d", i.GetId())
 	}
 }
 
-func TestOuvrage_GetCaution(t *testing.T) {
-	o := models.NewOuvrage(0, 7.25, "", 0)
-	if o.GetCaution() != 7.25 {
-		t.Errorf("GetCaution: attendu 7.25, obtenu %.2f", o.GetCaution())
+func TestItem_GetTitle(t *testing.T) {
+	i := models.NewItem(0, 0, "Test Title", 0)
+	if i.GetTitle() != "Test Title" {
+		t.Errorf("GetTitle: expected Test Title, got %s", i.GetTitle())
 	}
 }
 
-func TestOuvrage_SatisfaitInterfaceIOuvrage(t *testing.T) {
-	o := models.NewOuvrage(1, 2.0, "Test", 1)
-	var _ models.IOuvrage = o
-}
-
-// ===================== Livre =====================
-
-func TestNewLivre_ChampsInitialises(t *testing.T) {
-	auteur := *models.NewAuteur(1, "Tolkien", "J.R.R.")
-	l := models.NewLivre(3, 4.0, "Le Seigneur des Anneaux", 2, auteur, "978-0618260584")
-	if l.Id != 3 {
-		t.Errorf("Id: attendu 3, obtenu %d", l.Id)
-	}
-	if l.Caution != 4.0 {
-		t.Errorf("Caution: attendu 4.0, obtenu %.2f", l.Caution)
-	}
-	if l.Titre != "Le Seigneur des Anneaux" {
-		t.Errorf("Titre incorrect: %s", l.Titre)
-	}
-	if l.Exemplaires != 2 {
-		t.Errorf("Exemplaires: attendu 2, obtenu %d", l.Exemplaires)
-	}
-	if l.Isbn != "978-0618260584" {
-		t.Errorf("Isbn incorrect: %s", l.Isbn)
+func TestItem_GetDeposit(t *testing.T) {
+	i := models.NewItem(0, 7.25, "", 0)
+	if i.GetDeposit() != 7.25 {
+		t.Errorf("GetDeposit: expected 7.25, got %.2f", i.GetDeposit())
 	}
 }
 
-func TestNewLivre_AuteurNonNil(t *testing.T) {
-	auteur := *models.NewAuteur(5, "Zola", "Emile")
-	l := models.NewLivre(1, 2.0, "Germinal", 3, auteur, "978-2070413430")
-	if l.Auteur == nil {
-		t.Fatal("Auteur ne doit pas etre nil")
+func TestItem_SatisfiesIItem(t *testing.T) {
+	i := models.NewItem(1, 2.0, "Test", 1)
+	var _ models.IItem = i
+}
+
+// ===================== Book =====================
+
+func TestNewBook_FieldsInitialized(t *testing.T) {
+	author := *models.NewAuthor(1, "Tolkien", "J.R.R.")
+	b := models.NewBook(3, 4.0, "The Lord of the Rings", 2, author, "978-0618260584")
+	if b.Id != 3 {
+		t.Errorf("Id: expected 3, got %d", b.Id)
 	}
-	if l.Auteur.Nom != "Zola" {
-		t.Errorf("Auteur.Nom: attendu Zola, obtenu %s", l.Auteur.Nom)
+	if b.Deposit != 4.0 {
+		t.Errorf("Deposit: expected 4.0, got %.2f", b.Deposit)
+	}
+	if b.Title != "The Lord of the Rings" {
+		t.Errorf("Wrong title: %s", b.Title)
+	}
+	if b.Copies != 2 {
+		t.Errorf("Copies: expected 2, got %d", b.Copies)
+	}
+	if b.Isbn != "978-0618260584" {
+		t.Errorf("Wrong Isbn: %s", b.Isbn)
 	}
 }
 
-func TestLivre_SatisfaitInterfaceIOuvrage(t *testing.T) {
-	auteur := *models.NewAuteur(1, "Hugo", "Victor")
-	l := models.NewLivre(1, 2.0, "Notre-Dame de Paris", 1, auteur, "978-0140443530")
-	var _ models.IOuvrage = l
-}
-
-func TestLivre_GetTitrePropageDepuisOuvrage(t *testing.T) {
-	auteur := *models.NewAuteur(1, "Camus", "Albert")
-	l := models.NewLivre(1, 1.0, "L Etranger", 1, auteur, "978-2070360024")
-	if l.GetTitre() != "L Etranger" {
-		t.Errorf("GetTitre incorrect: %s", l.GetTitre())
+func TestNewBook_AuthorNotNil(t *testing.T) {
+	author := *models.NewAuthor(5, "Zola", "Emile")
+	b := models.NewBook(1, 2.0, "Germinal", 3, author, "978-2070413430")
+	if b.Author == nil {
+		t.Fatal("Author must not be nil")
+	}
+	if b.Author.LastName != "Zola" {
+		t.Errorf("Author.LastName: expected Zola, got %s", b.Author.LastName)
 	}
 }
 
-// ===================== Revue =====================
+func TestBook_SatisfiesIItem(t *testing.T) {
+	author := *models.NewAuthor(1, "Hugo", "Victor")
+	b := models.NewBook(1, 2.0, "Notre-Dame de Paris", 1, author, "978-0140443530")
+	var _ models.IItem = b
+}
 
-func TestNewRevue_ChampsInitialises(t *testing.T) {
+func TestBook_GetTitleInheritedFromItem(t *testing.T) {
+	author := *models.NewAuthor(1, "Camus", "Albert")
+	b := models.NewBook(1, 1.0, "L Etranger", 1, author, "978-2070360024")
+	if b.GetTitle() != "L Etranger" {
+		t.Errorf("Wrong GetTitle: %s", b.GetTitle())
+	}
+}
+
+// ===================== Journal =====================
+
+func TestNewJournal_FieldsInitialized(t *testing.T) {
 	date, _ := time.Parse("2006-01-02", "2024-03-01")
-	r := models.NewRevue(7, 1.50, "Science et Vie", 3, 42, date)
-	if r.Id != 7 {
-		t.Errorf("Id: attendu 7, obtenu %d", r.Id)
+	j := models.NewJournal(7, 1.50, "Science et Vie", 3, 42, date)
+	if j.Id != 7 {
+		t.Errorf("Id: expected 7, got %d", j.Id)
 	}
-	if r.Caution != 1.50 {
-		t.Errorf("Caution: attendu 1.50, obtenu %.2f", r.Caution)
+	if j.Deposit != 1.50 {
+		t.Errorf("Deposit: expected 1.50, got %.2f", j.Deposit)
 	}
-	if r.Titre != "Science et Vie" {
-		t.Errorf("Titre incorrect: %s", r.Titre)
+	if j.Title != "Science et Vie" {
+		t.Errorf("Wrong title: %s", j.Title)
 	}
-	if r.Numero != 42 {
-		t.Errorf("Numero: attendu 42, obtenu %d", r.Numero)
+	if j.IssueNumber != 42 {
+		t.Errorf("IssueNumber: expected 42, got %d", j.IssueNumber)
 	}
-	if !r.DateParution.Equal(date) {
-		t.Errorf("DateParution incorrecte: attendu %v, obtenu %v", date, r.DateParution)
-	}
-}
-
-func TestRevue_SatisfaitInterfaceIOuvrage(t *testing.T) {
-	r := models.NewRevue(1, 1.0, "Revue Test", 0, 1, time.Now())
-	var _ models.IOuvrage = r
-}
-
-func TestRevue_GetCautionCorrecte(t *testing.T) {
-	r := models.NewRevue(1, 2.75, "Test", 0, 1, time.Now())
-	if r.GetCaution() != 2.75 {
-		t.Errorf("GetCaution: attendu 2.75, obtenu %.2f", r.GetCaution())
+	if !j.PublicationDate.Equal(date) {
+		t.Errorf("Wrong PublicationDate: expected %v, got %v", date, j.PublicationDate)
 	}
 }
 
-// ===================== Utilisateur =====================
+func TestJournal_SatisfiesIItem(t *testing.T) {
+	j := models.NewJournal(1, 1.0, "Test Journal", 0, 1, time.Now())
+	var _ models.IItem = j
+}
 
-func TestNewUtilisateur_ChampsInitialises(t *testing.T) {
-	ddn, _ := time.Parse("2006-01-02", "1990-04-15")
-	u := models.NewUtilisateur(1, "Martin", "Jean", "0612345678", 20.0, "jmartin", "mdp", ddn, "jean@exemple.fr")
+func TestJournal_GetDeposit(t *testing.T) {
+	j := models.NewJournal(1, 2.75, "Test", 0, 1, time.Now())
+	if j.GetDeposit() != 2.75 {
+		t.Errorf("GetDeposit: expected 2.75, got %.2f", j.GetDeposit())
+	}
+}
+
+// ===================== User =====================
+
+func TestNewUser_FieldsInitialized(t *testing.T) {
+	birthDate, _ := time.Parse("2006-01-02", "1990-04-15")
+	u := models.NewUser(1, "Martin", "Jean", "0612345678", 20.0, "jmartin", "password", birthDate, "jean@example.com")
 	if u.Id != 1 {
-		t.Errorf("Id: attendu 1, obtenu %d", u.Id)
+		t.Errorf("Id: expected 1, got %d", u.Id)
 	}
-	if u.Nom != "Martin" {
-		t.Errorf("Nom: attendu Martin, obtenu %s", u.Nom)
+	if u.LastName != "Martin" {
+		t.Errorf("LastName: expected Martin, got %s", u.LastName)
 	}
-	if u.SoldeCaution != 20.0 {
-		t.Errorf("SoldeCaution: attendu 20.0, obtenu %.2f", u.SoldeCaution)
+	if u.DepositBalance != 20.0 {
+		t.Errorf("DepositBalance: expected 20.0, got %.2f", u.DepositBalance)
 	}
 	if u.Login != "jmartin" {
-		t.Errorf("Login: attendu jmartin, obtenu %s", u.Login)
+		t.Errorf("Login: expected jmartin, got %s", u.Login)
 	}
-	if u.Email != "jean@exemple.fr" {
-		t.Errorf("Email incorrect: %s", u.Email)
-	}
-}
-
-func TestNewUtilisateur_AdresseIdNilParDefaut(t *testing.T) {
-	u := models.NewUtilisateur(0, "", "", "", 0, "", "", time.Time{}, "")
-	if u.AdresseId != nil {
-		t.Error("AdresseId doit etre nil par defaut")
+	if u.Email != "jean@example.com" {
+		t.Errorf("Wrong Email: %s", u.Email)
 	}
 }
 
-// ===================== Etudiant =====================
-
-func TestNewEtudiant_ChampsInitialises(t *testing.T) {
-	e := models.NewEtudiant("Dupont", "Marie", "mdupont", "mdp", "L3")
-	if e.Nom != "Dupont" {
-		t.Errorf("Nom: attendu Dupont, obtenu %s", e.Nom)
-	}
-	if e.Prenom != "Marie" {
-		t.Errorf("Prenom: attendu Marie, obtenu %s", e.Prenom)
-	}
-	if e.Login != "mdupont" {
-		t.Errorf("Login: attendu mdupont, obtenu %s", e.Login)
-	}
-	if e.AnneeEtude != "L3" {
-		t.Errorf("AnneeEtude: attendu L3, obtenu %s", e.AnneeEtude)
+func TestNewUser_AddressIdNilByDefault(t *testing.T) {
+	u := models.NewUser(0, "", "", "", 0, "", "", time.Time{}, "")
+	if u.AddressId != nil {
+		t.Error("AddressId must be nil by default")
 	}
 }
 
-func TestEtudiant_HeritageUtilisateur(t *testing.T) {
-	e := models.NewEtudiant("Test", "User", "tuser", "mdp", "M1")
-	e.SoldeCaution = 15.0
-	if e.SoldeCaution != 15.0 {
-		t.Errorf("SoldeCaution herite: attendu 15.0, obtenu %.2f", e.SoldeCaution)
+// ===================== Student =====================
+
+func TestNewStudent_FieldsInitialized(t *testing.T) {
+	s := models.NewStudent("Dupont", "Marie", "mdupont", "password", "L3")
+	if s.LastName != "Dupont" {
+		t.Errorf("LastName: expected Dupont, got %s", s.LastName)
+	}
+	if s.FirstName != "Marie" {
+		t.Errorf("FirstName: expected Marie, got %s", s.FirstName)
+	}
+	if s.Login != "mdupont" {
+		t.Errorf("Login: expected mdupont, got %s", s.Login)
+	}
+	if s.StudyYear != "L3" {
+		t.Errorf("StudyYear: expected L3, got %s", s.StudyYear)
 	}
 }
 
-// ===================== Enseignant =====================
-
-func TestNewEnseignant_ChampsInitialises(t *testing.T) {
-	dept := models.NewDepartementEcole(1, "Informatique")
-	ens := models.NewEnseignant("Roche", "Pierre", "proche", "mdp", dept)
-	if ens.Nom != "Roche" {
-		t.Errorf("Nom: attendu Roche, obtenu %s", ens.Nom)
-	}
-	if ens.Prenom != "Pierre" {
-		t.Errorf("Prenom: attendu Pierre, obtenu %s", ens.Prenom)
-	}
-	if ens.Login != "proche" {
-		t.Errorf("Login: attendu proche, obtenu %s", ens.Login)
+func TestStudent_InheritsUser(t *testing.T) {
+	s := models.NewStudent("Test", "User", "tuser", "password", "M1")
+	s.DepositBalance = 15.0
+	if s.DepositBalance != 15.0 {
+		t.Errorf("Inherited DepositBalance: expected 15.0, got %.2f", s.DepositBalance)
 	}
 }
 
-func TestNewEnseignant_DepartementNonNil(t *testing.T) {
-	dept := models.NewDepartementEcole(2, "Physique")
-	ens := models.NewEnseignant("Bernard", "Claire", "cbernard", "mdp", dept)
-	if ens.Departement == nil {
-		t.Fatal("Departement ne doit pas etre nil")
+// ===================== Teacher =====================
+
+func TestNewTeacher_FieldsInitialized(t *testing.T) {
+	dept := models.NewDepartment(1, "Informatique")
+	teacher := models.NewTeacher("Roche", "Pierre", "proche", "password", dept)
+	if teacher.LastName != "Roche" {
+		t.Errorf("LastName: expected Roche, got %s", teacher.LastName)
 	}
-	if ens.Departement.Id != 2 {
-		t.Errorf("Departement.Id: attendu 2, obtenu %d", ens.Departement.Id)
+	if teacher.FirstName != "Pierre" {
+		t.Errorf("FirstName: expected Pierre, got %s", teacher.FirstName)
 	}
-	if ens.Departement.Nom != "Physique" {
-		t.Errorf("Departement.Nom: attendu Physique, obtenu %s", ens.Departement.Nom)
+	if teacher.Login != "proche" {
+		t.Errorf("Login: expected proche, got %s", teacher.Login)
 	}
 }
 
-func TestNewEnseignant_SansDepartement(t *testing.T) {
-	ens := models.NewEnseignant("Test", "User", "tuser", "mdp", nil)
-	if ens.Departement != nil {
-		t.Error("Departement doit etre nil si nil passe en parametre")
+func TestNewTeacher_DepartmentNotNil(t *testing.T) {
+	dept := models.NewDepartment(2, "Physique")
+	teacher := models.NewTeacher("Bernard", "Claire", "cbernard", "password", dept)
+	if teacher.Department == nil {
+		t.Fatal("Department must not be nil")
+	}
+	if teacher.Department.Id != 2 {
+		t.Errorf("Department.Id: expected 2, got %d", teacher.Department.Id)
+	}
+	if teacher.Department.Name != "Physique" {
+		t.Errorf("Department.Name: expected Physique, got %s", teacher.Department.Name)
 	}
 }
 
-// ===================== Bibliothecaire =====================
-
-func TestNewBibliothecaire_ChampsInitialises(t *testing.T) {
-	b := models.NewBibliothecaire(1, "Petit", "Valerie", "vpetit", "mdp")
-	if b.Id != 1 {
-		t.Errorf("Id: attendu 1, obtenu %d", b.Id)
-	}
-	if b.Nom != "Petit" {
-		t.Errorf("Nom: attendu Petit, obtenu %s", b.Nom)
-	}
-	if b.Login != "vpetit" {
-		t.Errorf("Login: attendu vpetit, obtenu %s", b.Login)
-	}
-	if b.MotDePasse != "mdp" {
-		t.Errorf("MotDePasse: attendu mdp, obtenu %s", b.MotDePasse)
+func TestNewTeacher_WithoutDepartment(t *testing.T) {
+	teacher := models.NewTeacher("Test", "User", "tuser", "password", nil)
+	if teacher.Department != nil {
+		t.Error("Department must be nil when nil is passed")
 	}
 }
 
-// ===================== DepartementEcole =====================
+// ===================== Librarian =====================
 
-func TestNewDepartementEcole_ChampsInitialises(t *testing.T) {
-	d := models.NewDepartementEcole(3, "Mathematiques")
+func TestNewLibrarian_FieldsInitialized(t *testing.T) {
+	l := models.NewLibrarian(1, "Petit", "Valerie", "vpetit", "password")
+	if l.Id != 1 {
+		t.Errorf("Id: expected 1, got %d", l.Id)
+	}
+	if l.LastName != "Petit" {
+		t.Errorf("LastName: expected Petit, got %s", l.LastName)
+	}
+	if l.Login != "vpetit" {
+		t.Errorf("Login: expected vpetit, got %s", l.Login)
+	}
+	if l.Password != "password" {
+		t.Errorf("Password: expected password, got %s", l.Password)
+	}
+}
+
+// ===================== Department =====================
+
+func TestNewDepartment_FieldsInitialized(t *testing.T) {
+	d := models.NewDepartment(3, "Mathematiques")
 	if d.Id != 3 {
-		t.Errorf("Id: attendu 3, obtenu %d", d.Id)
+		t.Errorf("Id: expected 3, got %d", d.Id)
 	}
-	if d.Nom != "Mathematiques" {
-		t.Errorf("Nom: attendu Mathematiques, obtenu %s", d.Nom)
+	if d.Name != "Mathematiques" {
+		t.Errorf("Name: expected Mathematiques, got %s", d.Name)
 	}
 }
 
-func TestNewDepartementEcole_IdZeroValide(t *testing.T) {
-	d := models.NewDepartementEcole(0, "Sans ID")
+func TestNewDepartment_ZeroIdIsValid(t *testing.T) {
+	d := models.NewDepartment(0, "No ID")
 	if d.Id != 0 {
-		t.Errorf("Id: attendu 0, obtenu %d", d.Id)
+		t.Errorf("Id: expected 0, got %d", d.Id)
 	}
 }
 
-// ===================== Exemplaire =====================
+// ===================== Copy =====================
 
-func TestNewExemplaire_ChampsInitialises(t *testing.T) {
-	ex := models.NewExemplaire("EX-0001", 15)
-	if ex.CodeBarre != "EX-0001" {
-		t.Errorf("CodeBarre: attendu EX-0001, obtenu %s", ex.CodeBarre)
+func TestNewCopy_FieldsInitialized(t *testing.T) {
+	c := models.NewCopy("EX-0001", 15)
+	if c.Barcode != "EX-0001" {
+		t.Errorf("Barcode: expected EX-0001, got %s", c.Barcode)
 	}
-	if ex.DelaiEmpruntJours != 15 {
-		t.Errorf("DelaiEmpruntJours: attendu 15, obtenu %d", ex.DelaiEmpruntJours)
+	if c.LoanPeriodDays != 15 {
+		t.Errorf("LoanPeriodDays: expected 15, got %d", c.LoanPeriodDays)
 	}
 }
 
-func TestNewExemplaire_NonEmprunterParDefaut(t *testing.T) {
-	ex := models.NewExemplaire("EX-0042", 7)
-	if ex.EstEmprunte {
-		t.Error("EstEmprunte doit etre false par defaut")
+func TestNewCopy_NotBorrowedByDefault(t *testing.T) {
+	c := models.NewCopy("EX-0042", 7)
+	if c.IsBorrowed {
+		t.Error("IsBorrowed must be false by default")
 	}
 }
 
-func TestNewExemplaire_DateVides(t *testing.T) {
-	ex := models.NewExemplaire("EX-0010", 15)
-	if !ex.DateDebutEmprunt.IsZero() {
-		t.Error("DateDebutEmprunt doit etre zero par defaut")
+func TestNewCopy_EmptyDates(t *testing.T) {
+	c := models.NewCopy("EX-0010", 15)
+	if !c.LoanStartDate.IsZero() {
+		t.Error("LoanStartDate must be zero by default")
 	}
-	if !ex.DateFinEmprunt.IsZero() {
-		t.Error("DateFinEmprunt doit etre zero par defaut")
+	if !c.LoanDueDate.IsZero() {
+		t.Error("LoanDueDate must be zero by default")
 	}
 }
