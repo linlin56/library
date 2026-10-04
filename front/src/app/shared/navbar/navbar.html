@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
   <div class="container">
-    <a class="navbar-brand fw-bold fs-5" routerLink="/">Bibliothèque</a>
+    <a class="navbar-brand fw-bold fs-5" routerLink="/">{{ 'nav.brand' | t }}</a>
     <button
       class="navbar-toggler"
       type="button"
@@ -8,7 +8,7 @@
       data-bs-target="#navMenu"
       aria-controls="navMenu"
       aria-expanded="false"
-      aria-label="Menu"
+      [attr.aria-label]="'nav.menu' | t"
     >
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -21,101 +21,121 @@
             routerLinkActive="active"
             [routerLinkActiveOptions]="{ exact: true }"
             data-bs-dismiss="collapse"
-            >Accueil</a
+            >{{ 'nav.home' | t }}</a
           >
         </li>
         <li class="nav-item">
           <a
             class="nav-link"
-            routerLink="/recherche"
+            routerLink="/search"
             routerLinkActive="active"
             data-bs-dismiss="collapse"
-            >Rechercher</a
+            >{{ 'nav.search' | t }}</a
           >
         </li>
 
-        <ng-container *ngIf="utilisateurConnecte$ | async as utilisateur; else nonConnecte">
-          <!-- Lien Emprunts visible pour tous les connectés -->
+        <ng-container *ngIf="loggedInUser$ | async as user; else loggedOut">
+          <!-- Loans link visible to every logged-in user -->
           <li class="nav-item">
             <a
               class="nav-link"
-              routerLink="/mes-emprunts"
+              routerLink="/my-loans"
               routerLinkActive="active"
               data-bs-dismiss="collapse"
-              >Emprunts</a
+              >{{ 'nav.loans' | t }}</a
             >
           </li>
-          <!-- Sous-menu Gestion pour la bibliothécaire -->
-          <li *ngIf="utilisateur.role === 'bibliothecaire'" class="nav-item dropdown">
+          <!-- Management sub-menu for librarians -->
+          <li *ngIf="user.role === 'librarian'" class="nav-item dropdown">
             <a
               class="nav-link dropdown-toggle"
               href="#"
               role="button"
               data-bs-toggle="dropdown"
               aria-expanded="false"
-              >Gestion</a
+              >{{ 'nav.management' | t }}</a
             >
             <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
               <li>
                 <a
                   class="dropdown-item"
-                  routerLink="/creer-utilisateur"
+                  routerLink="/create-user"
                   routerLinkActive="active"
                   data-bs-dismiss="collapse"
-                  >Créer un utilisateur</a
+                  >{{ 'nav.createUser' | t }}</a
                 >
               </li>
               <li>
                 <a
                   class="dropdown-item"
-                  routerLink="/creer-ouvrage"
+                  routerLink="/create-item"
                   routerLinkActive="active"
                   data-bs-dismiss="collapse"
-                  >Créer un ouvrage</a
+                  >{{ 'nav.createWork' | t }}</a
                 >
               </li>
               <li><hr class="dropdown-divider" /></li>
               <li>
                 <a
                   class="dropdown-item"
-                  routerLink="/emprunts-bibliothecaire"
+                  routerLink="/user-loans"
                   routerLinkActive="active"
                   data-bs-dismiss="collapse"
-                  >Recherche utilisateur</a
+                  >{{ 'nav.findUser' | t }}</a
                 >
               </li>
               <li>
                 <a
                   class="dropdown-item"
-                  routerLink="/emprunts-retard"
+                  routerLink="/overdue-loans"
                   routerLinkActive="active"
                   data-bs-dismiss="collapse"
-                  >Emprunts en retard</a
+                  >{{ 'nav.overdueLoans' | t }}</a
                 >
               </li>
             </ul>
           </li>
           <li class="nav-item d-flex align-items-center ms-2 text-white fw-semibold">
-            Bonjour {{ utilisateur.prenom }} {{ utilisateur.nom }}
-            <span class="ms-1">({{ formatRole(utilisateur.role) }})</span>
+            {{ 'nav.hello' | t: { name: user.first_name + ' ' + user.last_name } }}
+            <span class="ms-1">({{ formatRole(user.role) }})</span>
           </li>
           <li class="nav-item ms-2">
-            <button type="button" class="btn btn-outline-light btn-sm px-3" (click)="deconnecter()">
-              Se déconnecter
+            <button type="button" class="btn btn-outline-light btn-sm px-3" (click)="logout()">
+              {{ 'nav.logout' | t }}
             </button>
           </li>
         </ng-container>
 
-        <ng-template #nonConnecte>
+        <ng-template #loggedOut>
           <li class="nav-item ms-2">
             <a
               class="btn btn-outline-light btn-sm px-3"
-              routerLink="/connexion"
+              routerLink="/login"
               data-bs-dismiss="collapse"
-              >Se connecter</a
+              >{{ 'nav.login' | t }}</a
             >
           </li>
         </ng-template>
+
+        <!-- Language picker -->
+        <li class="nav-item ms-2 d-flex align-items-center">
+          <div class="btn-group btn-group-sm" role="group" [attr.aria-label]="'nav.language' | t">
+            @for (option of languages; track option.code) {
+              <button
+                type="button"
+                class="btn"
+                [class.btn-light]="language() === option.code"
+                [class.btn-outline-light]="language() !== option.code"
+                [attr.aria-pressed]="language() === option.code"
+                [attr.lang]="option.code"
+                [title]="option.name"
+                (click)="setLanguage(option.code)"
+              >
+                {{ option.code | uppercase }}
+              </button>
+            }
+          </div>
+        </li>
       </ul>
     </div>
   </div>

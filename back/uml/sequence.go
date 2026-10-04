@@ -1,5 +1,5 @@
-// Package uml fournit un builder fluide pour générer des diagrammes de
-// séquence au format PlantUML.
+// Package uml provides a fluent builder to generate PlantUML
+// sequence diagrams.
 package uml
 
 import (
@@ -9,13 +9,13 @@ import (
 	"strings"
 )
 
-// SequenceDiagram construit un diagramme de séquence PlantUML pas à pas.
+// SequenceDiagram builds a PlantUML sequence diagram step by step.
 type SequenceDiagram struct {
 	title string
 	lines []string
 }
 
-// NewSequenceDiagram crée un nouveau diagramme avec un titre optionnel.
+// NewSequenceDiagram creates a new diagram with an optional title.
 func NewSequenceDiagram(title string) *SequenceDiagram {
 	return &SequenceDiagram{title: title}
 }
@@ -25,72 +25,72 @@ func (s *SequenceDiagram) add(l string) *SequenceDiagram {
 	return s
 }
 
-// Participant déclare un participant avec un alias et un libellé affiché.
+// Participant declares a participant with an alias and a displayed label.
 func (s *SequenceDiagram) Participant(alias, label string) *SequenceDiagram {
 	return s.add(fmt.Sprintf(`participant "%s" as %s`, label, alias))
 }
 
-// Actor déclare un acteur (représentation humaine).
+// Actor declares an actor (human representation).
 func (s *SequenceDiagram) Actor(alias, label string) *SequenceDiagram {
 	return s.add(fmt.Sprintf(`actor "%s" as %s`, label, alias))
 }
 
-// Arrow ajoute une flèche pleine de from vers to avec un message.
+// Arrow adds a solid arrow from from to to with a message.
 func (s *SequenceDiagram) Arrow(from, to, msg string) *SequenceDiagram {
 	return s.add(fmt.Sprintf("%s -> %s : %s", from, to, msg))
 }
 
-// DashedArrow ajoute une flèche en pointillés (réponse / retour).
+// DashedArrow adds a dashed arrow (response / return).
 func (s *SequenceDiagram) DashedArrow(from, to, msg string) *SequenceDiagram {
 	return s.add(fmt.Sprintf("%s --> %s : %s", from, to, msg))
 }
 
-// Activate marque un participant comme actif (barre de vie).
+// Activate marks a participant as active (lifeline bar).
 func (s *SequenceDiagram) Activate(alias string) *SequenceDiagram {
 	return s.add("activate " + alias)
 }
 
-// Deactivate retire la barre de vie d'un participant.
+// Deactivate removes a participant's lifeline bar.
 func (s *SequenceDiagram) Deactivate(alias string) *SequenceDiagram {
 	return s.add("deactivate " + alias)
 }
 
-// AltStart ouvre un bloc alt/else/end.
+// AltStart opens an alt/else/end block.
 func (s *SequenceDiagram) AltStart(condition string) *SequenceDiagram {
 	return s.add("alt " + condition)
 }
 
-// Else ajoute une branche alt.
+// Else adds an alt branch.
 func (s *SequenceDiagram) Else(condition string) *SequenceDiagram {
 	return s.add("else " + condition)
 }
 
-// End ferme un bloc alt, group ou loop.
+// End closes an alt, group or loop block.
 func (s *SequenceDiagram) End() *SequenceDiagram {
 	return s.add("end")
 }
 
-// GroupStart ouvre un bloc group avec un libellé.
+// GroupStart opens a group block with a label.
 func (s *SequenceDiagram) GroupStart(label string) *SequenceDiagram {
 	return s.add("group " + label)
 }
 
-// Note ajoute une note côté d'un participant (side = "right of", "left of", "over").
+// Note adds a note next to a participant (side = "right of", "left of", "over").
 func (s *SequenceDiagram) Note(side, alias, msg string) *SequenceDiagram {
 	return s.add(fmt.Sprintf("note %s %s : %s", side, alias, msg))
 }
 
-// Separator ajoute un séparateur visuel avec un libellé.
+// Separator adds a visual separator with a label.
 func (s *SequenceDiagram) Separator(label string) *SequenceDiagram {
 	return s.add("== " + label + " ==")
 }
 
-// Blank insère une ligne vide pour l'aération.
+// Blank inserts an empty line for readability.
 func (s *SequenceDiagram) Blank() *SequenceDiagram {
 	return s.add("")
 }
 
-// String retourne le diagramme complet en syntaxe PlantUML.
+// String returns the full diagram in PlantUML syntax.
 func (s *SequenceDiagram) String() string {
 	var b strings.Builder
 	b.WriteString("@startuml\n")
@@ -104,13 +104,13 @@ func (s *SequenceDiagram) String() string {
 	return b.String()
 }
 
-// WriteTo écrit le diagramme dans un io.Writer.
+// WriteTo writes the diagram to an io.Writer.
 func (s *SequenceDiagram) WriteTo(w io.Writer) (int64, error) {
 	n, err := fmt.Fprint(w, s.String())
 	return int64(n), err
 }
 
-// WriteFile crée (ou écrase) le fichier au chemin donné avec le diagramme.
+// WriteFile creates (or overwrites) the file at the given path with the diagram.
 func (s *SequenceDiagram) WriteFile(path string) error {
 	f, err := os.Create(path)
 	if err != nil {

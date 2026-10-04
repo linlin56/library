@@ -2,30 +2,46 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { Observable } from 'rxjs';
-import { ConnexionService, UtilisateurConnecte } from '../../services/connexion.service';
+import { LanguageService } from '../../i18n/language.service';
+import { TranslatePipe } from '../../i18n/translate.pipe';
+import { Language } from '../../i18n/translations';
+import { AuthService, LoggedInUser } from '../../services/auth.service';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterLink, RouterLinkActive, TranslatePipe],
   templateUrl: './navbar.html',
 })
 export class NavbarComponent {
-  readonly utilisateurConnecte$: Observable<UtilisateurConnecte | null>;
+  readonly loggedInUser$: Observable<LoggedInUser | null>;
+  readonly languages: { code: Language; name: string }[] = [
+    { code: 'en', name: 'English' },
+    { code: 'fr', name: 'Français' },
+  ];
 
   constructor(
-    private connexionService: ConnexionService,
+    private authService: AuthService,
+    private languageService: LanguageService,
     private router: Router,
   ) {
-    this.utilisateurConnecte$ = this.connexionService.utilisateurConnecte$;
+    this.loggedInUser$ = this.authService.loggedInUser$;
+  }
+
+  get language() {
+    return this.languageService.language;
+  }
+
+  setLanguage(language: Language): void {
+    this.languageService.setLanguage(language);
   }
 
   formatRole(role: string): string {
-    return role === 'bibliothecaire' ? 'Bibliothécaire' : 'Utilisateur';
+    return this.languageService.roleLabel(role === 'librarian' ? 'librarian' : 'user');
   }
 
-  deconnecter(): void {
-    this.connexionService.deconnecter();
-    void this.router.navigateByUrl('/connexion');
+  logout(): void {
+    this.authService.logout();
+    void this.router.navigateByUrl('/login');
   }
 }

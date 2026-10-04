@@ -3,8 +3,8 @@ services:
     image: postgres:17-alpine
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-admin_bibli}
-      POSTGRES_DB: bibliotheque
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-admin_library}
+      POSTGRES_DB: library
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -14,14 +14,14 @@ services:
       retries: 10
 
   back:
-    image: ${BACK_IMAGE:-ghcr.io/eadl-jaffre/bibliotheque-back:latest}
+    image: ${BACK_IMAGE:-ghcr.io/linlin56/library-back:latest}
     build: ./back
     environment:
       DB_HOST: db
       DB_PORT: 5432
       DB_USER: postgres
-      DB_PASSWORD: ${DB_PASSWORD:-admin_bibli}
-      DB_NAME: bibliotheque
+      DB_PASSWORD: ${DB_PASSWORD:-admin_library}
+      DB_NAME: library
       DB_SSLMODE: disable
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost}
     ports:
@@ -31,7 +31,7 @@ services:
         condition: service_healthy
 
   front:
-    image: ${FRONT_IMAGE:-ghcr.io/eadl-jaffre/bibliotheque-front:latest}
+    image: ${FRONT_IMAGE:-ghcr.io/linlin56/library-front:latest}
     build: ./front
     ports:
       - "80:80"

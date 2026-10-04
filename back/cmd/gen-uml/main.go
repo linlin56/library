@@ -1,10 +1,10 @@
-// Commande gen-uml : génère les diagrammes de séquence PlantUML du projet
-// ainsi qu'un diagramme de classes via goplantuml.
+// gen-uml command: generates the project's PlantUML sequence diagrams
+// as well as a class diagram via goplantuml.
 //
-// Usage :
+// Usage:
 //
-//	go run ./cmd/gen-uml            → écrit dans back/diagrams/
-//	go run ./cmd/gen-uml -out /tmp  → répertoire personnalisé
+//	go run ./cmd/gen-uml            → writes to back/diagrams/
+//	go run ./cmd/gen-uml -out /tmp  → custom directory
 package main
 
 import (
@@ -15,38 +15,38 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"bibliotheque/uml"
+	"library/uml"
 )
 
-// Ce fichier sert à générer des diagrammes de séquence via une lib Go.
-// Pour comparer avec mes diagrammes faits à la main sur Paradigm et voir si tout correspond.
+// This file generates sequence diagrams with a Go library,
+// to compare them with my hand-made diagrams (Visual Paradigm) and check that everything matches.
 func main() {
-	out := flag.String("out", "diagrams", "Répertoire de sortie pour les fichiers .puml")
+	out := flag.String("out", "diagrams", "Output directory for the .puml files")
 	flag.Parse()
 
 	if err := os.MkdirAll(*out, 0o755); err != nil {
-		log.Fatalf("Impossible de créer le répertoire de sortie : %v", err)
+		log.Fatalf("Unable to create the output directory: %v", err)
 	}
 
 	diagrams := map[string]uml.Diagram{
-		// Liste des diagrammes à générer
-		"01_connexion":           connexionDiagram(),
-		"02_emprunt":             empruntDiagram(),
-		"03_creer_ouvrage":       creerOuvrageDiagram(),
-		// 04_recherche.puml est maintenu manuellement — ne pas ecraser.
-		// "04_recherche": rechercheDiagram(),
-		"05_creer_utilisateur":   creerUtilisateurDiagram(),
-		"06_lister_emprunts":     listerEmpruntsDiagram(),
-		"07_lister_retards":      listerRetardsDiagram(),
-		"08_trouver_utilisateur": trouverUtilisateurDiagram(),
-		"09_cas_utilisation":     casDUtilisationDiagram(),
+		// List of the diagrams to generate
+		"01_login":       loginDiagram(),
+		"02_loan":        loanDiagram(),
+		"03_create_item": createItemDiagram(),
+		// 04_search is maintained by hand — do not overwrite.
+		// "04_search": searchDiagram(),
+		"05_create_user":  createUserDiagram(),
+		"06_list_loans":   listLoansDiagram(),
+		"07_list_overdue": listOverdueDiagram(),
+		"08_find_user":    findUserDiagram(),
+		"09_use_cases":    useCaseDiagram(),
 	}
 
 	for name, d := range diagrams {
-		// Écrit chaque diagramme dans un fichier .puml
+		// Write each diagram to a .puml file
 		path := filepath.Join(*out, name+".puml")
 		if err := d.WriteFile(path); err != nil {
-			log.Fatalf("Erreur écriture %s : %v", path, err)
+			log.Fatalf("Error writing %s: %v", path, err)
 		}
 		fmt.Printf("OK  %s\n", path)
 	}
@@ -54,19 +54,19 @@ func main() {
 	genClassDiagram(*out)
 }
 
-// genClassDiagram invoque goplantuml pour générer le diagramme de classes.
+// genClassDiagram runs goplantuml to generate the class diagram.
 func genClassDiagram(outDir string) {
 	path, err := exec.LookPath("goplantuml")
 	if err != nil {
-		fmt.Println("INFO goplantuml non trouve dans le PATH — diagramme de classes ignore.")
-		fmt.Println("     Installez via : go install github.com/jfeliu007/goplantuml@latest")
+		fmt.Println("INFO goplantuml not found in PATH — class diagram skipped.")
+		fmt.Println("     Install it with: go install github.com/jfeliu007/goplantuml@latest")
 		return
 	}
 
 	outFile := filepath.Join(outDir, "00_classes.puml")
 	f, err := os.Create(outFile)
 	if err != nil {
-		log.Printf("Erreur creation %s : %v", outFile, err)
+		log.Printf("Error creating %s: %v", outFile, err)
 		return
 	}
 	defer func() { _ = f.Close() }()
@@ -75,392 +75,384 @@ func genClassDiagram(outDir string) {
 	cmd.Stdout = f
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
-		log.Printf("goplantuml a retourne une erreur : %v", err)
+		log.Printf("goplantuml returned an error: %v", err)
 		return
 	}
 	fmt.Printf("OK  %s\n", outFile)
 }
 
-// Diagramme 1 — Connexion utilisateur
+// Diagram 1 — User login
 
-func connexionDiagram() *uml.SequenceDiagram {
-	return uml.NewSequenceDiagram("Connexion d'un utilisateur").
+func loginDiagram() *uml.SequenceDiagram {
+	return uml.NewSequenceDiagram("User login").
 		Actor("C", "Client").
-		Participant("CTL", "ConnexionController").
-		Participant("UR", "UtilisateurRepository").
-		Participant("BR", "BibliothecaireRepository").
+		Participant("CTL", "LoginController").
+		Participant("UR", "UserRepository").
+		Participant("LR", "LibrarianRepository").
 		Participant("DB", "PostgreSQL").
 		Blank().
-		Arrow("C", "CTL", "POST /api/connexion\\n{login, mot_de_passe}").
+		Arrow("C", "CTL", "POST /api/login\\n{login, password}").
 		Activate("CTL").
 		Blank().
 		Arrow("CTL", "UR", "FindByLogin(login)").
 		Activate("UR").
-		Arrow("UR", "DB", "SELECT * FROM ONLY utilisateurs WHERE login = $1").
+		Arrow("UR", "DB", "SELECT * FROM ONLY users WHERE login = $1").
 		Activate("DB").
 		Blank().
-		AltStart("Utilisateur trouve").
-		DashedArrow("DB", "UR", "ligne utilisateur").
+		AltStart("User found").
+		DashedArrow("DB", "UR", "user row").
 		Deactivate("DB").
-		DashedArrow("UR", "CTL", "*Utilisateur, nil").
+		DashedArrow("UR", "CTL", "*User, nil").
 		Deactivate("UR").
-		AltStart("Mot de passe correct").
-		DashedArrow("CTL", "C", "200 {id, nom, prenom, role: utilisateur}").
-		Else("Mot de passe incorrect").
-		DashedArrow("CTL", "C", "401 Login ou mot de passe incorrect").
+		AltStart("Correct password").
+		DashedArrow("CTL", "C", "200 {id, last_name, first_name, role: user}").
+		Else("Wrong password").
+		DashedArrow("CTL", "C", "401 Incorrect username or password").
 		End().
 		Blank().
-		Else("Utilisateur non trouve").
+		Else("User not found").
 		DashedArrow("DB", "UR", "sql.ErrNoRows").
 		Deactivate("DB").
 		DashedArrow("UR", "CTL", "nil, error").
 		Deactivate("UR").
-		Arrow("CTL", "BR", "FindByLogin(login)").
-		Activate("BR").
-		Arrow("BR", "DB", "SELECT * FROM bibliothecaires WHERE login = $1").
+		Arrow("CTL", "LR", "FindByLogin(login)").
+		Activate("LR").
+		Arrow("LR", "DB", "SELECT * FROM librarians WHERE login = $1").
 		Activate("DB").
-		AltStart("Bibliothecaire trouve et mdp correct").
-		DashedArrow("DB", "BR", "ligne bibliothecaire").
+		AltStart("Librarian found and correct password").
+		DashedArrow("DB", "LR", "librarian row").
 		Deactivate("DB").
-		DashedArrow("BR", "CTL", "*Bibliothecaire, nil").
-		Deactivate("BR").
-		DashedArrow("CTL", "C", "200 {id, nom, prenom, role: bibliothecaire}").
-		Else("Non trouve ou mauvais mot de passe").
-		DashedArrow("CTL", "C", "401 Login ou mot de passe incorrect").
+		DashedArrow("LR", "CTL", "*Librarian, nil").
+		Deactivate("LR").
+		DashedArrow("CTL", "C", "200 {id, last_name, first_name, role: librarian}").
+		Else("Not found or wrong password").
+		DashedArrow("CTL", "C", "401 Incorrect username or password").
 		End().
 		Blank().
 		End().
 		Deactivate("CTL")
 }
 
-// Diagramme 2 — Emprunt (verification puis enregistrement)
+// Diagram 2 — Loan (check then record)
 
-func empruntDiagram() *uml.SequenceDiagram {
-	return uml.NewSequenceDiagram("Emprunt d'un exemplaire").
-		Actor("C", "Client (utilisateur connecte)").
-		Participant("CTL", "EmpruntController").
-		Participant("ER", "EmpruntRepository").
+func loanDiagram() *uml.SequenceDiagram {
+	return uml.NewSequenceDiagram("Borrowing a copy").
+		Actor("C", "Client (logged-in user)").
+		Participant("CTL", "LoanController").
+		Participant("LR", "LoanRepository").
 		Participant("DB", "PostgreSQL").
 		Blank().
-		Separator("Etape 1 - Verification").
-		Arrow("C", "CTL", "GET /api/emprunts/verifier?code_barre=X&utilisateur_id=Y").
+		Separator("Step 1 - Check").
+		Arrow("C", "CTL", "GET /api/loans/check?barcode=X&user_id=Y").
 		Activate("CTL").
-		Arrow("CTL", "ER", "Verifier(codeBarre, utilisateurId)").
-		Activate("ER").
-		Arrow("ER", "DB", "SELECT exemplaire + verifications metier").
+		Arrow("CTL", "LR", "Check(userId, barcode)").
+		Activate("LR").
+		Arrow("LR", "DB", "SELECT copy + business checks").
 		Activate("DB").
-		AltStart("Toutes les verifications passent").
-		DashedArrow("DB", "ER", "PreviewEmprunt").
+		AltStart("Every check passes").
+		DashedArrow("DB", "LR", "LoanPreview").
 		Deactivate("DB").
-		DashedArrow("ER", "CTL", "PreviewEmprunt, nil").
-		Deactivate("ER").
-		DashedArrow("CTL", "C", "200 {titre, auteur, caution, date_fin_prevue}").
-		Else("Exemplaire deja emprunte").
-		DashedArrow("CTL", "C", "400 Cet exemplaire est deja emprunte").
-		Else("Solde caution insuffisant").
-		DashedArrow("CTL", "C", "400 Solde de caution insuffisant").
-		Else("Limite de 3 emprunts atteinte").
-		DashedArrow("CTL", "C", "400 Limite de 3 emprunts simultanees atteinte").
+		DashedArrow("LR", "CTL", "LoanPreview, nil").
+		Deactivate("LR").
+		DashedArrow("CTL", "C", "200 {title, barcode, deposit, current_balance, new_balance}").
+		Else("Copy already on loan").
+		DashedArrow("CTL", "C", "422 This copy is already on loan").
+		Else("Overdue loans").
+		DashedArrow("CTL", "C", "422 You have overdue loans").
+		Else("Insufficient deposit balance").
+		DashedArrow("CTL", "C", "422 Insufficient deposit balance").
 		End().
 		Deactivate("CTL").
 		Blank().
-		Separator("Etape 2 - Enregistrement").
-		Arrow("C", "CTL", "POST /api/emprunts\\n{code_barre, utilisateur_id}").
+		Separator("Step 2 - Record").
+		Arrow("C", "CTL", "POST /api/loans\\n{barcode, user_id}").
 		Activate("CTL").
-		Arrow("CTL", "ER", "Emprunter(codeBarre, utilisateurId)").
-		Activate("ER").
-		Arrow("ER", "DB", "BEGIN TRANSACTION").
+		Arrow("CTL", "LR", "Borrow(userId, barcode)").
+		Activate("LR").
+		Arrow("LR", "DB", "UPDATE copies SET is_borrowed=true, borrower_id, dates").
 		Activate("DB").
-		Arrow("ER", "DB", "UPDATE exemplaires SET est_emprunte=true, emprunteur_id, dates").
-		Arrow("ER", "DB", "UPDATE utilisateurs SET solde_caution -= caution").
-		Arrow("ER", "DB", "COMMIT").
+		Arrow("LR", "DB", "UPDATE users SET deposit_balance -= deposit").
 		Deactivate("DB").
-		DashedArrow("ER", "CTL", "nil").
-		Deactivate("ER").
-		DashedArrow("CTL", "C", "200 {message: Emprunt enregistre avec succes}").
+		DashedArrow("LR", "CTL", "nil").
+		Deactivate("LR").
+		DashedArrow("CTL", "C", "201 {message: Loan registered successfully}").
 		Deactivate("CTL")
 }
 
-// Diagramme 3 — Creation d'un ouvrage (livre ou revue)
+// Diagram 3 — Creating an item (book or journal)
 
-func creerOuvrageDiagram() *uml.SequenceDiagram {
-	return uml.NewSequenceDiagram("Creation d'un ouvrage (livre ou revue)").
-		Actor("C", "Client (bibliothecaire)").
-		Participant("CTL", "CreerOuvrageController").
-		Participant("FAB", "FabriqueOuvrage").
-		Participant("OR", "OuvrageRepository").
-		Participant("AR", "AuteurRepository").
-		Participant("EMR", "EmplacementRepository").
+func createItemDiagram() *uml.SequenceDiagram {
+	return uml.NewSequenceDiagram("Creating an item (book or journal)").
+		Actor("C", "Client (librarian)").
+		Participant("CTL", "CreateItemController").
+		Participant("FAC", "ItemFactory").
+		Participant("IR", "ItemRepository").
+		Participant("AR", "AuthorRepository").
+		Participant("LOR", "LocationRepository").
 		Participant("DB", "PostgreSQL").
 		Blank().
-		Separator("Chargement du formulaire").
-		Arrow("C", "CTL", "GET /api/auteurs").
+		Separator("Loading the form").
+		Arrow("C", "CTL", "GET /api/authors").
 		Activate("CTL").
 		Arrow("CTL", "AR", "FindAll()").
 		Activate("AR").
-		Arrow("AR", "DB", "SELECT id, nom, prenom FROM auteurs ORDER BY nom").
+		Arrow("AR", "DB", "SELECT id, last_name, first_name FROM authors ORDER BY last_name").
 		Activate("DB").
-		DashedArrow("DB", "AR", "[]Auteur").
+		DashedArrow("DB", "AR", "[]Author").
 		Deactivate("DB").
-		DashedArrow("AR", "CTL", "[]Auteur, nil").
+		DashedArrow("AR", "CTL", "[]Author, nil").
 		Deactivate("AR").
-		DashedArrow("CTL", "C", "200 [auteurs]").
+		DashedArrow("CTL", "C", "200 [authors]").
 		Blank().
-		Arrow("C", "CTL", "GET /api/emplacements").
-		Arrow("CTL", "EMR", "FindAll()").
-		Activate("EMR").
-		Arrow("EMR", "DB", "SELECT emplacements JOIN categories").
+		Arrow("C", "CTL", "GET /api/locations").
+		Arrow("CTL", "LOR", "FindAll()").
+		Activate("LOR").
+		Arrow("LOR", "DB", "SELECT locations JOIN categories").
 		Activate("DB").
-		DashedArrow("DB", "EMR", "[]EmplacementResume").
+		DashedArrow("DB", "LOR", "[]LocationSummary").
 		Deactivate("DB").
-		DashedArrow("EMR", "CTL", "[]EmplacementResume, nil").
-		Deactivate("EMR").
-		DashedArrow("CTL", "C", "200 [emplacements]").
+		DashedArrow("LOR", "CTL", "[]LocationSummary, nil").
+		Deactivate("LOR").
+		DashedArrow("CTL", "C", "200 [locations]").
 		Deactivate("CTL").
 		Blank().
-		Separator("Soumission - Livre").
-		Arrow("C", "CTL", "POST /api/livres\\n{titre, isbn, caution, auteur_id?, auteur_nom?, auteur_prenom?, emplacement_id}").
+		Separator("Submit - Book").
+		Arrow("C", "CTL", "POST /api/books\\n{title, isbn, deposit, author_id?, author_last_name?, author_first_name?, location_id}").
 		Activate("CTL").
-		Note("right of", "CTL", "Validation : titre, isbn requis\\nemplacement_id > 0, caution >= 0").
-		AltStart("Auteur nouveau (auteur_id = 0)").
-		Arrow("CTL", "AR", "Create(&Auteur{nom, prenom})").
+		Note("right of", "CTL", "Validation: title, isbn required\\nlocation_id > 0, deposit >= 0").
+		AltStart("New author (author_id = 0)").
+		Arrow("CTL", "AR", "Create(&Author{last_name, first_name})").
 		Activate("AR").
-		Arrow("AR", "DB", "INSERT INTO auteurs(nom, prenom) RETURNING id").
+		Arrow("AR", "DB", "INSERT INTO authors(last_name, first_name) RETURNING id").
 		Activate("DB").
-		DashedArrow("DB", "AR", "auteurId").
+		DashedArrow("DB", "AR", "authorId").
 		Deactivate("DB").
-		DashedArrow("AR", "CTL", "auteurId, nil").
+		DashedArrow("AR", "CTL", "authorId, nil").
 		Deactivate("AR").
 		End().
-		Arrow("CTL", "FAB", "FabriqueLivre{}.CreerOuvrage()").
-		Activate("FAB").
-		DashedArrow("FAB", "CTL", "*Livre (id=0)").
-		Deactivate("FAB").
-		Arrow("CTL", "OR", "CreateLivre(titre, caution, isbn, auteurId, emplacementId)").
-		Activate("OR").
-		Arrow("OR", "DB", "BEGIN TRANSACTION").
+		Arrow("CTL", "FAC", "BookFactory{}.CreateItem()").
+		Activate("FAC").
+		DashedArrow("FAC", "CTL", "*Book (id=0)").
+		Deactivate("FAC").
+		Arrow("CTL", "IR", "CreateBook(title, deposit, isbn, authorId, locationId)").
+		Activate("IR").
+		Arrow("IR", "DB", "INSERT INTO books(title, deposit, isbn, author_id, location_id) RETURNING id").
 		Activate("DB").
-		Arrow("OR", "DB", "INSERT INTO ouvrages(titre, caution, emplacement_id) RETURNING id").
-		Arrow("OR", "DB", "INSERT INTO livres(id, isbn, auteur_id)").
-		Arrow("OR", "DB", "COMMIT").
+		Note("right of", "DB", "PostgreSQL inheritance:\\nthe row is also visible in items").
 		Deactivate("DB").
-		DashedArrow("OR", "CTL", "newId, nil").
-		Deactivate("OR").
-		DashedArrow("CTL", "C", "201 {id, message: Livre cree avec succes}").
+		DashedArrow("IR", "CTL", "newId, nil").
+		Deactivate("IR").
+		DashedArrow("CTL", "C", "201 {id, message: Book created successfully}").
 		Deactivate("CTL").
 		Blank().
-		Separator("Soumission - Revue").
-		Arrow("C", "CTL", "POST /api/revues\\n{titre, numero, date_parution, caution, emplacement_id}").
+		Separator("Submit - Journal").
+		Arrow("C", "CTL", "POST /api/journals\\n{title, issue_number, publication_date, deposit, location_id}").
 		Activate("CTL").
-		Note("right of", "CTL", "Validation : titre, numero, date_parution requis\\nemplacement_id > 0").
-		Arrow("CTL", "FAB", "FabriqueRevue{}.CreerOuvrage()").
-		Activate("FAB").
-		DashedArrow("FAB", "CTL", "*Revue (id=0)").
-		Deactivate("FAB").
-		Arrow("CTL", "OR", "CreateRevue(titre, caution, numero, dateParution, emplacementId)").
-		Activate("OR").
-		Arrow("OR", "DB", "BEGIN TRANSACTION").
+		Note("right of", "CTL", "Validation: title, issue_number, publication_date required\\nlocation_id > 0").
+		Arrow("CTL", "FAC", "JournalFactory{}.CreateItem()").
+		Activate("FAC").
+		DashedArrow("FAC", "CTL", "*Journal (id=0)").
+		Deactivate("FAC").
+		Arrow("CTL", "IR", "CreateJournal(title, deposit, issueNumber, publicationDate, locationId)").
+		Activate("IR").
+		Arrow("IR", "DB", "INSERT INTO journals(title, deposit, issue_number, publication_date, location_id) RETURNING id").
 		Activate("DB").
-		Arrow("OR", "DB", "INSERT INTO ouvrages(titre, caution, emplacement_id) RETURNING id").
-		Arrow("OR", "DB", "INSERT INTO revues(id, numero, date_parution)").
-		Arrow("OR", "DB", "COMMIT").
 		Deactivate("DB").
-		DashedArrow("OR", "CTL", "newId, nil").
-		Deactivate("OR").
-		DashedArrow("CTL", "C", "201 {id, message: Revue creee avec succes}").
+		DashedArrow("IR", "CTL", "newId, nil").
+		Deactivate("IR").
+		DashedArrow("CTL", "C", "201 {id, message: Journal created successfully}").
 		Deactivate("CTL")
 }
 
-// Diagramme 5 — Creation d'un utilisateur
+// Diagram 5 — Creating a user
 
-func creerUtilisateurDiagram() *uml.SequenceDiagram {
-	return uml.NewSequenceDiagram("Creation d'un utilisateur").
-		Actor("C", "Client (bibliothecaire)").
-		Participant("CTL", "CreerUtilisateurController").
-		Participant("DR", "DepartementRepository").
-		Participant("UR", "UtilisateurRepository").
-		Participant("SR", "EtudiantRepo | EnseignantRepo").
+func createUserDiagram() *uml.SequenceDiagram {
+	return uml.NewSequenceDiagram("Creating a user").
+		Actor("C", "Client (librarian)").
+		Participant("CTL", "CreateUserController").
+		Participant("DR", "DepartmentRepository").
+		Participant("UR", "UserRepository").
+		Participant("SR", "StudentRepo | TeacherRepo").
 		Participant("DB", "PostgreSQL").
 		Blank().
-		Separator("Chargement du formulaire").
-		Arrow("C", "CTL", "GET /api/departements").
+		Separator("Loading the form").
+		Arrow("C", "CTL", "GET /api/departments").
 		Activate("CTL").
 		Arrow("CTL", "DR", "FindAll()").
 		Activate("DR").
-		Arrow("DR", "DB", "SELECT * FROM departements_ecole ORDER BY nom").
+		Arrow("DR", "DB", "SELECT * FROM departments ORDER BY name").
 		Activate("DB").
-		DashedArrow("DB", "DR", "[]DepartementEcole").
+		DashedArrow("DB", "DR", "[]Department").
 		Deactivate("DB").
-		DashedArrow("DR", "CTL", "[]DepartementEcole, nil").
+		DashedArrow("DR", "CTL", "[]Department, nil").
 		Deactivate("DR").
-		DashedArrow("CTL", "C", "200 [departements]").
+		DashedArrow("CTL", "C", "200 [departments]").
 		Deactivate("CTL").
 		Blank().
-		Separator("Soumission du formulaire").
-		Arrow("C", "CTL", "POST /api/utilisateurs\\n{nom, prenom, telephone, date_naissance,\\nemail, statut, annee_etude?, departement_id?, adresse}").
+		Separator("Submitting the form").
+		Arrow("C", "CTL", "POST /api/users\\n{last_name, first_name, phone_number, birth_date,\\nemail, status, study_year?, department_id?, address}").
 		Activate("CTL").
-		Note("right of", "CTL", "Validation : telephone 10 chiffres,\\ndate valide, statut in {etudiant,enseignant,particulier}").
+		Note("right of", "CTL", "Validation: 10-digit phone number,\\nvalid date, status in {student,teacher,individual}").
 		Blank().
 		Arrow("CTL", "UR", "LoginExists(login)").
 		Activate("UR").
-		Arrow("UR", "DB", "SELECT COUNT(*) FROM utilisateurs WHERE login = $1").
+		Arrow("UR", "DB", "SELECT COUNT(*) FROM users/librarians WHERE login = $1").
 		Activate("DB").
 		DashedArrow("DB", "UR", "count").
 		Deactivate("DB").
 		DashedArrow("UR", "CTL", "bool, nil").
 		Deactivate("UR").
 		Blank().
-		AltStart("Login deja pris").
-		DashedArrow("CTL", "C", "409 Un compte existe deja avec ce login").
-		Else("Login disponible").
-		Arrow("CTL", "DB", "INSERT INTO adresses(...) RETURNING id").
+		AltStart("Login already taken").
+		DashedArrow("CTL", "C", "409 An account already exists with this login").
+		Else("Login available").
+		Arrow("CTL", "DB", "INSERT INTO addresses(...) RETURNING id").
 		Activate("DB").
-		DashedArrow("DB", "CTL", "adresseId").
+		DashedArrow("DB", "CTL", "addressId").
 		Deactivate("DB").
-		Arrow("CTL", "SR", "Create(*Etudiant | *Enseignant | *Particulier)").
+		Arrow("CTL", "SR", "Create(*Student | *Teacher | *Individual)").
 		Activate("SR").
-		Arrow("SR", "DB", "BEGIN\\nINSERT INTO utilisateurs(...) RETURNING id\\nINSERT INTO etudiants|enseignants(id,...)\\nCOMMIT").
+		Arrow("SR", "DB", "INSERT INTO students|teachers|users(...) RETURNING id").
 		Activate("DB").
 		DashedArrow("DB", "SR", "newId").
 		Deactivate("DB").
 		DashedArrow("SR", "CTL", "newId, nil").
 		Deactivate("SR").
-		DashedArrow("CTL", "C", "201 {login, mot_de_passe, message}").
+		DashedArrow("CTL", "C", "201 {login, password, message}").
 		End().
 		Deactivate("CTL")
 }
 
-// Diagramme 6 — Liste des emprunts actifs d'un utilisateur
+// Diagram 6 — A user's active loans
 
-func listerEmpruntsDiagram() *uml.SequenceDiagram {
-	return uml.NewSequenceDiagram("Liste des emprunts actifs").
-		Actor("C", "Client (utilisateur)").
-		Participant("CTL", "EmpruntController").
-		Participant("ER", "EmpruntRepository").
+func listLoansDiagram() *uml.SequenceDiagram {
+	return uml.NewSequenceDiagram("Active loans").
+		Actor("C", "Client (user)").
+		Participant("CTL", "LoanController").
+		Participant("LR", "LoanRepository").
 		Participant("DB", "PostgreSQL").
 		Blank().
-		Arrow("C", "CTL", "GET /api/emprunts?utilisateur_id=X").
+		Arrow("C", "CTL", "GET /api/loans?user_id=X").
 		Activate("CTL").
-		Note("right of", "CTL", "Validation : utilisateur_id > 0").
-		Arrow("CTL", "ER", "GetEmprunts(utilisateurId)").
-		Activate("ER").
-		Arrow("ER", "DB", "SELECT e.*, o.titre, o.caution\\nFROM exemplaires e JOIN ouvrages o ON o.id = e.ouvrage_id\\nWHERE e.emprunteur_id = $1 AND e.est_emprunte = TRUE").
+		Note("right of", "CTL", "Validation: user_id > 0").
+		Arrow("CTL", "LR", "GetLoans(userId)").
+		Activate("LR").
+		Arrow("LR", "DB", "SELECT c.*, i.title\\nFROM copies c JOIN items i ON i.id = c.item_id\\nWHERE c.borrower_id = $1 AND c.is_borrowed = TRUE").
 		Activate("DB").
-		DashedArrow("DB", "ER", "[]EmpruntItem").
+		DashedArrow("DB", "LR", "[]LoanSummary").
 		Deactivate("DB").
-		DashedArrow("ER", "CTL", "[]EmpruntItem, nil").
-		Deactivate("ER").
-		AltStart("Emprunts trouves").
-		DashedArrow("CTL", "C", "200 [{code_barre, titre, date_debut, date_fin_prevue, caution}]").
-		Else("Aucun emprunt actif").
-		DashedArrow("CTL", "C", "200 []").
+		DashedArrow("LR", "CTL", "[]LoanSummary, nil").
+		Deactivate("LR").
+		AltStart("Loans found").
+		DashedArrow("CTL", "C", "200 [{id, barcode, title, start_date, due_date, overdue}]").
+		Else("No active loan").
+		DashedArrow("CTL", "C", "204 No Content").
 		End().
 		Deactivate("CTL")
 }
 
-// Diagramme 7 — Emprunts en retard (vue bibliothecaire)
+// Diagram 7 — Overdue loans (librarian view)
 
-func listerRetardsDiagram() *uml.SequenceDiagram {
-	return uml.NewSequenceDiagram("Liste des emprunts en retard").
-		Actor("C", "Client (bibliothecaire)").
-		Participant("CTL", "EmpruntController").
-		Participant("ER", "EmpruntRepository").
+func listOverdueDiagram() *uml.SequenceDiagram {
+	return uml.NewSequenceDiagram("Overdue loans").
+		Actor("C", "Client (librarian)").
+		Participant("CTL", "LoanController").
+		Participant("LR", "LoanRepository").
 		Participant("DB", "PostgreSQL").
 		Blank().
-		Arrow("C", "CTL", "GET /api/emprunts/retard").
+		Arrow("C", "CTL", "GET /api/loans/overdue").
 		Activate("CTL").
-		Arrow("CTL", "ER", "GetEmpruntsEnRetard()").
-		Activate("ER").
-		Arrow("ER", "DB", "SELECT e.*, o.titre, u.nom, u.prenom\\nFROM exemplaires e\\nJOIN ouvrages o ON o.id = e.ouvrage_id\\nJOIN utilisateurs u ON u.id = e.emprunteur_id\\nWHERE e.est_emprunte = TRUE\\nAND e.date_fin_emprunt < NOW()\\nORDER BY date_fin_emprunt ASC").
+		Arrow("CTL", "LR", "GetOverdueLoans()").
+		Activate("LR").
+		Arrow("LR", "DB", "SELECT c.*, i.title, u.last_name, u.first_name\\nFROM copies c\\nJOIN items i ON i.id = c.item_id\\nJOIN users u ON u.id = c.borrower_id\\nWHERE c.is_borrowed = TRUE\\nAND c.loan_due_date < NOW()\\nORDER BY loan_due_date ASC").
 		Activate("DB").
-		DashedArrow("DB", "ER", "[]EmpruntRetardItem").
+		DashedArrow("DB", "LR", "[]OverdueLoan").
 		Deactivate("DB").
-		DashedArrow("ER", "CTL", "[]EmpruntRetardItem, nil").
-		Deactivate("ER").
-		AltStart("Retards trouves").
-		DashedArrow("CTL", "C", "200 [{code_barre, titre, emprunteur, date_fin_prevue, nb_jours_retard}]").
-		Else("Aucun retard").
-		DashedArrow("CTL", "C", "200 []").
+		DashedArrow("LR", "CTL", "[]OverdueLoan, nil").
+		Deactivate("LR").
+		AltStart("Overdue loans found").
+		DashedArrow("CTL", "C", "200 [{id, barcode, title, due_date, last_name, first_name, phone_number}]").
+		Else("No overdue loan").
+		DashedArrow("CTL", "C", "204 No Content").
 		End().
 		Deactivate("CTL")
 }
 
-// Diagramme 8 — Recherche d'un utilisateur (vue bibliothecaire)
+// Diagram 8 — Finding a user (librarian view)
 
-func trouverUtilisateurDiagram() *uml.SequenceDiagram {
-	return uml.NewSequenceDiagram("Recherche d'un utilisateur").
-		Actor("C", "Client (bibliothecaire)").
-		Participant("CTL", "EmpruntController").
-		Participant("UR", "UtilisateurRepository").
+func findUserDiagram() *uml.SequenceDiagram {
+	return uml.NewSequenceDiagram("Finding a user").
+		Actor("C", "Client (librarian)").
+		Participant("CTL", "LoanController").
+		Participant("UR", "UserRepository").
 		Participant("DB", "PostgreSQL").
 		Blank().
-		Arrow("C", "CTL", "GET /api/utilisateurs/rechercher\\n?nom=X&prenom=Y&code_postal=Z&numero_telephone=W").
+		Arrow("C", "CTL", "GET /api/users/search\\n?last_name=X&first_name=Y&postal_code=Z&phone_number=W").
 		Activate("CTL").
-		Note("right of", "CTL", "Au moins un critere non vide est requis").
-		AltStart("Aucun critere fourni").
-		DashedArrow("CTL", "C", "400 Au moins un critere de recherche est requis").
-		Else("Au moins un critere fourni").
-		Arrow("CTL", "UR", "RechercherUtilisateurs(nom, prenom, codePostal, telephone)").
+		Note("right of", "CTL", "At least one non-empty criterion is required").
+		AltStart("No criterion provided").
+		DashedArrow("CTL", "C", "400 At least one search criterion is required").
+		Else("At least one criterion provided").
+		Arrow("CTL", "UR", "SearchUsers(lastName, firstName, postalCode, phoneNumber)").
 		Activate("UR").
-		Note("right of", "UR", "Construction dynamique\\nde la requete SQL\\nselon les criteres fournis").
-		Arrow("UR", "DB", "SELECT u.*, a.*\\nFROM utilisateurs u JOIN adresses a ON a.id = u.adresse_id\\nWHERE <criteres> ORDER BY nom, prenom").
+		Arrow("UR", "DB", "SELECT u.*\\nFROM students | teachers | ONLY users u\\nLEFT JOIN addresses a ON a.id = u.address_id\\nWHERE <criteria> ORDER BY last_name, first_name").
 		Activate("DB").
-		DashedArrow("DB", "UR", "[]UtilisateurResume").
+		DashedArrow("DB", "UR", "[]UserSummary").
 		Deactivate("DB").
-		DashedArrow("UR", "CTL", "[]UtilisateurResume, nil").
+		DashedArrow("UR", "CTL", "[]UserSummary, nil").
 		Deactivate("UR").
-		DashedArrow("CTL", "C", "200 [{id, nom, prenom, login, telephone, solde_caution}]").
+		DashedArrow("CTL", "C", "200 [{id, last_name, first_name, phone_number, role}]").
 		End().
 		Deactivate("CTL")
 }
 
-// Diagramme 9 — Cas d'utilisation (vue globale du système)
+// Diagram 9 — Use cases (overview of the system)
 
-func casDUtilisationDiagram() *uml.UseCaseDiagram {
-	return uml.NewUseCaseDiagram("Diagramme de cas d'utilisation - Bibliotheque").
+func useCaseDiagram() *uml.UseCaseDiagram {
+	return uml.NewUseCaseDiagram("Use case diagram - Library").
 		Direction("left to right direction").
 		Blank().
-		// Acteurs
-		Actor("BIB", "Bibliothecaire").
-		Actor("UTI", "Utilisateur").
-		Actor("ETU", "Etudiant").
-		Actor("ENS", "Enseignant").
+		// Actors
+		Actor("LIB", "Librarian").
+		Actor("USR", "User").
+		Actor("STU", "Student").
+		Actor("TEA", "Teacher").
 		Blank().
-		// Héritages acteurs
-		ActorInherits("ETU", "UTI").
-		ActorInherits("ENS", "UTI").
+		// Actor inheritance
+		ActorInherits("STU", "USR").
+		ActorInherits("TEA", "USR").
 		Blank().
-		// Frontière système
-		RectangleStart("Gestion bibliotheque").
-		UseCase("UC_CO", "connexion").
-		UseCase("UC_CU", "creer_utilisateur").
-		UseCase("UC_TU", "trouver_un_utilisateur").
-		UseCase("UC_LR", "lister_les_retards").
-		UseCase("UC_EO", "enregistrer_ouvrage").
-		UseCase("UC_RO", "rechercher_ouvrage").
-		UseCase("UC_LEU", "lister_emprunts_utilisateur").
-		UseCase("UC_LSE", "lister_ses_emprunts").
-		UseCase("UC_EU", "emprunter_un_ouvrage").
+		// System boundary
+		RectangleStart("Library management").
+		UseCase("UC_LI", "log_in").
+		UseCase("UC_CU", "create_user").
+		UseCase("UC_FU", "find_user").
+		UseCase("UC_LO", "list_overdue_loans").
+		UseCase("UC_RI", "register_item").
+		UseCase("UC_SI", "search_item").
+		UseCase("UC_LUL", "list_user_loans").
+		UseCase("UC_LML", "list_my_loans").
+		UseCase("UC_BI", "borrow_item").
 		RectangleEnd().
 		Blank().
-		// Associations Bibliothécaire
-		Association("BIB", "UC_CU").
-		Association("BIB", "UC_TU").
-		Association("BIB", "UC_LR").
-		Association("BIB", "UC_EO").
-		Association("BIB", "UC_RO").
-		Association("BIB", "UC_LEU").
+		// Librarian associations
+		Association("LIB", "UC_CU").
+		Association("LIB", "UC_FU").
+		Association("LIB", "UC_LO").
+		Association("LIB", "UC_RI").
+		Association("LIB", "UC_SI").
+		Association("LIB", "UC_LUL").
 		Blank().
-		// Associations Utilisateur (connecte)
-		Association("UTI", "UC_RO").
-		Association("UTI", "UC_LSE").
-		Association("UTI", "UC_EU").
+		// User associations (logged in)
+		Association("USR", "UC_SI").
+		Association("USR", "UC_LML").
+		Association("USR", "UC_BI").
 		Blank().
-		// Relations <<include>>
-		Include("UC_CU", "UC_CO").
-		Include("UC_TU", "UC_CO").
-		Include("UC_EO", "UC_CO").
-		Include("UC_LEU", "UC_TU").
-		Include("UC_LSE", "UC_CO").
-		Include("UC_EU", "UC_CO")
+		// <<include>> relations
+		Include("UC_CU", "UC_LI").
+		Include("UC_FU", "UC_LI").
+		Include("UC_RI", "UC_LI").
+		Include("UC_LUL", "UC_FU").
+		Include("UC_LML", "UC_LI").
+		Include("UC_BI", "UC_LI")
 }

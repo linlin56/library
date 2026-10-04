@@ -1,0 +1,26 @@
+@startuml
+title Finding a user
+
+actor "Client (librarian)" as C
+participant "LoanController" as CTL
+participant "UserRepository" as UR
+participant "PostgreSQL" as DB
+
+C -> CTL : GET /api/users/search\n?last_name=X&first_name=Y&postal_code=Z&phone_number=W
+activate CTL
+note right of CTL : At least one non-empty criterion is required
+alt No criterion provided
+CTL --> C : 400 At least one search criterion is required
+else At least one criterion provided
+CTL -> UR : SearchUsers(lastName, firstName, postalCode, phoneNumber)
+activate UR
+UR -> DB : SELECT u.*\nFROM students | teachers | ONLY users u\nLEFT JOIN addresses a ON a.id = u.address_id\nWHERE <criteria> ORDER BY last_name, first_name
+activate DB
+DB --> UR : []UserSummary
+deactivate DB
+UR --> CTL : []UserSummary, nil
+deactivate UR
+CTL --> C : 200 [{id, last_name, first_name, phone_number, role}]
+end
+deactivate CTL
+@enduml

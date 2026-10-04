@@ -1,55 +1,55 @@
 /**
- * Fonctions utilitaires pures (sans dépendance Angular) utilisées par les services.
- * Elles peuvent être testées avec Mocha directement sous Node.js.
+ * Pure utility functions (no Angular dependency) used by the services.
+ * They can be tested with Mocha directly under Node.js.
  */
 
-export interface FiltresRecherche {
-  titre?: string;
-  auteur?: string;
+export interface SearchFilters {
+  title?: string;
+  author?: string;
   isbn?: string;
-  codeBarre?: string;
-  codeRevue?: string;
-  disponible?: boolean;
+  barcode?: string;
+  issueNumber?: string;
+  available?: boolean;
 }
 
-export interface UtilisateurConnecte {
+export interface LoggedInUser {
   id: number;
-  nom: string;
-  prenom: string;
+  last_name: string;
+  first_name: string;
   role: string;
   message: string;
 }
 
 /**
- * Convertit un objet FiltresRecherche en dictionnaire de paramètres URL.
- * Les champs vides ou composés uniquement d'espaces sont exclus.
+ * Converts a SearchFilters object into a dictionary of URL parameters.
+ * Empty or whitespace-only fields are left out.
  */
-export function buildFiltresParams(filtres: FiltresRecherche): Record<string, string> {
+export function buildSearchParams(filters: SearchFilters): Record<string, string> {
   const params: Record<string, string> = {};
-  if (filtres.titre?.trim()) params['titre'] = filtres.titre.trim();
-  if (filtres.auteur?.trim()) params['auteur'] = filtres.auteur.trim();
-  if (filtres.isbn?.trim()) params['isbn'] = filtres.isbn.trim();
-  if (filtres.codeBarre?.trim()) params['code_barre'] = filtres.codeBarre.trim();
-  if (filtres.codeRevue?.trim()) params['code_revue'] = filtres.codeRevue.trim();
-  if (filtres.disponible) params['disponible'] = 'true';
+  if (filters.title?.trim()) params['title'] = filters.title.trim();
+  if (filters.author?.trim()) params['author'] = filters.author.trim();
+  if (filters.isbn?.trim()) params['isbn'] = filters.isbn.trim();
+  if (filters.barcode?.trim()) params['barcode'] = filters.barcode.trim();
+  if (filters.issueNumber?.trim()) params['issue_number'] = filters.issueNumber.trim();
+  if (filters.available) params['available'] = 'true';
   return params;
 }
 
 /**
- * Désérialise un JSON brut en UtilisateurConnecte.
- * Retourne null si le JSON est invalide.
+ * Deserializes raw JSON into a LoggedInUser.
+ * Returns null if the JSON is invalid.
  */
-export function parseUtilisateur(raw: string): UtilisateurConnecte | null {
+export function parseUser(raw: string): LoggedInUser | null {
   try {
-    return JSON.parse(raw) as UtilisateurConnecte;
+    return JSON.parse(raw) as LoggedInUser;
   } catch {
     return null;
   }
 }
 
 /**
- * Indique si l'utilisateur connecté a le rôle bibliothécaire.
+ * Tells whether the logged-in user has the librarian role.
  */
-export function estBibliothecaire(user: UtilisateurConnecte | null): boolean {
-  return user?.role === 'bibliothecaire';
+export function isLibrarian(user: LoggedInUser | null): boolean {
+  return user?.role === 'librarian';
 }

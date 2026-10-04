@@ -1,0 +1,50 @@
+@startuml
+title User login
+
+actor "Client" as C
+participant "LoginController" as CTL
+participant "UserRepository" as UR
+participant "LibrarianRepository" as LR
+participant "PostgreSQL" as DB
+
+C -> CTL : POST /api/login\n{login, password}
+activate CTL
+
+CTL -> UR : FindByLogin(login)
+activate UR
+UR -> DB : SELECT * FROM ONLY users WHERE login = $1
+activate DB
+
+alt User found
+DB --> UR : user row
+deactivate DB
+UR --> CTL : *User, nil
+deactivate UR
+alt Correct password
+CTL --> C : 200 {id, last_name, first_name, role: user}
+else Wrong password
+CTL --> C : 401 Incorrect username or password
+end
+
+else User not found
+DB --> UR : sql.ErrNoRows
+deactivate DB
+UR --> CTL : nil, error
+deactivate UR
+CTL -> LR : FindByLogin(login)
+activate LR
+LR -> DB : SELECT * FROM librarians WHERE login = $1
+activate DB
+alt Librarian found and correct password
+DB --> LR : librarian row
+deactivate DB
+LR --> CTL : *Librarian, nil
+deactivate LR
+CTL --> C : 200 {id, last_name, first_name, role: librarian}
+else Not found or wrong password
+CTL --> C : 401 Incorrect username or password
+end
+
+end
+deactivate CTL
+@enduml

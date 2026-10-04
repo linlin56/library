@@ -1,14 +1,14 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { ConnexionService } from '../services/connexion.service';
+import { AuthService } from '../services/auth.service';
 
-// Vérifie qu'un utilisateur est connecté. Redirige vers /connexion sinon.
+// Checks that a user is logged in. Redirects to /login otherwise.
 export const authGuard: CanActivateFn = () => {
-  const connexionService = inject(ConnexionService);
+  const authService = inject(AuthService);
   const router = inject(Router);
 
-  if (connexionService.estConnecte()) {
+  if (authService.isLoggedIn()) {
     return true;
   }
-  return router.createUrlTree(['/connexion']);
+  return router.createUrlTree(['/login']);
 };

@@ -1,0 +1,43 @@
+@startuml
+title Use case diagram - Library
+
+left to right direction
+
+actor "Librarian" as LIB
+actor "User" as USR
+actor "Student" as STU
+actor "Teacher" as TEA
+
+USR <|-- STU
+USR <|-- TEA
+
+rectangle "Library management" {
+usecase "log_in" as UC_LI
+usecase "create_user" as UC_CU
+usecase "find_user" as UC_FU
+usecase "list_overdue_loans" as UC_LO
+usecase "register_item" as UC_RI
+usecase "search_item" as UC_SI
+usecase "list_user_loans" as UC_LUL
+usecase "list_my_loans" as UC_LML
+usecase "borrow_item" as UC_BI
+}
+
+LIB --> UC_CU
+LIB --> UC_FU
+LIB --> UC_LO
+LIB --> UC_RI
+LIB --> UC_SI
+LIB --> UC_LUL
+
+USR --> UC_SI
+USR --> UC_LML
+USR --> UC_BI
+
+UC_CU ..> UC_LI : <<include>>
+UC_FU ..> UC_LI : <<include>>
+UC_RI ..> UC_LI : <<include>>
+UC_LUL ..> UC_FU : <<include>>
+UC_LML ..> UC_LI : <<include>>
+UC_BI ..> UC_LI : <<include>>
+@enduml

@@ -1,0 +1,288 @@
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <!-- Title -->
+      <h1 class="fw-bold mb-1">{{ 'createUser.title' | t }}</h1>
+      <p class="text-muted mb-4">{{ 'createUser.subtitle' | t }}</p>
+
+      <!-- Account already exists -->
+      <div *ngIf="existingAccount" class="alert alert-warning d-flex align-items-center gap-2">
+        <span
+          >{{ 'createUser.accountExists' | t }} <strong>{{ existingAccount }}</strong
+          >.</span
+        >
+        <button
+          type="button"
+          class="btn-close ms-auto"
+          (click)="existingAccount = null"
+          [attr.aria-label]="'common.close' | t"
+        ></button>
+      </div>
+
+      <!-- Generic error -->
+      <div *ngIf="error" class="alert alert-danger d-flex align-items-center gap-2">
+        <span>{{ error }}</span>
+        <button
+          type="button"
+          class="btn-close ms-auto"
+          (click)="error = null"
+          [attr.aria-label]="'common.close' | t"
+        ></button>
+      </div>
+
+      <!-- Creation result -->
+      <div *ngIf="result" class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+          <h5 class="card-title text-success fw-bold mb-3">{{ 'createUser.successTitle' | t }}</h5>
+          <p class="text-muted mb-3">
+            {{ 'createUser.successText' | t }}
+          </p>
+          <dl class="row mb-0">
+            <dt class="col-sm-4">{{ 'createUser.login' | t }}</dt>
+            <dd class="col-sm-8">
+              <code>{{ result.login }}</code>
+            </dd>
+            <dt class="col-sm-4">{{ 'createUser.tempPassword' | t }}</dt>
+            <dd class="col-sm-8">
+              <code>{{ result.password }}</code>
+            </dd>
+          </dl>
+          <button type="button" class="btn btn-primary mt-3" (click)="newForm()">
+            {{ 'createUser.createAnother' | t }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <div *ngIf="!result" class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+          <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+            <!-- Last name / First name -->
+            <div class="row g-3 mb-3">
+              <div class="col-sm-6">
+                <label for="last_name" class="form-label fw-semibold"
+                  >{{ 'createUser.lastName' | t }} <span class="text-danger">*</span></label
+                >
+                <input
+                  id="last_name"
+                  type="text"
+                  class="form-control"
+                  [class.is-invalid]="
+                    form.get('last_name')?.invalid && form.get('last_name')?.touched
+                  "
+                  formControlName="last_name"
+                  [placeholder]="'common.example' | t: { value: 'Martin' }"
+                />
+                <div class="invalid-feedback">{{ 'createUser.lastNameRequired' | t }}</div>
+              </div>
+              <div class="col-sm-6">
+                <label for="first_name" class="form-label fw-semibold"
+                  >{{ 'createUser.firstName' | t }} <span class="text-danger">*</span></label
+                >
+                <input
+                  id="first_name"
+                  type="text"
+                  class="form-control"
+                  [class.is-invalid]="
+                    form.get('first_name')?.invalid && form.get('first_name')?.touched
+                  "
+                  formControlName="first_name"
+                  [placeholder]="'common.example' | t: { value: 'Alice' }"
+                />
+                <div class="invalid-feedback">{{ 'createUser.firstNameRequired' | t }}</div>
+              </div>
+            </div>
+
+            <!-- Phone -->
+            <div class="mb-3">
+              <label for="phone" class="form-label fw-semibold"
+                >{{ 'createUser.phone' | t }} <span class="text-danger">*</span></label
+              >
+              <input
+                id="phone"
+                type="tel"
+                class="form-control"
+                [class.is-invalid]="
+                  form.get('phone_number')?.invalid && form.get('phone_number')?.touched
+                "
+                formControlName="phone_number"
+                [placeholder]="'common.example' | t: { value: '0601020304' }"
+              />
+              <div class="invalid-feedback">
+                <span *ngIf="form.get('phone_number')?.errors?.['required']">{{
+                  'createUser.phoneRequired' | t
+                }}</span>
+                <span *ngIf="form.get('phone_number')?.errors?.['pattern']">{{
+                  'createUser.phoneInvalid' | t
+                }}</span>
+              </div>
+            </div>
+
+            <!-- Date of birth -->
+            <div class="mb-3">
+              <label for="birthDate" class="form-label fw-semibold"
+                >{{ 'createUser.birthDate' | t }} <span class="text-danger">*</span></label
+              >
+              <input
+                id="birthDate"
+                type="date"
+                class="form-control"
+                [class.is-invalid]="
+                  form.get('birth_date')?.invalid && form.get('birth_date')?.touched
+                "
+                formControlName="birth_date"
+              />
+              <div class="invalid-feedback">{{ 'createUser.birthDateRequired' | t }}</div>
+            </div>
+
+            <!-- Email -->
+            <div class="mb-3">
+              <label for="email" class="form-label fw-semibold"
+                >{{ 'createUser.email' | t }} <span class="text-danger">*</span></label
+              >
+              <input
+                id="email"
+                type="email"
+                class="form-control"
+                [class.is-invalid]="form.get('email')?.invalid && form.get('email')?.touched"
+                formControlName="email"
+                [placeholder]="'common.example' | t: { value: 'alice.martin@etud.fr' }"
+              />
+              <div class="invalid-feedback">{{ 'createUser.emailInvalid' | t }}</div>
+            </div>
+
+            <!-- Status -->
+            <div class="mb-3">
+              <label for="status" class="form-label fw-semibold"
+                >{{ 'createUser.status' | t }} <span class="text-danger">*</span></label
+              >
+              <select id="status" class="form-select" formControlName="status">
+                <option value="student">{{ 'roles.student' | t }}</option>
+                <option value="teacher">{{ 'roles.teacher' | t }}</option>
+                <option value="individual">{{ 'roles.individual' | t }}</option>
+              </select>
+            </div>
+
+            <!-- Conditional field: student -->
+            <div *ngIf="status === 'student'" class="mb-3">
+              <label for="studyYear" class="form-label fw-semibold"
+                >{{ 'createUser.studyYear' | t }} <span class="text-danger">*</span></label
+              >
+              <select
+                id="studyYear"
+                class="form-select"
+                [class.is-invalid]="
+                  form.get('study_year')?.invalid && form.get('study_year')?.touched
+                "
+                formControlName="study_year"
+              >
+                <option *ngFor="let y of studyYears" [value]="y">{{ y }}</option>
+              </select>
+              <div class="invalid-feedback">{{ 'createUser.studyYearRequired' | t }}</div>
+            </div>
+
+            <!-- Conditional field: teacher -->
+            <div *ngIf="status === 'teacher'" class="mb-3">
+              <label for="department" class="form-label fw-semibold"
+                >{{ 'createUser.department' | t }} <span class="text-danger">*</span></label
+              >
+              <select
+                id="department"
+                class="form-select"
+                [class.is-invalid]="
+                  form.get('department_id')?.invalid && form.get('department_id')?.touched
+                "
+                formControlName="department_id"
+              >
+                <option [ngValue]="null" disabled>{{ 'createUser.selectDepartment' | t }}</option>
+                <option *ngFor="let d of departments" [value]="d.id">{{ d.name }}</option>
+              </select>
+              <div class="invalid-feedback">{{ 'createUser.departmentRequired' | t }}</div>
+            </div>
+
+            <!-- Address -->
+            <p class="fw-semibold mt-4 mb-2">{{ 'createUser.address' | t }}</p>
+            <div class="row g-3 mb-3">
+              <div class="col-sm-3">
+                <label for="streetNumber" class="form-label"
+                  >{{ 'createUser.streetNumber' | t }} <span class="text-danger">*</span></label
+                >
+                <input
+                  id="streetNumber"
+                  type="text"
+                  class="form-control"
+                  [class.is-invalid]="
+                    form.get('street_number')?.invalid && form.get('street_number')?.touched
+                  "
+                  formControlName="street_number"
+                  [placeholder]="'common.example' | t: { value: '10' }"
+                />
+                <div class="invalid-feedback">{{ 'common.required' | t }}</div>
+              </div>
+              <div class="col-sm-9">
+                <label for="streetName" class="form-label"
+                  >{{ 'createUser.street' | t }} <span class="text-danger">*</span></label
+                >
+                <input
+                  id="streetName"
+                  type="text"
+                  class="form-control"
+                  [class.is-invalid]="
+                    form.get('street_name')?.invalid && form.get('street_name')?.touched
+                  "
+                  formControlName="street_name"
+                  [placeholder]="'common.example' | t: { value: 'Rue de Rivoli' }"
+                />
+                <div class="invalid-feedback">{{ 'createUser.streetRequired' | t }}</div>
+              </div>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-sm-4">
+                <label for="postalCode" class="form-label"
+                  >{{ 'createUser.postalCode' | t }} <span class="text-danger">*</span></label
+                >
+                <input
+                  id="postalCode"
+                  type="text"
+                  class="form-control"
+                  [class.is-invalid]="
+                    form.get('postal_code')?.invalid && form.get('postal_code')?.touched
+                  "
+                  formControlName="postal_code"
+                  [placeholder]="'common.example' | t: { value: '75001' }"
+                />
+                <div class="invalid-feedback">{{ 'common.required' | t }}</div>
+              </div>
+              <div class="col-sm-8">
+                <label for="city" class="form-label"
+                  >{{ 'createUser.city' | t }} <span class="text-danger">*</span></label
+                >
+                <input
+                  id="city"
+                  type="text"
+                  class="form-control"
+                  [class.is-invalid]="form.get('city')?.invalid && form.get('city')?.touched"
+                  formControlName="city"
+                  [placeholder]="'common.example' | t: { value: 'Paris' }"
+                />
+                <div class="invalid-feedback">{{ 'createUser.cityRequired' | t }}</div>
+              </div>
+            </div>
+
+            <!-- Button -->
+            <div class="d-grid mt-4">
+              <button type="submit" class="btn btn-primary btn-lg" [disabled]="loading">
+                <span
+                  *ngIf="loading"
+                  class="spinner-border spinner-border-sm me-2"
+                  role="status"
+                ></span>
+                {{ (loading ? 'createUser.submitting' : 'createUser.submit') | t }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

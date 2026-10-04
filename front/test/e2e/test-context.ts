@@ -1,17 +1,17 @@
 /**
- * TestContext — réinitialisation de la BDD entre fichiers de test.
+ * TestContext — resets the database between test files.
  *
- * Usage dans chaque fichier .e2e.ts :
+ * Usage in each .e2e.ts file:
  *
  *   const ctx = new TestContext();
  *
  *   describe('Suite ...', () => {
  *     before(async () => {
- *       await ctx.before();               // vide toutes les tables, réinitialise les séquences
- *       await ctx.exec(`INSERT ...`);     // insère les données propres à ce fichier
+ *       await ctx.before();               // empties every table, resets the sequences
+ *       await ctx.exec(`INSERT ...`);     // inserts the data specific to this file
  *     });
  *     after(async () => await ctx.after());
- *     // ... describes imbriqués ...
+ *     // ... nested describes ...
  *   });
  */
 
@@ -25,44 +25,44 @@ export class TestContext {
       host: process.env['DB_HOST'] ?? '127.0.0.1',
       port: parseInt(process.env['DB_PORT'] ?? '5435'),
       user: process.env['DB_USER'] ?? 'postgres',
-      password: process.env['DB_PASSWORD'] ?? 'admin_bibli',
-      database: process.env['DB_NAME'] ?? 'bibliotheque',
+      password: process.env['DB_PASSWORD'] ?? 'admin_library',
+      database: process.env['DB_NAME'] ?? 'library',
     });
   }
 
   /**
-   * Ouvre la connexion, applique les migrations de schéma manquantes,
-   * puis vide toutes les tables avec RESTART IDENTITY CASCADE.
-   * Utilise TRUNCATE (pas DROP) pour ne pas invalider les connexions du backend.
+   * Opens the connection, applies the missing schema migrations,
+   * then empties every table with RESTART IDENTITY CASCADE.
+   * Uses TRUNCATE (not DROP) so that the backend connections stay valid.
    */
   async before(): Promise<void> {
     await this.client.connect();
 
-    // Colonnes requises par le backend mais absentes du schéma initial
+    // Columns required by the backend but missing from the initial schema
     await this.client.query(
-      `ALTER TABLE ouvrages ADD COLUMN IF NOT EXISTS emplacement_id INT REFERENCES emplacements(id)`,
+      `ALTER TABLE items ADD COLUMN IF NOT EXISTS location_id INT REFERENCES locations(id)`,
     );
-    await this.client.query(`ALTER TABLE revues ADD COLUMN IF NOT EXISTS date_parution DATE`);
+    await this.client.query(`ALTER TABLE journals ADD COLUMN IF NOT EXISTS publication_date DATE`);
 
     await this.client.query(`
       TRUNCATE
-        enseignants, etudiants, ONLY utilisateurs,
-        bibliothecaires,
-        exemplaires,
-        livres, revues, ONLY ouvrages,
-        auteurs, adresses,
-        emplacements, categories,
-        departements_ecole
+        teachers, students, ONLY users,
+        librarians,
+        copies,
+        books, journals, ONLY items,
+        authors, addresses,
+        locations, categories,
+        departments
       RESTART IDENTITY CASCADE
     `);
   }
 
-  /** Ferme la connexion. */
+  /** Closes the connection. */
   async after(): Promise<void> {
     await this.client.end();
   }
 
-  /** Exécute un ou plusieurs INSERT (séparés par ;) dans le contexte du test. */
+  /** Runs one or more INSERT statements (separated by ;) in the test context. */
   async exec(sql: string): Promise<void> {
     const statements = sql
       .split(';')

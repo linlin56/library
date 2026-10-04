@@ -1,5 +1,5 @@
-// Package uml — UseCaseDiagram construit un diagramme de cas d'utilisation
-// PlantUML de façon fluide, de manière similaire à SequenceDiagram.
+// Package uml — UseCaseDiagram builds a PlantUML use case diagram
+// fluently, in the same way as SequenceDiagram.
 package uml
 
 import (
@@ -9,20 +9,20 @@ import (
 	"strings"
 )
 
-// Diagram est une interface commune à tous les types de diagrammes PlantUML.
-// Elle permet de stocker des types différents (séquence, cas d'utilisation…)
-// dans une même map et de les écrire via une boucle unique.
+// Diagram is an interface shared by every PlantUML diagram type.
+// It allows different types (sequence, use case…) to be stored
+// in the same map and written with a single loop.
 type Diagram interface {
 	WriteFile(path string) error
 }
 
-// UseCaseDiagram construit un diagramme de cas d'utilisation PlantUML.
+// UseCaseDiagram builds a PlantUML use case diagram.
 type UseCaseDiagram struct {
 	title string
 	lines []string
 }
 
-// NewUseCaseDiagram crée un nouveau diagramme de cas d'utilisation avec un titre.
+// NewUseCaseDiagram creates a new use case diagram with a title.
 func NewUseCaseDiagram(title string) *UseCaseDiagram {
 	return &UseCaseDiagram{title: title}
 }
@@ -32,58 +32,58 @@ func (u *UseCaseDiagram) add(l string) *UseCaseDiagram {
 	return u
 }
 
-// Direction définit l'orientation du diagramme (ex : "left to right direction").
+// Direction sets the diagram orientation (e.g. "left to right direction").
 func (u *UseCaseDiagram) Direction(dir string) *UseCaseDiagram {
 	return u.add(dir)
 }
 
-// Actor déclare un acteur avec un alias et un libellé affiché.
+// Actor declares an actor with an alias and a displayed label.
 func (u *UseCaseDiagram) Actor(alias, label string) *UseCaseDiagram {
 	return u.add(fmt.Sprintf(`actor "%s" as %s`, label, alias))
 }
 
-// ActorInherits déclare une relation d'héritage entre acteurs (enfant hérite de parent).
-// Produit : parent <|-- enfant
+// ActorInherits declares an inheritance relation between actors (child inherits from parent).
+// Produces: parent <|-- child
 func (u *UseCaseDiagram) ActorInherits(child, parent string) *UseCaseDiagram {
 	return u.add(fmt.Sprintf("%s <|-- %s", parent, child))
 }
 
-// UseCase déclare un cas d'utilisation avec un alias et un libellé.
+// UseCase declares a use case with an alias and a label.
 func (u *UseCaseDiagram) UseCase(alias, label string) *UseCaseDiagram {
 	return u.add(fmt.Sprintf(`usecase "%s" as %s`, label, alias))
 }
 
-// RectangleStart ouvre un bloc rectangle (frontière système).
+// RectangleStart opens a rectangle block (system boundary).
 func (u *UseCaseDiagram) RectangleStart(label string) *UseCaseDiagram {
 	return u.add(fmt.Sprintf(`rectangle "%s" {`, label))
 }
 
-// RectangleEnd ferme un bloc rectangle.
+// RectangleEnd closes a rectangle block.
 func (u *UseCaseDiagram) RectangleEnd() *UseCaseDiagram {
 	return u.add("}")
 }
 
-// Association relie un acteur à un cas d'utilisation.
+// Association links an actor to a use case.
 func (u *UseCaseDiagram) Association(from, to string) *UseCaseDiagram {
 	return u.add(fmt.Sprintf("%s --> %s", from, to))
 }
 
-// Include relie deux cas d'utilisation avec la relation <<include>>.
+// Include links two use cases with the <<include>> relation.
 func (u *UseCaseDiagram) Include(from, to string) *UseCaseDiagram {
 	return u.add(fmt.Sprintf("%s ..> %s : <<include>>", from, to))
 }
 
-// Extend relie deux cas d'utilisation avec la relation <<extend>>.
+// Extend links two use cases with the <<extend>> relation.
 func (u *UseCaseDiagram) Extend(from, to string) *UseCaseDiagram {
 	return u.add(fmt.Sprintf("%s ..> %s : <<extend>>", from, to))
 }
 
-// Blank insère une ligne vide pour l'aération.
+// Blank inserts an empty line for readability.
 func (u *UseCaseDiagram) Blank() *UseCaseDiagram {
 	return u.add("")
 }
 
-// String retourne le diagramme complet en syntaxe PlantUML.
+// String returns the full diagram in PlantUML syntax.
 func (u *UseCaseDiagram) String() string {
 	var b strings.Builder
 	b.WriteString("@startuml\n")
@@ -97,13 +97,13 @@ func (u *UseCaseDiagram) String() string {
 	return b.String()
 }
 
-// WriteTo écrit le diagramme dans un io.Writer.
+// WriteTo writes the diagram to an io.Writer.
 func (u *UseCaseDiagram) WriteTo(w io.Writer) (int64, error) {
 	n, err := fmt.Fprint(w, u.String())
 	return int64(n), err
 }
 
-// WriteFile crée ou écrase le fichier au chemin donné avec le diagramme.
+// WriteFile creates or overwrites the file at the given path with the diagram.
 func (u *UseCaseDiagram) WriteFile(path string) error {
 	f, err := os.Create(path)
 	if err != nil {

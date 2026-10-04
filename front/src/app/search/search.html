@@ -1,0 +1,488 @@
+<div class="container py-5">
+  <div class="row">
+    <!-- Search panel -->
+    <div class="col-lg-4 mb-4">
+      <div class="card border-0 shadow-sm sticky-top" style="top: 1rem">
+        <div class="card-body p-4">
+          <h4 class="card-title fw-bold mb-3">{{ 'search.title' | t }}</h4>
+
+          <div class="mb-3">
+            <label for="title" class="form-label fw-semibold">{{ 'search.titleLabel' | t }}</label>
+            <input
+              id="title"
+              type="text"
+              class="form-control"
+              [(ngModel)]="title"
+              (keyup.enter)="search()"
+              [placeholder]="'common.example' | t: { value: 'Clean Code' }"
+            />
+          </div>
+
+          <div class="mb-3">
+            <button
+              type="button"
+              class="btn btn-link p-0 text-decoration-none text-secondary fw-semibold small"
+              (click)="advancedSearchOpen = !advancedSearchOpen"
+            >
+              {{ advancedSearchOpen ? '▲' : '▼' }} {{ 'search.advanced' | t }}
+            </button>
+          </div>
+
+          @if (advancedSearchOpen) {
+            <div class="border-top pt-3">
+              <p class="text-muted small mb-3">
+                {{ 'search.advancedHint' | t }}
+              </p>
+              <div class="mb-3">
+                <label for="author" class="form-label">{{ 'search.author' | t }}</label>
+                <input
+                  id="author"
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="author"
+                  (keyup.enter)="search()"
+                  [placeholder]="'common.example' | t: { value: 'Zola' }"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="isbn" class="form-label">{{ 'search.isbn' | t }}</label>
+                <input
+                  id="isbn"
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="isbn"
+                  (keyup.enter)="search()"
+                  [placeholder]="'common.example' | t: { value: '978-0131103627' }"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="issueNumber" class="form-label">{{ 'search.journalCode' | t }}</label>
+                <input
+                  id="issueNumber"
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="issueNumber"
+                  (keyup.enter)="search()"
+                  [placeholder]="'common.example' | t: { value: '258' }"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="barcode" class="form-label">{{ 'search.barcode' | t }}</label>
+                <input
+                  id="barcode"
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="barcode"
+                  (keyup.enter)="search()"
+                  [placeholder]="'common.example' | t: { value: 'CB001234' }"
+                />
+              </div>
+              <div class="mb-3 form-check">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="available"
+                  [(ngModel)]="available"
+                />
+                <label class="form-check-label" for="available">{{
+                  'search.availableOnly' | t
+                }}</label>
+              </div>
+            </div>
+          }
+
+          <div class="d-grid gap-2 mt-3">
+            <button type="button" class="btn btn-primary" (click)="search()" [disabled]="loading">
+              @if (loading) {
+                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+              }
+              {{ (loading ? 'search.searching' : 'search.submit') | t }}
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              (click)="clear()"
+              [disabled]="loading"
+            >
+              {{ 'search.clear' | t }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="col-lg-8">
+      @if (error) {
+        <div class="alert alert-danger d-flex align-items-center gap-2 mb-4">
+          <span>{{ error }}</span>
+          <button type="button" class="btn-close ms-auto" (click)="error = null"></button>
+        </div>
+      }
+      @if (!hasSearched && !error) {
+        <div class="alert alert-info text-center">
+          <p class="mb-0">{{ 'search.prompt' | t }}</p>
+        </div>
+      }
+      @if (hasSearched && results.length === 0) {
+        <div class="alert alert-warning text-center">
+          <p class="mb-0">{{ 'search.noResults' | t }}</p>
+        </div>
+      }
+      @if (results.length > 0) {
+        <p class="text-muted small mb-3">
+          {{ 'search.resultsCount' | t: { count: results.length } }}
+        </p>
+        <div class="row g-3">
+          @for (item of results; track item.id) {
+            <div class="col-12">
+              <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="card-title fw-bold mb-0">{{ item.title }}</h5>
+                    <span [class]="'badge ms-2 ' + getTypeBadgeClass(item)">{{
+                      getTypeBadge(item)
+                    }}</span>
+                  </div>
+                  @if (item.author) {
+                    <p class="text-muted small mb-1">
+                      <span class="fw-semibold">{{ 'search.authorLabel' | t }}</span>
+                      {{ item.author }}
+                    </p>
+                  }
+                  @if (item.isbn) {
+                    <p class="text-muted small mb-1">
+                      <span class="fw-semibold">{{ 'search.isbnLabel' | t }}</span>
+                      {{ item.isbn }}
+                    </p>
+                  }
+                  @if (item.issue_number) {
+                    <p class="text-muted small mb-1">
+                      <span class="fw-semibold">{{ 'search.numberLabel' | t }}</span>
+                      {{ item.issue_number }}
+                    </p>
+                  }
+                  <p class="text-muted small mb-1">
+                    <span class="fw-semibold">{{ 'search.availableCopiesLabel' | t }}</span>
+                    <span
+                      [class.text-success]="item.available_copies > 0"
+                      [class.text-danger]="item.available_copies === 0"
+                    >
+                      {{ item.available_copies }}
+                    </span>
+                  </p>
+                  @if (item.location) {
+                    <p class="text-muted small mb-1">
+                      <span class="fw-semibold">{{ 'search.locationLabel' | t }}</span>
+                      {{
+                        'common.location'
+                          | t
+                            : {
+                                bay: item.location.bay_number,
+                                shelf: item.location.shelf_number,
+                                level: item.location.level,
+                              }
+                      }}
+                    </p>
+                  }
+                  <div class="d-flex justify-content-between align-items-center mt-3">
+                    <span class="text-primary fw-bold">{{
+                      'search.deposit' | t: { amount: item.deposit | amount }
+                    }}</span>
+                    <div class="d-flex gap-2">
+                      @if (isLibrarian) {
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-outline-warning"
+                          [title]="'search.manageCopies' | t"
+                          (click)="openCopiesModal(item)"
+                        >
+                          {{ 'search.editCopies' | t }}
+                        </button>
+                      }
+                      <button
+                        type="button"
+                        class="btn btn-sm"
+                        [class.btn-primary]="isLoggedIn"
+                        [class.btn-outline-secondary]="!isLoggedIn"
+                        [disabled]="!isLoggedIn"
+                        [title]="(isLoggedIn ? 'search.borrowTitle' : 'search.loginToBorrow') | t"
+                        (click)="isLoggedIn && openModal(item)"
+                      >
+                        {{ (isLoggedIn ? 'search.borrow' : 'search.logIn') | t }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- ===== LOAN MODAL ===== -->
+@if (modalVisible) {
+  <div class="modal-backdrop fade show"></div>
+  <div class="modal d-block" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold">
+            @if (modalStep === 'input') {
+              {{ 'loanModal.titleInput' | t }}
+            }
+            @if (modalStep === 'preview') {
+              {{ 'loanModal.titlePreview' | t }}
+            }
+            @if (modalStep === 'success') {
+              {{ 'loanModal.titleSuccess' | t }}
+            }
+            @if (modalStep === 'failure') {
+              {{ 'loanModal.titleFailure' | t }}
+            }
+          </h5>
+          <button type="button" class="btn-close" (click)="closeModal()"></button>
+        </div>
+        <div class="modal-body">
+          <!-- STEP 1: choose the copy -->
+          @if (modalStep === 'input') {
+            @if (selectedItem) {
+              <div class="alert alert-light border mb-3">
+                <span class="fw-semibold">{{ selectedItem.title }}</span>
+              </div>
+            }
+            @if (loadingCopies) {
+              <div class="text-center py-3">
+                <span class="spinner-border spinner-border-sm me-2"></span>
+                {{ 'loanModal.loadingCopies' | t }}
+              </div>
+            } @else if (availableCopies.length === 0 && !modalError) {
+              <div class="alert alert-warning mb-0">
+                {{ 'loanModal.noCopies' | t }}
+              </div>
+            } @else {
+              <div class="mb-3">
+                <label for="copySelect" class="form-label">{{
+                  'loanModal.availableCopy' | t
+                }}</label>
+                <select
+                  id="copySelect"
+                  class="form-select"
+                  [(ngModel)]="modalBarcode"
+                  [class.is-invalid]="modalError"
+                >
+                  <option value="">{{ 'loanModal.chooseCopy' | t }}</option>
+                  @for (copy of availableCopies; track copy.id) {
+                    <option [value]="copy.barcode">{{ copy.barcode }}</option>
+                  }
+                </select>
+                @if (modalError) {
+                  <div class="invalid-feedback">{{ modalError }}</div>
+                }
+              </div>
+            }
+          }
+
+          <!-- STEP 2: preview before confirmation -->
+          @if (modalStep === 'preview' && preview) {
+            <div class="alert alert-info mb-3">
+              <p class="mb-1 fw-semibold">{{ preview.title }}</p>
+              <p class="mb-1">
+                {{ 'loanModal.barcodeLabel' | t }} <code>{{ preview.barcode }}</code>
+              </p>
+            </div>
+            <table class="table table-sm table-borderless">
+              <tbody>
+                <tr>
+                  <td class="text-muted">{{ 'loanModal.depositAmount' | t }}</td>
+                  <td class="fw-bold text-danger">- {{ preview.deposit | amount }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted">{{ 'loanModal.currentBalance' | t }}</td>
+                  <td>{{ preview.current_balance | amount }}</td>
+                </tr>
+                <tr class="border-top">
+                  <td class="fw-semibold">{{ 'loanModal.newBalance' | t }}</td>
+                  <td class="fw-bold text-primary">
+                    {{ preview.new_balance | amount }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="text-muted small">
+              {{ 'loanModal.depositRefund' | t }}
+            </p>
+          }
+
+          <!-- STEP 3: success -->
+          @if (modalStep === 'success') {
+            <div class="text-center py-3">
+              <div class="display-4 mb-3">✅</div>
+              <p class="fw-semibold">{{ 'loanModal.successText' | t }}</p>
+              <p class="text-muted small">{{ 'loanModal.successHint' | t }}</p>
+            </div>
+          }
+
+          <!-- STEP 4: failure / declined -->
+          @if (modalStep === 'failure') {
+            <div class="text-center py-3">
+              <div class="display-4 mb-3">❌</div>
+              @if (modalError) {
+                <div class="alert alert-danger text-start">{{ modalError }}</div>
+              } @else {
+                <p class="fw-semibold">{{ 'loanModal.cancelled' | t }}</p>
+              }
+              <p class="text-muted small">{{ 'loanModal.viewLoansQuestion' | t }}</p>
+            </div>
+          }
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          @if (modalStep === 'input') {
+            <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">
+              {{ 'common.cancel' | t }}
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              (click)="checkLoan()"
+              [disabled]="modalLoading || !modalBarcode || loadingCopies"
+            >
+              @if (modalLoading) {
+                <span class="spinner-border spinner-border-sm me-1"></span>
+              }
+              {{ 'loanModal.verify' | t }}
+            </button>
+          }
+          @if (modalStep === 'preview') {
+            <button type="button" class="btn btn-outline-danger" (click)="declineLoan()">
+              {{ 'loanModal.decline' | t }}
+            </button>
+            <button
+              type="button"
+              class="btn btn-success"
+              (click)="confirmLoan()"
+              [disabled]="modalLoading"
+            >
+              @if (modalLoading) {
+                <span class="spinner-border spinner-border-sm me-1"></span>
+              }
+              {{ 'loanModal.confirm' | t }}
+            </button>
+          }
+          @if (modalStep === 'success') {
+            <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">
+              {{ 'common.close' | t }}
+            </button>
+            <button type="button" class="btn btn-primary" (click)="viewMyLoans()">
+              {{ 'loanModal.viewLoans' | t }}
+            </button>
+          }
+          @if (modalStep === 'failure') {
+            <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">
+              {{ 'loanModal.noClose' | t }}
+            </button>
+            <button type="button" class="btn btn-primary" (click)="viewMyLoans()">
+              {{ 'loanModal.yesViewLoans' | t }}
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ===== COPY EDITING MODAL ===== -->
+@if (copiesModalVisible) {
+  <div class="modal-backdrop fade show"></div>
+  <div class="modal d-block" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold">{{ 'copies.title' | t }}</h5>
+          <button type="button" class="btn-close" (click)="closeCopiesModal()"></button>
+        </div>
+        <div class="modal-body">
+          @if (selectedItem) {
+            <div class="alert alert-light border mb-3">
+              <span class="fw-semibold">{{ selectedItem.title }}</span>
+            </div>
+          }
+
+          <!-- Copies table -->
+          @if (loadingAllCopies) {
+            <div class="text-center py-3">
+              <span class="spinner-border spinner-border-sm me-2"></span> {{ 'common.loading' | t }}
+            </div>
+          } @else if (allCopies.length === 0) {
+            <div class="alert alert-warning mb-3">{{ 'copies.none' | t }}</div>
+          } @else {
+            <table class="table table-sm table-bordered mb-4">
+              <thead class="table-light">
+                <tr>
+                  <th>{{ 'copies.barcode' | t }}</th>
+                  <th>{{ 'copies.status' | t }}</th>
+                  <th>{{ 'copies.dueDate' | t }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (copy of allCopies; track copy.id) {
+                  <tr>
+                    <td>
+                      <code>{{ copy.barcode }}</code>
+                    </td>
+                    <td>
+                      @if (copy.is_borrowed) {
+                        <span class="badge bg-danger">{{ 'copies.onLoan' | t }}</span>
+                      } @else {
+                        <span class="badge bg-success">{{ 'copies.available' | t }}</span>
+                      }
+                    </td>
+                    <td class="text-muted small">{{ copy.loan_due_date ?? '—' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+
+          <!-- Creation form -->
+          <hr />
+          <h6 class="fw-semibold mb-3">{{ 'copies.createTitle' | t }}</h6>
+          @if (copyCreated) {
+            <div class="alert alert-success py-2">{{ 'copies.created' | t }}</div>
+          }
+          @if (copiesError && !loadingAllCopies) {
+            <div class="alert alert-danger py-2">{{ copiesError }}</div>
+          }
+          <div class="input-group">
+            <input
+              type="text"
+              class="form-control"
+              [placeholder]="'copies.newBarcodePlaceholder' | t"
+              [(ngModel)]="newBarcode"
+              [disabled]="creatingCopy"
+            />
+            <button
+              type="button"
+              class="btn btn-primary"
+              (click)="createCopy()"
+              [disabled]="creatingCopy || !newBarcode.trim()"
+            >
+              @if (creatingCopy) {
+                <span class="spinner-border spinner-border-sm me-1"></span>
+              }
+              {{ 'common.create' | t }}
+            </button>
+          </div>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeCopiesModal()">
+            {{ 'common.close' | t }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

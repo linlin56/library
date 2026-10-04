@@ -1,62 +1,67 @@
-# Architecture Backend
+# Backend architecture
 
-## Structure des dossiers
+## Folder structure
 
 ```
 back/
-├── main.go              Point d'entrée : routes, init BDD, Swagger
-├── controllers/         Couche HTTP : validation, réponses JSON, codes statut
-├── repositories/        Accès données : requêtes SQL, structs de résultat
-├── models/              Modèles métier : structs Go mappant les tables
-├── db/                  Connexion et utilitaires SQL (DBO maison)
-├── docs/                Spec Swagger générée (ne pas modifier manuellement)
-└── test/                Tests unitaires Go
+├── main.go              Entry point: routes, DB init, Swagger
+├── controllers/         HTTP layer: validation, JSON responses, status codes
+├── repositories/        Data access: SQL queries, result structs
+├── models/              Domain models: Go structs mapping the tables
+├── builder/             Builder pattern for users, students and teachers
+├── factory/             Abstract factory for items (books, journals)
+├── i18n/                API messages in English and French
+├── db/                  Connection and SQL helpers (custom DBO)
+├── docs/                Generated Swagger spec (do not edit by hand)
+├── uml/, cmd/gen-uml/   PlantUML diagram generator
+├── diagrams/            Generated diagrams
+└── test/                Go unit tests
 ```
 
-## Cycle d'une requête
+## Request lifecycle
 
-1. Route Gin dans `main.go` reçoit la requête
-2. Le contrôleur (`controllers/`) valide les paramètres et le body
-3. Le repository (`repositories/`) exécute le SQL
-4. Le contrôleur retourne le JSON avec le code HTTP approprié (200 / 201 / 204 / 4xx / 5xx)
+1. A Gin route in `main.go` receives the request
+2. The controller (`controllers/`) validates the parameters and the body
+3. The repository (`repositories/`) runs the SQL
+4. The controller returns the JSON with the appropriate HTTP code (200 / 201 / 204 / 4xx / 5xx), with messages in the language requested by the client
 
-## Accès base de données
+## Database access
 
-Le projet utilise un DBO maison (`back/db/dbo.go`) sans ORM.
+The project uses a custom DBO (`back/db/dbo.go`) with no ORM.
 
-Méthodes principales :
+Main methods:
 
-- `QueryRows` — requête retournant plusieurs lignes
-- `QueryRow` — requête retournant une seule ligne
-- `Exec` — requête sans retour
-- `ExecReturning` — requête avec `RETURNING id`
-- `WithTx` — exécution dans une transaction
+- `QueryRows` — query returning several rows
+- `QueryRow` — query returning a single row
+- `Exec` — query with no result
+- `ExecReturning` — query with `RETURNING id`
+- `WithTx` — runs inside a transaction
 
-Au démarrage, `SeedIfEmpty("db/scripts/insert.sql")` crée et peuple la base si elle est vide.
+On startup, `SeedIfEmpty("db/scripts/insert.sql")` creates and seeds the database if it is empty.
 
-## Modèle relationnel
+## Relational model
 
-La base exploite l'héritage natif PostgreSQL :
+The database uses native PostgreSQL inheritance:
 
 ```
-ouvrages        (table parente)
-├── livres      INHERITS ouvrages  — ajoute isbn, auteur_id
-└── revues      INHERITS ouvrages  — ajoute numero, date_parution
+items           (parent table)
+├── books       INHERITS items  — adds isbn, author_id
+└── journals    INHERITS items  — adds issue_number, publication_date
 
-utilisateurs    (table parente)
-├── etudiants   INHERITS utilisateurs  — ajoute annee_etude
-└── enseignants INHERITS utilisateurs  — ajoute departement_id
+users           (parent table)
+├── students    INHERITS users  — adds study_year
+└── teachers    INHERITS users  — adds department_id
 ```
 
-Tables indépendantes : `auteurs`, `categories`, `emplacements`, `adresses`, `departements_ecole`, `bibliothecaires`, `exemplaires`, `emprunts`.
+Independent tables: `authors`, `categories`, `locations`, `addresses`, `departments`, `librarians`, `copies`.
 
-Les repositories ciblent explicitement les tables parentes ou enfants selon le besoin (lecture globale sur `ouvrages`, création sur `livres`/`revues`).
+The repositories explicitly target the parent or child tables as needed (global reads on `items`, inserts into `books`/`journals`).
 
-## Génération Swagger
+## Swagger generation
 
 ```bash
 cd back
 ~/go/bin/swag init -g main.go -o docs
 ```
 
-Le CI vérifie que la spec committée est à jour (`git diff --exit-code -- back/docs`).
+The CI checks that the committed spec is up to date (`git diff --exit-code -- back/docs`).

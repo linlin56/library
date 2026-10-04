@@ -10,12 +10,12 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// DBO est le Database Object central, similaire à un EntityManager en Java
+// DBO is the central Database Object, similar to an EntityManager in Java
 type DBO struct {
 	conn *sql.DB
 }
 
-// Config contient les paramètres de connexion
+// Config holds the connection settings
 type Config struct {
 	Host     string
 	Port     int
@@ -25,28 +25,28 @@ type Config struct {
 	SSLMode  string
 }
 
-// NewDBO crée une nouvelle instance du DBO et ouvre la connexion
+// NewDBO creates a new DBO instance and opens the connection
 func NewDBO(cfg Config) (*DBO, error) {
 	dsn := fmt.Sprintf(
-		// URI de connexion PostgreSQL
+		// PostgreSQL connection URI
 		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
 		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.DBName, cfg.SSLMode,
 	)
 
 	conn, err := sql.Open("postgres", dsn)
 	if err != nil {
-		return nil, fmt.Errorf("erreur ouverture connexion: %w", err)
+		return nil, fmt.Errorf("error opening connection: %w", err)
 	}
 
 	if err := conn.Ping(); err != nil {
-		return nil, fmt.Errorf("erreur ping base de données: %w", err)
+		return nil, fmt.Errorf("error pinging database: %w", err)
 	}
 
-	log.Println("Connexion à PostgreSQL établie")
+	log.Println("Connected to PostgreSQL")
 	return &DBO{conn: conn}, nil
 }
 
-// NewDBOFromEnv crée un DBO depuis les variables d'environnement
+// NewDBOFromEnv creates a DBO from environment variables
 func NewDBOFromEnv() (*DBO, error) {
 	cfg := Config{
 		Host:     getEnv("DB_HOST", "localhost"),
@@ -59,14 +59,14 @@ func NewDBOFromEnv() (*DBO, error) {
 	return NewDBO(cfg)
 }
 
-// Close ferme la connexion à la base de données
+// Close closes the database connection
 func (d *DBO) Close() error {
 	return d.conn.Close()
 }
 
-// Méthodes SQL de base, à utiliser dans les repositories
+// Basic SQL methods, to be used in the repositories
 
-// QueryRows exécute une requête SELECT et retourne les lignes
+// QueryRows runs a SELECT query and returns the rows
 func (d *DBO) QueryRows(query string, args ...any) (*sql.Rows, error) {
 	rows, err := d.conn.Query(query, args...)
 	if err != nil {
@@ -75,13 +75,13 @@ func (d *DBO) QueryRows(query string, args ...any) (*sql.Rows, error) {
 	return rows, nil
 }
 
-// QueryRow exécute une requête SELECT et retourne une seule ligne
+// QueryRow runs a SELECT query and returns a single row
 func (d *DBO) QueryRow(query string, args ...any) *sql.Row {
 	return d.conn.QueryRow(query, args...)
 }
 
-// Exec exécute une requête INSERT / UPDATE / DELETE
-// Retourne le nombre de lignes affectées
+// Exec runs an INSERT / UPDATE / DELETE query
+// Returns the number of affected rows
 func (d *DBO) Exec(query string, args ...any) (int64, error) {
 	result, err := d.conn.Exec(query, args...)
 	if err != nil {
@@ -94,13 +94,13 @@ func (d *DBO) Exec(query string, args ...any) (int64, error) {
 	return rowsAffected, nil
 }
 
-// ExecReturning exécute une requête INSERT ... RETURNING id (ou autre colonne)
+// ExecReturning runs an INSERT ... RETURNING id (or another column) query
 func (d *DBO) ExecReturning(query string, args ...any) *sql.Row {
 	return d.conn.QueryRow(query, args...)
 }
 
-// Gestion des transactions :
-// BeginTx démarre une transaction et retourne un TxDBO
+// Transaction management:
+// BeginTx starts a transaction and returns a TxDBO
 func (d *DBO) BeginTx() (*TxDBO, error) {
 	tx, err := d.conn.Begin()
 	if err != nil {
@@ -109,7 +109,7 @@ func (d *DBO) BeginTx() (*TxDBO, error) {
 	return &TxDBO{tx: tx}, nil
 }
 
-// WithTx exécute une fonction dans une transaction, commit ou rollback automatique
+// WithTx runs a function inside a transaction, with automatic commit or rollback
 func (d *DBO) WithTx(fn func(tx *TxDBO) error) error {
 	tx, err := d.BeginTx()
 	if err != nil {
@@ -124,36 +124,36 @@ func (d *DBO) WithTx(fn func(tx *TxDBO) error) error {
 
 	if err := fn(tx); err != nil {
 		_ = tx.Rollback()
-		return fmt.Errorf("transaction annulée: %w", err)
+		return fmt.Errorf("transaction rolled back: %w", err)
 	}
 	return tx.Commit()
 }
 
-// SeedIfEmpty exécute le script SQL si la base est vide (table auteurs absente ou vide)
+// SeedIfEmpty runs the SQL script if the database is empty (authors table missing or empty)
 func (d *DBO) SeedIfEmpty(scriptPath string) error {
 	var tableCount int
 	err := d.conn.QueryRow(`
 		SELECT COUNT(*) FROM information_schema.tables
-		WHERE table_schema = 'public' AND table_name = 'auteurs'
+		WHERE table_schema = 'public' AND table_name = 'authors'
 	`).Scan(&tableCount)
 	if err != nil {
-		return fmt.Errorf("erreur vérification tables: %w", err)
+		return fmt.Errorf("error checking tables: %w", err)
 	}
 
 	if tableCount > 0 {
 		var rowCount int
-		if err := d.conn.QueryRow("SELECT COUNT(*) FROM auteurs").Scan(&rowCount); err != nil {
-			return fmt.Errorf("erreur vérification données: %w", err)
+		if err := d.conn.QueryRow("SELECT COUNT(*) FROM authors").Scan(&rowCount); err != nil {
+			return fmt.Errorf("error checking data: %w", err)
 		}
 		if rowCount > 0 {
-			log.Println("Base de données déjà peuplée, aucun chargement nécessaire")
+			log.Println("Database already seeded, nothing to load")
 			return nil
 		}
 	}
 
 	script, err := os.ReadFile(scriptPath)
 	if err != nil {
-		return fmt.Errorf("erreur lecture script SQL %s: %w", scriptPath, err)
+		return fmt.Errorf("error reading SQL script %s: %w", scriptPath, err)
 	}
 
 	stmts := splitSQLStatements(string(script))
@@ -163,17 +163,17 @@ func (d *DBO) SeedIfEmpty(scriptPath string) error {
 			if len(preview) > 80 {
 				preview = preview[:80] + "..."
 			}
-			return fmt.Errorf("erreur instruction #%d (%s): %w", i+1, preview, err)
+			return fmt.Errorf("error in statement #%d (%s): %w", i+1, preview, err)
 		}
 	}
 
-	log.Println("Base de données peuplée avec succès")
+	log.Println("Database seeded successfully")
 	return nil
 }
 
-// splitSQLStatements découpe un script SQL en instructions individuelles.
-// Gère les chaînes entre guillemets simples (y compris les '' échappés) et les commentaires --.
-// Cela évite les split naïfs sur les points-virgules qui pourraient être présents dans les données.
+// splitSQLStatements splits a SQL script into individual statements.
+// Handles single-quoted strings (including escaped '') and -- comments.
+// This avoids naive splitting on semicolons that may appear in the data.
 func splitSQLStatements(script string) []string {
 	var stmts []string
 	var cur strings.Builder
@@ -201,7 +201,7 @@ func splitSQLStatements(script string) []string {
 			inString = true
 			cur.WriteByte(ch)
 		case ch == '-' && i+1 < n && script[i+1] == '-':
-			// commentaire ligne : sauter jusqu'à la fin de ligne
+			// line comment: skip to the end of the line
 			for i < n && script[i] != '\n' {
 				i++
 			}

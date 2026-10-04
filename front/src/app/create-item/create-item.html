@@ -1,0 +1,328 @@
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+      <h1 class="fw-bold mb-1">{{ 'createItem.title' | t }}</h1>
+      <p class="text-muted mb-4">{{ 'createItem.subtitle' | t }}</p>
+
+      @if (step === 'form') {
+        @if (error) {
+          <div class="alert alert-danger d-flex align-items-center gap-2 mb-4">
+            <span>{{ error }}</span>
+            <button type="button" class="btn-close ms-auto" (click)="error = null"></button>
+          </div>
+        }
+
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <!-- Type -->
+            <div class="mb-4">
+              <label class="form-label fw-semibold"
+                >{{ 'createItem.type' | t }} <span class="text-danger">*</span></label
+              >
+              <div class="d-flex gap-4">
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    id="typeBook"
+                    name="type"
+                    [(ngModel)]="type"
+                    value="book"
+                    (change)="changeType()"
+                  />
+                  <label class="form-check-label" for="typeBook">{{
+                    'search.types.book' | t
+                  }}</label>
+                </div>
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    id="typeJournal"
+                    name="type"
+                    [(ngModel)]="type"
+                    value="journal"
+                    (change)="changeType()"
+                  />
+                  <label class="form-check-label" for="typeJournal">{{
+                    'search.types.journal' | t
+                  }}</label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Title -->
+            <div class="mb-3">
+              <label for="title" class="form-label fw-semibold"
+                >{{ 'createItem.titleLabel' | t }} <span class="text-danger">*</span></label
+              >
+              <input
+                id="title"
+                type="text"
+                class="form-control"
+                [(ngModel)]="title"
+                [placeholder]="'common.example' | t: { value: 'Clean Code' }"
+              />
+            </div>
+
+            <!-- Deposit -->
+            <div class="mb-3">
+              <label for="deposit" class="form-label fw-semibold"
+                >{{ 'createItem.deposit' | t }} <span class="text-danger">*</span></label
+              >
+              <input
+                id="deposit"
+                type="number"
+                class="form-control"
+                min="0"
+                step="0.01"
+                [(ngModel)]="deposit"
+                [placeholder]="'common.example' | t: { value: '5.00' }"
+              />
+            </div>
+
+            <!-- Location (shared) -->
+            <div class="mb-3">
+              <label for="location" class="form-label fw-semibold"
+                >{{ 'createItem.location' | t }} <span class="text-danger">*</span></label
+              >
+              <select id="location" class="form-select" [(ngModel)]="locationId">
+                <option [ngValue]="null" disabled>{{ 'createItem.selectLocation' | t }}</option>
+                @for (loc of locations; track loc.id) {
+                  <option [ngValue]="loc.id">
+                    {{
+                      'common.location'
+                        | t: { bay: loc.bay_number, shelf: loc.shelf_number, level: loc.level }
+                    }}
+                    @if (loc.category_name) {
+                      ({{ loc.category_name }})
+                    }
+                  </option>
+                }
+              </select>
+            </div>
+
+            <!-- BOOK fields -->
+            @if (type === 'book') {
+              <div class="mb-3">
+                <label for="isbn" class="form-label fw-semibold"
+                  >{{ 'createItem.isbn' | t }} <span class="text-danger">*</span></label
+                >
+                <input
+                  id="isbn"
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="isbn"
+                  [placeholder]="'common.example' | t: { value: '978-0132350884' }"
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="authorSearch" class="form-label fw-semibold"
+                  >{{ 'createItem.author' | t }} <span class="text-danger">*</span></label
+                >
+
+                <!-- Autocomplete field -->
+                @if (!newAuthorVisible) {
+                  <div class="position-relative">
+                    <input
+                      id="authorSearch"
+                      type="text"
+                      class="form-control"
+                      [(ngModel)]="authorQuery"
+                      (input)="filterAuthors()"
+                      (blur)="closeSuggestions()"
+                      [placeholder]="'createItem.authorPlaceholder' | t"
+                      autocomplete="off"
+                    />
+                    @if (selectedAuthor) {
+                      <span
+                        class="position-absolute top-50 end-0 translate-middle-y pe-3 text-success fw-semibold small"
+                        >{{ 'createItem.selected' | t }}</span
+                      >
+                    }
+                    @if (suggestionsOpen) {
+                      <ul
+                        class="list-group position-absolute w-100 shadow-sm z-3"
+                        style="top: 100%; max-height: 220px; overflow-y: auto"
+                      >
+                        @for (author of authorSuggestions; track author.id) {
+                          <li
+                            class="list-group-item list-group-item-action py-2"
+                            (mousedown)="selectAuthor(author)"
+                          >
+                            {{ author.first_name }} {{ author.last_name }}
+                          </li>
+                        }
+                        <li
+                          class="list-group-item list-group-item-action py-2 text-primary fw-semibold"
+                          (mousedown)="chooseNewAuthor()"
+                        >
+                          {{ 'createItem.newAuthorOption' | t }}
+                        </li>
+                      </ul>
+                    }
+                  </div>
+                }
+
+                <!-- New author fields -->
+                @if (newAuthorVisible) {
+                  <div class="border rounded p-3 bg-light">
+                    <p class="small text-muted mb-2">{{ 'createItem.newAuthor' | t }}</p>
+                    <div class="row g-2">
+                      <div class="col-6">
+                        <input
+                          type="text"
+                          class="form-control"
+                          [(ngModel)]="authorFirstName"
+                          [placeholder]="'createItem.firstName' | t"
+                        />
+                      </div>
+                      <div class="col-6">
+                        <input
+                          type="text"
+                          class="form-control"
+                          [(ngModel)]="authorLastName"
+                          [placeholder]="'createItem.lastName' | t"
+                        />
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      class="btn btn-link btn-sm p-0 mt-2 text-secondary"
+                      (click)="newAuthorVisible = false; authorQuery = ''"
+                    >
+                      {{ 'createItem.backToSearch' | t }}
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- JOURNAL fields -->
+            @if (type === 'journal') {
+              <div class="mb-3">
+                <label for="issueNumber" class="form-label fw-semibold"
+                  >{{ 'createItem.number' | t }} <span class="text-danger">*</span></label
+                >
+                <input
+                  id="issueNumber"
+                  type="number"
+                  class="form-control"
+                  min="1"
+                  step="1"
+                  [(ngModel)]="issueNumber"
+                  [placeholder]="'common.example' | t: { value: '258' }"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="publicationDate" class="form-label fw-semibold"
+                  >{{ 'createItem.publicationDate' | t }} <span class="text-danger">*</span></label
+                >
+                <input
+                  id="publicationDate"
+                  type="date"
+                  class="form-control"
+                  [(ngModel)]="publicationDate"
+                />
+              </div>
+            }
+
+            <div class="d-grid mt-4">
+              <button type="button" class="btn btn-primary" (click)="submit()" [disabled]="loading">
+                @if (loading) {
+                  <span class="spinner-border spinner-border-sm me-2"></span>
+                }
+                {{ (type === 'book' ? 'createItem.createBook' : 'createItem.createJournal') | t }}
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- STEP 2: copy management -->
+      @if (step === 'copies') {
+        <div class="alert alert-success d-flex align-items-center gap-2 mb-4">
+          <span
+            >✅ <strong>{{ createdItemTitle }}</strong> {{ 'createItem.createdSuffix' | t }}</span
+          >
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h5 class="fw-semibold mb-3">{{ 'copies.title' | t }}</h5>
+
+            @if (loadingCopies) {
+              <div class="text-center py-3">
+                <span class="spinner-border spinner-border-sm me-2"></span>
+                {{ 'common.loading' | t }}
+              </div>
+            } @else if (allCopies.length === 0) {
+              <div class="alert alert-warning mb-3">{{ 'copies.none' | t }}</div>
+            } @else {
+              <table class="table table-sm table-bordered mb-4">
+                <thead class="table-light">
+                  <tr>
+                    <th>{{ 'copies.barcode' | t }}</th>
+                    <th>{{ 'copies.status' | t }}</th>
+                    <th>{{ 'copies.dueDate' | t }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (copy of allCopies; track copy.id) {
+                    <tr>
+                      <td>
+                        <code>{{ copy.barcode }}</code>
+                      </td>
+                      <td>
+                        @if (copy.is_borrowed) {
+                          <span class="badge bg-danger">{{ 'copies.onLoan' | t }}</span>
+                        } @else {
+                          <span class="badge bg-success">{{ 'copies.available' | t }}</span>
+                        }
+                      </td>
+                      <td class="text-muted small">{{ copy.loan_due_date ?? '—' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            }
+
+            <hr />
+            <h6 class="fw-semibold mb-3">{{ 'copies.createTitle' | t }}</h6>
+            @if (copyCreated) {
+              <div class="alert alert-success py-2">{{ 'copies.created' | t }}</div>
+            }
+            @if (copiesError) {
+              <div class="alert alert-danger py-2">{{ copiesError }}</div>
+            }
+            <div class="input-group">
+              <input
+                type="text"
+                class="form-control"
+                [placeholder]="'copies.newBarcodePlaceholder' | t"
+                [(ngModel)]="newBarcode"
+                [disabled]="creatingCopy"
+              />
+              <button
+                type="button"
+                class="btn btn-primary"
+                (click)="createCopy()"
+                [disabled]="creatingCopy || !newBarcode.trim()"
+              >
+                @if (creatingCopy) {
+                  <span class="spinner-border spinner-border-sm me-1"></span>
+                }
+                {{ 'common.create' | t }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-outline-secondary w-100" (click)="createAnotherItem()">
+          {{ 'createItem.createAnother' | t }}
+        </button>
+      }
+    </div>
+  </div>
+</div>

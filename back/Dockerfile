@@ -5,14 +5,14 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -o /bibliotheque-api .
+RUN CGO_ENABLED=0 GOOS=linux go build -o /library-api .
 
 FROM alpine:3.21
 RUN apk add --no-cache ca-certificates tzdata
 WORKDIR /app
 
-COPY --from=builder /bibliotheque-api .
+COPY --from=builder /library-api .
 COPY db/scripts/ db/scripts/
 
 EXPOSE 8080
-CMD ["./bibliotheque-api"]
+CMD ["./library-api"]

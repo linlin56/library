@@ -13,8 +13,8 @@ jobs:
         image: postgres:latest
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: admin_bibli
-          POSTGRES_DB: bibliotheque
+          POSTGRES_PASSWORD: admin_library
+          POSTGRES_DB: library
         ports:
           - 5435:5432
         options: >-
@@ -27,8 +27,8 @@ jobs:
       DB_HOST: 127.0.0.1
       DB_PORT: 5435
       DB_USER: postgres
-      DB_PASSWORD: admin_bibli
-      DB_NAME: bibliotheque
+      DB_PASSWORD: admin_library
+      DB_NAME: library
 
     steps:
       - uses: actions/checkout@v4

@@ -1,40 +1,45 @@
 # Backend
 
-## Stack technique
+## Tech stack
 
 - Go
-- Gin (routeur HTTP)
-- PostgreSQL (héritage natif de tables)
+- Gin (HTTP router)
+- PostgreSQL (native table inheritance)
 - Swagger (swaggo/swag)
 
-## Démarrage local
+## Running locally
 
 ```bash
 make run-back
 ```
 
-L'API écoute sur `http://localhost:8080/api`.  
-L'interface Swagger est disponible sur `http://localhost:8080/swagger/index.html`.
+The API listens on `http://localhost:8080/api`.  
+The Swagger UI is available at `http://localhost:8080/swagger/index.html`.
 
-## Variables d'environnement
+## Environment variables
 
-| Variable | Valeur par défaut | Description |
-|----------|------------------|-------------|
-| `DB_HOST` | `localhost` | Hôte PostgreSQL |
-| `DB_PORT` | `5432` | Port PostgreSQL |
-| `DB_USER` | `postgres` | Utilisateur PostgreSQL |
-| `DB_PASSWORD` | _(vide)_ | Mot de passe PostgreSQL |
-| `DB_NAME` | `bibliotheque` | Nom de la base |
-| `DB_SSLMODE` | `disable` | Mode SSL |
+| Variable | Default value | Description |
+|----------|---------------|-------------|
+| `DB_HOST` | `localhost` | PostgreSQL host |
+| `DB_PORT` | `5432` | PostgreSQL port |
+| `DB_USER` | `postgres` | PostgreSQL user |
+| `DB_PASSWORD` | _(empty)_ | PostgreSQL password |
+| `DB_NAME` | `library` | Database name |
+| `DB_SSLMODE` | `disable` | SSL mode |
+| `CORS_ORIGIN` | `http://localhost:4200` | Origin allowed to call the API |
 
-## Tests unitaires
+## Languages
+
+API messages (errors and confirmations) are available in English and French. The language is picked from the `Accept-Language` request header, English by default. The catalogue lives in `back/i18n/messages.go`.
+
+## Unit tests
 
 ```bash
 cd back
 go test ./test/...
 ```
 
-Les tests sont dans `back/test/` et ne nécessitent pas de base de données active.
+The tests live in `back/test/` and do not need a running database.
 
 ## Sections
 

@@ -1,15 +1,15 @@
-// @title           Bibliothèque API
+// @title           Library API
 // @version         1.0
-// @description     API REST de gestion de bibliothèque universitaire.
+// @description     REST API for managing a university library.
 // @host            localhost:8080
 // @BasePath        /api
 
 package main
 
 import (
-	"bibliotheque/controllers"
-	"bibliotheque/db"
-	_ "bibliotheque/docs"
+	"library/controllers"
+	"library/db"
+	_ "library/docs"
 	"log"
 	"os"
 
@@ -33,7 +33,7 @@ func main() {
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{corsOrigin},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "Accept-Language"},
 		AllowCredentials: true,
 	}))
 
@@ -41,26 +41,26 @@ func main() {
 
 	api := r.Group("/api")
 	{
-		api.GET("/accueil", controllers.Accueil)
-		api.POST("/connexion", controllers.Connexion)
-		api.GET("/ouvrages", controllers.GetOuvrages)
-		api.GET("/ouvrages/:id/exemplaires", controllers.GetExemplairesDisponibles)
-		api.GET("/ouvrages/:id/exemplaires/tous", controllers.GetTousExemplaires)
-		api.POST("/ouvrages/:id/exemplaires", controllers.CreerExemplaireForOuvrage)
-		api.GET("/auteurs", controllers.GetAuteurs)
-		api.GET("/emplacements", controllers.GetEmplacements)
-		api.POST("/livres", controllers.CreerLivre)
-		api.POST("/revues", controllers.CreerRevue)
-		api.GET("/departements", controllers.GetDepartements)
-		api.POST("/utilisateurs", controllers.CreerUtilisateur)
-		api.GET("/utilisateurs/:id/caution", controllers.GetCaution)
-		api.PUT("/utilisateurs/:id/caution", controllers.UpdateCautionTotale)
-		api.GET("/emprunts/verifier", controllers.VerifierEmprunt)
-		api.GET("/emprunts", controllers.ListerEmprunts)
-		api.GET("/emprunts/retard", controllers.ListerEmpruntsEnRetard)
-		api.POST("/emprunts", controllers.Emprunter)
-		api.DELETE("/emprunts/:id", controllers.RetournerEmprunt)
-		api.GET("/utilisateurs/rechercher", controllers.RechercherUtilisateurs)
+		api.GET("/home", controllers.Home)
+		api.POST("/login", controllers.Login)
+		api.GET("/items", controllers.GetItems)
+		api.GET("/items/:id/copies", controllers.GetAvailableCopies)
+		api.GET("/items/:id/copies/all", controllers.GetAllCopies)
+		api.POST("/items/:id/copies", controllers.CreateCopyForItem)
+		api.GET("/authors", controllers.GetAuthors)
+		api.GET("/locations", controllers.GetLocations)
+		api.POST("/books", controllers.CreateBook)
+		api.POST("/journals", controllers.CreateJournal)
+		api.GET("/departments", controllers.GetDepartments)
+		api.POST("/users", controllers.CreateUser)
+		api.GET("/users/:id/deposit", controllers.GetDeposit)
+		api.PUT("/users/:id/deposit", controllers.UpdateTotalDeposit)
+		api.GET("/loans/check", controllers.CheckLoan)
+		api.GET("/loans", controllers.ListLoans)
+		api.GET("/loans/overdue", controllers.ListOverdueLoans)
+		api.POST("/loans", controllers.Borrow)
+		api.DELETE("/loans/:id", controllers.ReturnLoan)
+		api.GET("/users/search", controllers.SearchUsers)
 	}
 
 	if err := r.Run(":8080"); err != nil {

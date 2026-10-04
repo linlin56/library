@@ -1,191 +1,191 @@
 package test
 
 import (
-	"bibliotheque/builder"
-	"bibliotheque/models"
+	"library/builder"
+	"library/models"
 	"testing"
 	"time"
 )
 
-// Tests pour le design pattern builder
-// ===================== UtilisateurBuilder =====================
+// Tests for the builder design pattern
+// ===================== UserBuilder =====================
 
-func TestUtilisateurBuilder_Build_ChampsSimples(t *testing.T) {
-	ddn := time.Date(1990, 5, 12, 0, 0, 0, 0, time.UTC)
-	u := builder.NewUtilisateurBuilder().
-		WithNom("Martin").
-		WithPrenom("Jean").
+func TestUserBuilder_Build_SimpleFields(t *testing.T) {
+	birthDate := time.Date(1990, 5, 12, 0, 0, 0, 0, time.UTC)
+	u := builder.NewUserBuilder().
+		WithLastName("Martin").
+		WithFirstName("Jean").
 		WithLogin("jmartin").
-		WithMotDePasse("mdp").
-		WithEmail("jean@exemple.fr").
-		WithNumeroTelephone("0612345678").
-		WithSoldeCaution(20.0).
-		WithDateDeNaissance(ddn).
+		WithPassword("password").
+		WithEmail("jean@example.com").
+		WithPhoneNumber("0612345678").
+		WithDepositBalance(20.0).
+		WithBirthDate(birthDate).
 		Build()
-	if u.Nom != "Martin" {
-		t.Errorf("Nom: attendu Martin, obtenu %s", u.Nom)
+	if u.LastName != "Martin" {
+		t.Errorf("LastName: expected Martin, got %s", u.LastName)
 	}
-	if u.Prenom != "Jean" {
-		t.Errorf("Prenom: attendu Jean, obtenu %s", u.Prenom)
+	if u.FirstName != "Jean" {
+		t.Errorf("FirstName: expected Jean, got %s", u.FirstName)
 	}
 	if u.Login != "jmartin" {
-		t.Errorf("Login: attendu jmartin, obtenu %s", u.Login)
+		t.Errorf("Login: expected jmartin, got %s", u.Login)
 	}
-	if u.MotDePasse != "mdp" {
-		t.Errorf("MotDePasse incorrect: %s", u.MotDePasse)
+	if u.Password != "password" {
+		t.Errorf("Wrong Password: %s", u.Password)
 	}
-	if u.Email != "jean@exemple.fr" {
-		t.Errorf("Email incorrect: %s", u.Email)
+	if u.Email != "jean@example.com" {
+		t.Errorf("Wrong Email: %s", u.Email)
 	}
-	if u.NumeroTelephone != "0612345678" {
-		t.Errorf("NumeroTelephone incorrect: %s", u.NumeroTelephone)
+	if u.PhoneNumber != "0612345678" {
+		t.Errorf("Wrong PhoneNumber: %s", u.PhoneNumber)
 	}
-	if u.SoldeCaution != 20.0 {
-		t.Errorf("SoldeCaution: attendu 20.0, obtenu %.2f", u.SoldeCaution)
+	if u.DepositBalance != 20.0 {
+		t.Errorf("DepositBalance: expected 20.0, got %.2f", u.DepositBalance)
 	}
-	if !u.DateDeNaissance.Equal(ddn) {
-		t.Errorf("DateDeNaissance incorrecte")
+	if !u.BirthDate.Equal(birthDate) {
+		t.Errorf("Wrong BirthDate")
 	}
 }
 
-func TestUtilisateurBuilder_Build_RetournePointeurUtilisateur(t *testing.T) {
-	u := builder.NewUtilisateurBuilder().WithNom("Test").Build()
+func TestUserBuilder_Build_ReturnsUserPointer(t *testing.T) {
+	u := builder.NewUserBuilder().WithLastName("Test").Build()
 	_ = u
 }
 
-func TestUtilisateurBuilder_Build_ValeursParDefautVides(t *testing.T) {
-	u := builder.NewUtilisateurBuilder().Build()
-	if u.Nom != "" {
-		t.Errorf("Nom devrait etre vide par defaut, obtenu %s", u.Nom)
+func TestUserBuilder_Build_EmptyDefaults(t *testing.T) {
+	u := builder.NewUserBuilder().Build()
+	if u.LastName != "" {
+		t.Errorf("LastName should be empty by default, got %s", u.LastName)
 	}
-	if u.SoldeCaution != 0 {
-		t.Errorf("SoldeCaution devrait etre 0 par defaut, obtenu %.2f", u.SoldeCaution)
-	}
-}
-
-func TestUtilisateurBuilder_Chaining_RetourneMemeBuildeur(t *testing.T) {
-	b := builder.NewUtilisateurBuilder()
-	u := b.WithNom("Test").WithPrenom("User").Build()
-	if u.Nom != "Test" {
-		t.Errorf("Nom apres chaingage: attendu Test, obtenu %s", u.Nom)
+	if u.DepositBalance != 0 {
+		t.Errorf("DepositBalance should be 0 by default, got %.2f", u.DepositBalance)
 	}
 }
 
-// ===================== EtudiantBuilder =====================
+func TestUserBuilder_Chaining_ReturnsSameBuilder(t *testing.T) {
+	b := builder.NewUserBuilder()
+	u := b.WithLastName("Test").WithFirstName("User").Build()
+	if u.LastName != "Test" {
+		t.Errorf("LastName after chaining: expected Test, got %s", u.LastName)
+	}
+}
 
-func TestEtudiantBuilder_Build_ChampsComplets(t *testing.T) {
-	ddn := time.Date(2000, 9, 1, 0, 0, 0, 0, time.UTC)
-	e := builder.NewEtudiantBuilder().
-		WithNom("Dupont").
-		WithPrenom("Marie").
+// ===================== StudentBuilder =====================
+
+func TestStudentBuilder_Build_AllFields(t *testing.T) {
+	birthDate := time.Date(2000, 9, 1, 0, 0, 0, 0, time.UTC)
+	s := builder.NewStudentBuilder().
+		WithLastName("Dupont").
+		WithFirstName("Marie").
 		WithLogin("mdupont").
-		WithMotDePasse("mdp").
-		WithEmail("marie@exemple.fr").
-		WithNumeroTelephone("0698765432").
-		WithSoldeCaution(20.0).
-		WithDateDeNaissance(ddn).
-		WithAnneeEtude("L3").
+		WithPassword("password").
+		WithEmail("marie@example.com").
+		WithPhoneNumber("0698765432").
+		WithDepositBalance(20.0).
+		WithBirthDate(birthDate).
+		WithStudyYear("L3").
 		Build()
-	if e.Nom != "Dupont" {
-		t.Errorf("Nom: attendu Dupont, obtenu %s", e.Nom)
+	if s.LastName != "Dupont" {
+		t.Errorf("LastName: expected Dupont, got %s", s.LastName)
 	}
-	if e.AnneeEtude != "L3" {
-		t.Errorf("AnneeEtude: attendu L3, obtenu %s", e.AnneeEtude)
+	if s.StudyYear != "L3" {
+		t.Errorf("StudyYear: expected L3, got %s", s.StudyYear)
 	}
-	if e.SoldeCaution != 20.0 {
-		t.Errorf("SoldeCaution: attendu 20.0, obtenu %.2f", e.SoldeCaution)
-	}
-}
-
-func TestEtudiantBuilder_Build_RetournePointeurEtudiant(t *testing.T) {
-	e := builder.NewEtudiantBuilder().WithNom("Test").Build()
-	_ = e
-}
-
-func TestEtudiantBuilder_Build_AnneeEtudeVideParDefaut(t *testing.T) {
-	e := builder.NewEtudiantBuilder().WithNom("Test").Build()
-	if e.AnneeEtude != "" {
-		t.Errorf("AnneeEtude devrait etre vide par defaut, obtenu %s", e.AnneeEtude)
+	if s.DepositBalance != 20.0 {
+		t.Errorf("DepositBalance: expected 20.0, got %.2f", s.DepositBalance)
 	}
 }
 
-func TestEtudiantBuilder_HeritageUtilisateurChamps(t *testing.T) {
-	e := builder.NewEtudiantBuilder().
-		WithNom("Bernard").
-		WithPrenom("Alice").
-		WithSoldeCaution(15.0).
+func TestStudentBuilder_Build_ReturnsStudentPointer(t *testing.T) {
+	s := builder.NewStudentBuilder().WithLastName("Test").Build()
+	_ = s
+}
+
+func TestStudentBuilder_Build_StudyYearEmptyByDefault(t *testing.T) {
+	s := builder.NewStudentBuilder().WithLastName("Test").Build()
+	if s.StudyYear != "" {
+		t.Errorf("StudyYear should be empty by default, got %s", s.StudyYear)
+	}
+}
+
+func TestStudentBuilder_InheritsUserFields(t *testing.T) {
+	s := builder.NewStudentBuilder().
+		WithLastName("Bernard").
+		WithFirstName("Alice").
+		WithDepositBalance(15.0).
 		Build()
-	if e.Nom != "Bernard" {
-		t.Errorf("Nom: attendu Bernard, obtenu %s", e.Nom)
+	if s.LastName != "Bernard" {
+		t.Errorf("LastName: expected Bernard, got %s", s.LastName)
 	}
-	if e.SoldeCaution != 15.0 {
-		t.Errorf("Utilisateur.SoldeCaution: attendu 15.0, obtenu %.2f", e.SoldeCaution)
+	if s.DepositBalance != 15.0 {
+		t.Errorf("User.DepositBalance: expected 15.0, got %.2f", s.DepositBalance)
 	}
 }
 
-// ===================== EnseignantBuilder =====================
+// ===================== TeacherBuilder =====================
 
-func TestEnseignantBuilder_Build_SansDepartement(t *testing.T) {
-	ens := builder.NewEnseignantBuilder().
-		WithNom("Roche").
-		WithPrenom("Pierre").
+func TestTeacherBuilder_Build_WithoutDepartment(t *testing.T) {
+	teacher := builder.NewTeacherBuilder().
+		WithLastName("Roche").
+		WithFirstName("Pierre").
 		WithLogin("proche").
-		WithMotDePasse("mdp").
+		WithPassword("password").
 		Build()
-	if ens.Nom != "Roche" {
-		t.Errorf("Nom: attendu Roche, obtenu %s", ens.Nom)
+	if teacher.LastName != "Roche" {
+		t.Errorf("LastName: expected Roche, got %s", teacher.LastName)
 	}
-	if ens.Departement != nil {
-		t.Error("Departement doit etre nil si non renseigne")
+	if teacher.Department != nil {
+		t.Error("Department must be nil when not set")
 	}
 }
 
-func TestEnseignantBuilder_Build_AvecDepartement(t *testing.T) {
-	dept := models.NewDepartementEcole(2, "Physique")
-	ens := builder.NewEnseignantBuilder().
-		WithNom("Bernard").
-		WithPrenom("Claire").
+func TestTeacherBuilder_Build_WithDepartment(t *testing.T) {
+	dept := models.NewDepartment(2, "Physique")
+	teacher := builder.NewTeacherBuilder().
+		WithLastName("Bernard").
+		WithFirstName("Claire").
 		WithLogin("cbernard").
-		WithDepartement(dept).
+		WithDepartment(dept).
 		Build()
-	if ens.Departement == nil {
-		t.Fatal("Departement ne doit pas etre nil")
+	if teacher.Department == nil {
+		t.Fatal("Department must not be nil")
 	}
-	if ens.Departement.Id != 2 {
-		t.Errorf("Departement.Id: attendu 2, obtenu %d", ens.Departement.Id)
+	if teacher.Department.Id != 2 {
+		t.Errorf("Department.Id: expected 2, got %d", teacher.Department.Id)
 	}
-	if ens.Departement.Nom != "Physique" {
-		t.Errorf("Departement.Nom: attendu Physique, obtenu %s", ens.Departement.Nom)
+	if teacher.Department.Name != "Physique" {
+		t.Errorf("Department.Name: expected Physique, got %s", teacher.Department.Name)
 	}
 }
 
-func TestEnseignantBuilder_Build_RetournePointeurEnseignant(t *testing.T) {
-	ens := builder.NewEnseignantBuilder().WithNom("Test").Build()
-	_ = ens
+func TestTeacherBuilder_Build_ReturnsTeacherPointer(t *testing.T) {
+	teacher := builder.NewTeacherBuilder().WithLastName("Test").Build()
+	_ = teacher
 }
 
-func TestEnseignantBuilder_Build_ChampsUtilisateurPropages(t *testing.T) {
-	ens := builder.NewEnseignantBuilder().
-		WithNom("Durand").
-		WithPrenom("Luc").
-		WithEmail("luc@exemple.fr").
-		WithSoldeCaution(20.0).
+func TestTeacherBuilder_Build_UserFieldsPropagated(t *testing.T) {
+	teacher := builder.NewTeacherBuilder().
+		WithLastName("Durand").
+		WithFirstName("Luc").
+		WithEmail("luc@example.com").
+		WithDepositBalance(20.0).
 		Build()
-	if ens.Nom != "Durand" {
-		t.Errorf("Utilisateur.Nom: attendu Durand, obtenu %s", ens.Nom)
+	if teacher.LastName != "Durand" {
+		t.Errorf("User.LastName: expected Durand, got %s", teacher.LastName)
 	}
-	if ens.Email != "luc@exemple.fr" {
-		t.Errorf("Utilisateur.Email incorrect: %s", ens.Email)
+	if teacher.Email != "luc@example.com" {
+		t.Errorf("Wrong User.Email: %s", teacher.Email)
 	}
 }
 
-func TestEnseignantBuilder_Build_DateDeNaissance(t *testing.T) {
-	ddn := time.Date(1975, 3, 20, 0, 0, 0, 0, time.UTC)
-	ens := builder.NewEnseignantBuilder().
-		WithNom("Lefebvre").
-		WithDateDeNaissance(ddn).
+func TestTeacherBuilder_Build_BirthDate(t *testing.T) {
+	birthDate := time.Date(1975, 3, 20, 0, 0, 0, 0, time.UTC)
+	teacher := builder.NewTeacherBuilder().
+		WithLastName("Lefebvre").
+		WithBirthDate(birthDate).
 		Build()
-	if !ens.DateDeNaissance.Equal(ddn) {
-		t.Errorf("DateDeNaissance incorrecte")
+	if !teacher.BirthDate.Equal(birthDate) {
+		t.Errorf("Wrong BirthDate")
 	}
 }

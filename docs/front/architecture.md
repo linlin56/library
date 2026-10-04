@@ -1,118 +1,125 @@
-# Architecture Frontend
+# Frontend architecture
 
-## Structure des dossiers
+## Folder structure
 
 ```
 front/src/app/
-├── accueil/                   Page d'accueil
-├── connexion/                 Formulaire de connexion
-├── recherche/                 Recherche d'ouvrages + modal d'emprunt
-├── mes-emprunts/              Emprunts actifs de l'utilisateur connecté
-├── creer-utilisateur/         Formulaire de création utilisateur
-├── creer-ouvrage/             Formulaire de création livre ou revue
-├── emprunts-bibliothecaire/   Gestion des emprunts côté bibliothécaire
-├── emprunts-retard/           Liste des emprunts en retard
-├── guards/                    Protections de routes
-├── services/                  Appels API
-└── shared/                    Composants partagés (navbar)
+├── home/            Home page
+├── login/           Login form
+├── search/          Item search + loan modal
+├── my-loans/        Active loans of the logged-in user
+├── create-user/     User creation form
+├── create-item/     Book or journal creation form
+├── user-loans/      Loan management for librarians
+├── overdue-loans/   List of overdue loans
+├── guards/          Route guards
+├── i18n/            Translations, language service, pipes, interceptor
+├── services/        API calls
+└── shared/          Shared components (navbar)
 ```
 
 ## Routes
 
-| Route | Composant | Accès |
-|-------|-----------|-------|
-| `/` | AccueilComponent | Public |
-| `/connexion` | ConnexionComponent | Non connecté (connexionGuard) |
-| `/recherche` | RechercheComponent | Public |
-| `/mes-emprunts` | MesEmpruntsComponent | Connecté (authGuard) |
-| `/creer-utilisateur` | CreerUtilisateurComponent | Bibliothécaire (bibliothecaireGuard) |
-| `/creer-ouvrage` | CreerOuvrageComponent | Bibliothécaire (bibliothecaireGuard) |
-| `/emprunts-bibliothecaire` | EmpruntsBibliothecaireComponent | Bibliothécaire (bibliothecaireGuard) |
-| `/emprunts-retard` | EmpruntsRetardComponent | Bibliothécaire (bibliothecaireGuard) |
-| `**` | — | Redirige vers `/` |
+| Route | Component | Access |
+|-------|-----------|--------|
+| `/` | HomeComponent | Public |
+| `/login` | LoginComponent | Logged out (guestGuard) |
+| `/search` | SearchComponent | Public |
+| `/my-loans` | MyLoansComponent | Logged in (authGuard) |
+| `/create-user` | CreateUserComponent | Librarian (librarianGuard) |
+| `/create-item` | CreateItemComponent | Librarian (librarianGuard) |
+| `/user-loans` | UserLoansComponent | Librarian (librarianGuard) |
+| `/overdue-loans` | OverdueLoansComponent | Librarian (librarianGuard) |
+| `**` | — | Redirects to `/` |
 
 ## Guards
 
-- `authGuard` : exige un utilisateur connecté, redirige vers `/connexion` sinon
-- `bibliothecaireGuard` : exige le rôle `bibliothecaire`, redirige vers `/` sinon
-- `connexionGuard` : bloque l'accès à `/connexion` si déjà connecté, redirige vers `/`
+- `authGuard`: requires a logged-in user, redirects to `/login` otherwise
+- `librarianGuard`: requires the `librarian` role, redirects to `/` otherwise
+- `guestGuard`: blocks `/login` when already logged in, redirects to `/`
 
-## Gestion de session
+## Session management
 
-`ConnexionService` est le point central de la session :
+`AuthService` is the central point of the session:
 
-- Persiste l'utilisateur connecté dans `sessionStorage`
-- Expose un `BehaviorSubject<UtilisateurConnecte | null>` (`utilisateurConnecte$`)
-- Méthodes : `connecter()`, `deconnecter()`, `estConnecte()`, `getUtilisateurConnecte()`
+- Persists the logged-in user in `sessionStorage`
+- Exposes a `BehaviorSubject<LoggedInUser | null>` (`loggedInUser$`)
+- Methods: `login()`, `logout()`, `isLoggedIn()`, `getLoggedInUser()`
 
-## Services API
+## Internationalization
 
-| Service | Endpoints appelés |
+- `LanguageService` holds the current language in a signal and remembers it in `localStorage`
+- `TranslatePipe` (`| t`) translates a key, `AmountPipe` (`| amount`) formats euro amounts for the current language
+- `languageInterceptor` adds the `Accept-Language` header to every API call
+
+## API services
+
+| Service | Called endpoints |
 |---------|------------------|
-| `AccueilService` | `GET /accueil` |
-| `ConnexionService` | `POST /connexion` |
-| `RechercheService` | `GET /ouvrages` |
-| `EmpruntService` | `GET /emprunts/verifier`, `POST /emprunts`, `DELETE /emprunts/:id`, `GET /emprunts`, `GET /emprunts/retard`, `GET /ouvrages/:id/exemplaires`, `GET /ouvrages/:id/exemplaires/tous`, `POST /ouvrages/:id/exemplaires` |
-| `UtilisateurService` | `GET /utilisateurs/rechercher`, `GET /utilisateurs/:id/caution`, `PUT /utilisateurs/:id/caution` |
-| `CreerUtilisateurService` | `GET /departements`, `POST /utilisateurs` |
-| `CreerOuvrageService` | `GET /auteurs`, `GET /emplacements`, `POST /livres`, `POST /revues` |
+| `HomeService` | `GET /home` |
+| `AuthService` | `POST /login` |
+| `SearchService` | `GET /items` |
+| `LoanService` | `GET /loans/check`, `POST /loans`, `DELETE /loans/:id`, `GET /loans`, `GET /loans/overdue`, `GET /items/:id/copies`, `GET /items/:id/copies/all`, `POST /items/:id/copies` |
+| `UserService` | `GET /users/search`, `GET /users/:id/deposit`, `PUT /users/:id/deposit` |
+| `CreateUserService` | `GET /departments`, `POST /users` |
+| `ItemService` | `GET /authors`, `GET /locations`, `POST /books`, `POST /journals` |
 
-## Modèles TypeScript
+## TypeScript models
 
 ### Session
 
 ```typescript
-UtilisateurConnecte  { id, nom, prenom, role, message }
-UtilisateurResume    { id, nom, prenom, numero_telephone, role }
+LoggedInUser  { id, last_name, first_name, role, message }
+UserSummary   { id, last_name, first_name, phone_number, role }
 ```
 
-### Ouvrages
+### Items
 
 ```typescript
-Ouvrage     { id, titre, caution, type, isbn?, auteur?, numero?, exemplaires_disponibles, emplacement? }
-Auteur      { id, nom, prenom }
-Emplacement { id, numero_travee, numero_etagere, niveau, categorie_nom }
-Departement { Id, Nom }
+Item        { id, title, deposit, type, isbn?, author?, issue_number?, available_copies, location? }
+Author      { id, last_name, first_name }
+Location    { id, bay_number, shelf_number, level, category_name }
+Department  { id, name }
 ```
 
-### Exemplaires
+### Copies
 
 ```typescript
-ExemplaireDisponible { id, code_barre }
-ExemplaireComplet    { id, code_barre, est_emprunte, date_fin_emprunt? }
+AvailableCopy { id, barcode }
+CopyDetail    { id, barcode, is_borrowed, loan_due_date? }
 ```
 
-### Emprunts
+### Loans
 
 ```typescript
-EmpruntItem         { id, code_barre, titre, date_debut, date_fin, en_retard }
-PreviewEmprunt      { titre, code_barre, caution, solde_actuel, nouveau_solde }
-EmpruntEnRetardItem { id, code_barre, titre, date_fin, nom, prenom, numero_telephone }
+Loan         { id, barcode, title, start_date, due_date, overdue }
+LoanPreview  { title, barcode, deposit, current_balance, new_balance }
+OverdueLoan  { id, barcode, title, due_date, last_name, first_name, phone_number }
 ```
 
-### Caution et création
+### Deposit and creation
 
 ```typescript
-CautionInfo              { solde_caution, caution_totale }
-CreerUtilisateurResponse { login, mot_de_passe, message }
-CreerOuvrageResponse     { id, message }
-FiltresRecherche         { titre?, auteur?, isbn?, codeBarre?, codeRevue?, disponible? }
+DepositInfo         { deposit_balance, total_deposit }
+CreateUserResponse  { login, password, message }
+CreateItemResponse  { id, message }
+SearchFilters       { title?, author?, isbn?, barcode?, issueNumber?, available? }
 ```
 
-## Pages — rôles fonctionnels
+## Pages — functional roles
 
-**Accueil** : affiche les 4 statistiques globales (livres, revues, exemplaires disponibles, utilisateurs).
+**Home**: shows the 4 global statistics (books, journals, available copies, users).
 
-**Connexion** : formulaire login/mot de passe. Redirige automatiquement si déjà connecté.
+**Login**: login/password form. Redirects automatically when already logged in.
 
-**Recherche** : filtrage des ouvrages par titre, auteur, ISBN, code barre, code revue ou disponibilité. Pour un bibliothécaire, affiche aussi le bouton d'emprunt et la gestion des exemplaires dans une modale.
+**Search**: filters items by title, author, ISBN, barcode, journal issue number or availability. Logged-in users can borrow from a modal; librarians can also manage copies in a modal.
 
-**Mes emprunts** : liste les emprunts actifs de l'utilisateur connecté avec les dates de retour, indicateur de retard et bouton "rendre".
+**My loans**: lists the logged-in user's active loans with due dates, an overdue indicator and a "mark as returned" button.
 
-**Creer utilisateur** : formulaire réactif avec champs conditionnels selon le statut (année d'étude pour étudiant, département pour enseignant). Affiche le login et le mot de passe générés après création.
+**Create user**: reactive form with conditional fields depending on the status (year of study for students, department for teachers). Shows the generated login and password after creation.
 
-**Creer ouvrage** : création en deux étapes — étape 1 : saisie des informations du livre ou de la revue (avec autocomplétion de l'auteur) ; étape 2 : ajout d'exemplaires avec code-barre et délai d'emprunt.
+**Create item**: two-step creation — step 1: book or journal details (with author autocompletion); step 2: adding copies with a barcode.
 
-**Emprunts bibliothécaire** : recherche d'un utilisateur, consultation de ses emprunts actifs et modification du montant de la caution totale.
+**User loans**: find a user, view their active loans and update their total deposit.
 
-**Emprunts retard** : liste des emprunts dépassant leur date de retour, avec les coordonnées de l'utilisateur concerné.
+**Overdue loans**: list of loans past their due date, with the borrower's contact details.

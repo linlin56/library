@@ -15,43 +15,23 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/accueil": {
+        "/authors": {
             "get": {
-                "description": "Retourne les statistiques globales de la bibliothèque.",
+                "description": "Returns the list of available authors.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Accueil"
+                    "Items"
                 ],
-                "summary": "Statistiques d'accueil",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.AccueilStats"
-                        }
-                    }
-                }
-            }
-        },
-        "/auteurs": {
-            "get": {
-                "description": "Retourne la liste des auteurs disponibles.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Ouvrages"
-                ],
-                "summary": "Lister les auteurs",
+                "summary": "List authors",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.Auteur"
+                                "$ref": "#/definitions/models.Author"
                             }
                         }
                     },
@@ -64,9 +44,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/connexion": {
+        "/books": {
             "post": {
-                "description": "Authentifie un utilisateur (etudiant/enseignant/particulier) ou un bibliothecaire.",
+                "description": "Creates a new book with an existing author or a new one.",
                 "consumes": [
                     "application/json"
                 ],
@@ -74,169 +54,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Auth"
+                    "Items"
                 ],
-                "summary": "Connexion utilisateur",
+                "summary": "Create a book",
                 "parameters": [
                     {
-                        "description": "Identifiants de connexion",
-                        "name": "credentials",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/controllers.ConnexionRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.ConnexionResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/departements": {
-            "get": {
-                "description": "Retourne la liste des departements d'ecole.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Utilisateurs"
-                ],
-                "summary": "Lister les departements",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.DepartementEcole"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/emplacements": {
-            "get": {
-                "description": "Retourne la liste des emplacements disponibles.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Ouvrages"
-                ],
-                "summary": "Lister les emplacements",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/repositories.EmplacementResume"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/emprunts": {
-            "get": {
-                "description": "Retourne les emprunts actifs pour un utilisateur donne.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Emprunts"
-                ],
-                "summary": "Lister les emprunts d'un utilisateur",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID utilisateur",
-                        "name": "utilisateur_id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/repositories.EmpruntItem"
-                            }
-                        }
-                    },
-                    "204": {
-                        "description": "No Content",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Enregistre l'emprunt d'un exemplaire pour un utilisateur.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Emprunts"
-                ],
-                "summary": "Enregistrer un emprunt",
-                "parameters": [
-                    {
-                        "description": "Demande d'emprunt",
+                        "description": "Book data",
                         "name": "payload",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/controllers.EmpruntRequest"
+                            "$ref": "#/definitions/controllers.CreateBookRequest"
                         }
                     }
                 ],
@@ -244,7 +72,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/controllers.MessageResponse"
+                            "$ref": "#/definitions/controllers.CreateItemResponse"
                         }
                     },
                     "400": {
@@ -253,8 +81,8 @@ const docTemplate = `{
                             "$ref": "#/definitions/controllers.ErrorResponse"
                         }
                     },
-                    "422": {
-                        "description": "Unprocessable Entity",
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/controllers.ErrorResponse"
                         }
@@ -262,32 +90,26 @@ const docTemplate = `{
                 }
             }
         },
-        "/emprunts/retard": {
+        "/departments": {
             "get": {
-                "description": "Retourne tous les emprunts en retard.",
+                "description": "Returns the list of school departments.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Emprunts"
+                    "Users"
                 ],
-                "summary": "Lister les emprunts en retard",
+                "summary": "List departments",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/repositories.EmpruntEnRetardItem"
+                                "$ref": "#/definitions/models.Department"
                             }
                         }
                     },
-                    "204": {
-                        "description": "No Content",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -297,162 +119,47 @@ const docTemplate = `{
                 }
             }
         },
-        "/emprunts/verifier": {
+        "/home": {
             "get": {
-                "description": "Verifie la possibilite d'emprunt et retourne un apercu.",
+                "description": "Returns global statistics about the library.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Emprunts"
+                    "Home"
                 ],
-                "summary": "Verifier un emprunt",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID utilisateur",
-                        "name": "utilisateur_id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Code barre exemplaire",
-                        "name": "code_barre",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
+                "summary": "Home statistics",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/repositories.PreviewEmprunt"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.ErrorResponse"
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.ErrorResponse"
+                            "$ref": "#/definitions/controllers.HomeStats"
                         }
                     }
                 }
             }
         },
-        "/emprunts/{id}": {
-            "delete": {
-                "description": "Marque l'exemplaire comme rendu et restitue la caution.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Emprunts"
-                ],
-                "summary": "Retourner un exemplaire",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID exemplaire",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.MessageResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.ErrorResponse"
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/livres": {
-            "post": {
-                "description": "Cree un nouveau livre avec auteur existant ou nouvel auteur.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Ouvrages"
-                ],
-                "summary": "Creer un livre",
-                "parameters": [
-                    {
-                        "description": "Donnees du livre",
-                        "name": "payload",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/controllers.CreerLivreRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.CreerOuvrageResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/ouvrages": {
+        "/items": {
             "get": {
-                "description": "Recherche avancee des ouvrages (livres/revues) ou liste initiale sans filtres.",
+                "description": "Advanced search for items (books/journals), or initial list without filters.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Ouvrages"
+                    "Items"
                 ],
-                "summary": "Rechercher des ouvrages",
+                "summary": "Search items",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Titre",
-                        "name": "titre",
+                        "description": "Title",
+                        "name": "title",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Auteur",
-                        "name": "auteur",
+                        "description": "Author",
+                        "name": "author",
                         "in": "query"
                     },
                     {
@@ -463,20 +170,20 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Code barre",
-                        "name": "code_barre",
+                        "description": "Barcode",
+                        "name": "barcode",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Numero revue",
-                        "name": "code_revue",
+                        "description": "Journal issue number",
+                        "name": "issue_number",
                         "in": "query"
                     },
                     {
                         "type": "boolean",
-                        "description": "Filtrer disponibles",
-                        "name": "disponible",
+                        "description": "Available only",
+                        "name": "available",
                         "in": "query"
                     }
                 ],
@@ -486,7 +193,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/repositories.OuvrageResultat"
+                                "$ref": "#/definitions/repositories.ItemResult"
                             }
                         }
                     },
@@ -511,20 +218,20 @@ const docTemplate = `{
                 }
             }
         },
-        "/ouvrages/{id}/exemplaires": {
+        "/items/{id}/copies": {
             "get": {
-                "description": "Retourne les exemplaires non empruntes pour un ouvrage.",
+                "description": "Returns the copies of an item that are not on loan.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Exemplaires"
+                    "Copies"
                 ],
-                "summary": "Lister les exemplaires disponibles",
+                "summary": "List available copies",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "ID ouvrage",
+                        "description": "Item ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -536,7 +243,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/controllers.ExemplaireResume"
+                                "$ref": "#/definitions/controllers.CopySummary"
                             }
                         }
                     },
@@ -561,7 +268,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Cree un exemplaire pour un ouvrage donne.",
+                "description": "Creates a copy of a given item.",
                 "consumes": [
                     "application/json"
                 ],
@@ -569,24 +276,24 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Exemplaires"
+                    "Copies"
                 ],
-                "summary": "Creer un exemplaire",
+                "summary": "Create a copy",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "ID ouvrage",
+                        "description": "Item ID",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "Donnees exemplaire",
+                        "description": "Copy data",
                         "name": "payload",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/controllers.CreerExemplaireRequest"
+                            "$ref": "#/definitions/controllers.CreateCopyRequest"
                         }
                     }
                 ],
@@ -606,20 +313,20 @@ const docTemplate = `{
                 }
             }
         },
-        "/ouvrages/{id}/exemplaires/tous": {
+        "/items/{id}/copies/all": {
             "get": {
-                "description": "Retourne tous les exemplaires d'un ouvrage.",
+                "description": "Returns every copy of an item.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Exemplaires"
+                    "Copies"
                 ],
-                "summary": "Lister tous les exemplaires",
+                "summary": "List all copies",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "ID ouvrage",
+                        "description": "Item ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -631,7 +338,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/controllers.ExemplaireDetail"
+                                "$ref": "#/definitions/controllers.CopyDetail"
                             }
                         }
                     },
@@ -656,9 +363,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/revues": {
+        "/journals": {
             "post": {
-                "description": "Cree une nouvelle revue.",
+                "description": "Creates a new journal issue.",
                 "consumes": [
                     "application/json"
                 ],
@@ -666,17 +373,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Ouvrages"
+                    "Items"
                 ],
-                "summary": "Creer une revue",
+                "summary": "Create a journal",
                 "parameters": [
                     {
-                        "description": "Donnees de la revue",
+                        "description": "Journal data",
                         "name": "payload",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/controllers.CreerRevueRequest"
+                            "$ref": "#/definitions/controllers.CreateJournalRequest"
                         }
                     }
                 ],
@@ -684,7 +391,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/controllers.CreerOuvrageResponse"
+                            "$ref": "#/definitions/controllers.CreateItemResponse"
                         }
                     },
                     "400": {
@@ -702,9 +409,57 @@ const docTemplate = `{
                 }
             }
         },
-        "/utilisateurs": {
+        "/loans": {
+            "get": {
+                "description": "Returns the active loans of a given user.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Loans"
+                ],
+                "summary": "List a user's loans",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/repositories.LoanSummary"
+                            }
+                        }
+                    },
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorResponse"
+                        }
+                    }
+                }
+            },
             "post": {
-                "description": "Cree un etudiant, un enseignant ou un particulier.",
+                "description": "Records the loan of a copy for a user.",
                 "consumes": [
                     "application/json"
                 ],
@@ -712,17 +467,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Utilisateurs"
+                    "Loans"
                 ],
-                "summary": "Creer un utilisateur",
+                "summary": "Record a loan",
                 "parameters": [
                     {
-                        "description": "Donnees utilisateur",
+                        "description": "Loan request",
                         "name": "payload",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/controllers.CreerUtilisateurRequest"
+                            "$ref": "#/definitions/controllers.LoanRequest"
                         }
                     }
                 ],
@@ -730,7 +485,252 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/controllers.CreerUtilisateurResponse"
+                            "$ref": "#/definitions/controllers.MessageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/loans/check": {
+            "get": {
+                "description": "Checks whether a copy can be borrowed and returns a preview.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Loans"
+                ],
+                "summary": "Check a loan",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Copy barcode",
+                        "name": "barcode",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/repositories.LoanPreview"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/loans/overdue": {
+            "get": {
+                "description": "Returns every overdue loan.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Loans"
+                ],
+                "summary": "List overdue loans",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/repositories.OverdueLoan"
+                            }
+                        }
+                    },
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/loans/{id}": {
+            "delete": {
+                "description": "Marks the copy as returned and refunds the deposit.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Loans"
+                ],
+                "summary": "Return a copy",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Copy ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.MessageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/locations": {
+            "get": {
+                "description": "Returns the list of available locations.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Items"
+                ],
+                "summary": "List locations",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/repositories.LocationSummary"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/login": {
+            "post": {
+                "description": "Authenticates a user (student/teacher/individual) or a librarian.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "User login",
+                "parameters": [
+                    {
+                        "description": "Login credentials",
+                        "name": "credentials",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controllers.LoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.LoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users": {
+            "post": {
+                "description": "Creates a student, a teacher or an individual.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Create a user",
+                "parameters": [
+                    {
+                        "description": "User data",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controllers.CreateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.CreateUserResponse"
                         }
                     },
                     "400": {
@@ -742,7 +742,7 @@ const docTemplate = `{
                     "409": {
                         "description": "Conflict",
                         "schema": {
-                            "$ref": "#/definitions/controllers.ConflictLoginResponse"
+                            "$ref": "#/definitions/controllers.LoginConflictResponse"
                         }
                     },
                     "500": {
@@ -754,39 +754,39 @@ const docTemplate = `{
                 }
             }
         },
-        "/utilisateurs/rechercher": {
+        "/users/search": {
             "get": {
-                "description": "Recherche des utilisateurs par nom, prenom, code postal ou numero de telephone.",
+                "description": "Searches users by last name, first name, postal code or phone number.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Utilisateurs"
+                    "Users"
                 ],
-                "summary": "Rechercher des utilisateurs",
+                "summary": "Search users",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Nom",
-                        "name": "nom",
+                        "description": "Last name",
+                        "name": "last_name",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Prenom",
-                        "name": "prenom",
+                        "description": "First name",
+                        "name": "first_name",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Code postal",
-                        "name": "code_postal",
+                        "description": "Postal code",
+                        "name": "postal_code",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Numero de telephone",
-                        "name": "numero_telephone",
+                        "description": "Phone number",
+                        "name": "phone_number",
                         "in": "query"
                     }
                 ],
@@ -796,7 +796,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/repositories.UtilisateurResume"
+                                "$ref": "#/definitions/repositories.UserSummary"
                             }
                         }
                     },
@@ -821,20 +821,20 @@ const docTemplate = `{
                 }
             }
         },
-        "/utilisateurs/{id}/caution": {
+        "/users/{id}/deposit": {
             "get": {
-                "description": "Retourne le solde de caution disponible et la caution totale.",
+                "description": "Returns the available deposit balance and the total deposit.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Utilisateurs"
+                    "Users"
                 ],
-                "summary": "Consulter la caution d'un utilisateur",
+                "summary": "Get a user's deposit",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "ID utilisateur",
+                        "description": "User ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -844,7 +844,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/repositories.CautionInfo"
+                            "$ref": "#/definitions/repositories.DepositInfo"
                         }
                     },
                     "400": {
@@ -862,7 +862,7 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Met a jour la caution totale d'un utilisateur et recalcule son solde.",
+                "description": "Updates a user's total deposit and recomputes their balance.",
                 "consumes": [
                     "application/json"
                 ],
@@ -870,24 +870,24 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Utilisateurs"
+                    "Users"
                 ],
-                "summary": "Mettre a jour la caution totale",
+                "summary": "Update the total deposit",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "ID utilisateur",
+                        "description": "User ID",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "Nouvelle caution",
+                        "description": "New deposit",
                         "name": "payload",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/controllers.UpdateCautionRequest"
+                            "$ref": "#/definitions/controllers.UpdateDepositRequest"
                         }
                     }
                 ],
@@ -895,7 +895,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/repositories.CautionInfo"
+                            "$ref": "#/definitions/repositories.DepositInfo"
                         }
                     },
                     "400": {
@@ -909,107 +909,72 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "controllers.AccueilStats": {
+        "controllers.CopyDetail": {
             "type": "object",
             "properties": {
-                "nb_exemplaires_disponibles": {
-                    "type": "integer"
-                },
-                "nb_livres": {
-                    "type": "integer"
-                },
-                "nb_revues": {
-                    "type": "integer"
-                },
-                "nb_utilisateurs": {
-                    "type": "integer"
-                }
-            }
-        },
-        "controllers.ConflictLoginResponse": {
-            "type": "object",
-            "properties": {
-                "login_existant": {
+                "barcode": {
                     "type": "string"
                 },
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
-        "controllers.ConnexionRequest": {
-            "type": "object",
-            "required": [
-                "login",
-                "mot_de_passe"
-            ],
-            "properties": {
-                "login": {
-                    "type": "string"
-                },
-                "mot_de_passe": {
-                    "type": "string"
-                }
-            }
-        },
-        "controllers.ConnexionResponse": {
-            "type": "object",
-            "properties": {
                 "id": {
                     "type": "integer"
                 },
-                "message": {
-                    "type": "string"
+                "is_borrowed": {
+                    "type": "boolean"
                 },
-                "nom": {
-                    "type": "string"
-                },
-                "prenom": {
-                    "type": "string"
-                },
-                "role": {
+                "loan_due_date": {
                     "type": "string"
                 }
             }
         },
-        "controllers.CreerExemplaireRequest": {
+        "controllers.CopySummary": {
             "type": "object",
             "properties": {
-                "code_barre": {
+                "barcode": {
                     "type": "string"
                 },
-                "delai_emprunt_jours": {
+                "id": {
                     "type": "integer"
                 }
             }
         },
-        "controllers.CreerLivreRequest": {
+        "controllers.CreateBookRequest": {
             "type": "object",
             "properties": {
-                "auteur_id": {
+                "author_first_name": {
+                    "type": "string"
+                },
+                "author_id": {
                     "type": "integer"
                 },
-                "auteur_nom": {
+                "author_last_name": {
                     "type": "string"
                 },
-                "auteur_prenom": {
-                    "type": "string"
-                },
-                "caution": {
+                "deposit": {
                     "type": "number"
-                },
-                "emplacement_id": {
-                    "type": "integer"
                 },
                 "isbn": {
                     "type": "string"
                 },
-                "titre": {
+                "location_id": {
+                    "type": "integer"
+                },
+                "title": {
                     "type": "string"
                 }
             }
         },
-        "controllers.CreerOuvrageResponse": {
+        "controllers.CreateCopyRequest": {
+            "type": "object",
+            "properties": {
+                "barcode": {
+                    "type": "string"
+                },
+                "loan_period_days": {
+                    "type": "integer"
+                }
+            }
+        },
+        "controllers.CreateItemResponse": {
             "type": "object",
             "properties": {
                 "id": {
@@ -1020,85 +985,85 @@ const docTemplate = `{
                 }
             }
         },
-        "controllers.CreerRevueRequest": {
+        "controllers.CreateJournalRequest": {
             "type": "object",
             "properties": {
-                "caution": {
+                "deposit": {
                     "type": "number"
                 },
-                "date_parution": {
+                "issue_number": {
+                    "type": "integer"
+                },
+                "location_id": {
+                    "type": "integer"
+                },
+                "publication_date": {
                     "type": "string"
                 },
-                "emplacement_id": {
-                    "type": "integer"
-                },
-                "numero": {
-                    "type": "integer"
-                },
-                "titre": {
+                "title": {
                     "type": "string"
                 }
             }
         },
-        "controllers.CreerUtilisateurRequest": {
+        "controllers.CreateUserRequest": {
             "type": "object",
             "required": [
-                "code_postal",
-                "date_naissance",
+                "birth_date",
+                "city",
                 "email",
-                "nom",
-                "nom_rue",
-                "numero_rue",
-                "numero_telephone",
-                "prenom",
-                "statut",
-                "ville"
+                "first_name",
+                "last_name",
+                "phone_number",
+                "postal_code",
+                "status",
+                "street_name",
+                "street_number"
             ],
             "properties": {
-                "annee_etude": {
+                "birth_date": {
                     "type": "string"
                 },
-                "code_postal": {
+                "city": {
                     "type": "string"
                 },
-                "date_naissance": {
-                    "type": "string"
-                },
-                "departement_id": {
+                "department_id": {
                     "type": "integer"
                 },
                 "email": {
                     "type": "string"
                 },
-                "nom": {
+                "first_name": {
                     "type": "string"
                 },
-                "nom_rue": {
+                "last_name": {
                     "type": "string"
                 },
-                "numero_rue": {
+                "phone_number": {
                     "type": "string"
                 },
-                "numero_telephone": {
+                "postal_code": {
                     "type": "string"
                 },
-                "prenom": {
-                    "type": "string"
-                },
-                "statut": {
+                "status": {
                     "type": "string",
                     "enum": [
-                        "etudiant",
-                        "enseignant",
-                        "particulier"
+                        "student",
+                        "teacher",
+                        "individual"
                     ]
                 },
-                "ville": {
+                "street_name": {
+                    "type": "string"
+                },
+                "street_number": {
+                    "type": "string"
+                },
+                "study_year": {
                     "type": "string"
                 }
             }
         },
-        "controllers.CreerUtilisateurResponse": {
+        "controllers.CreateUserResponse": {
             "type": "object",
             "properties": {
                 "login": {
@@ -1107,58 +1072,32 @@ const docTemplate = `{
                 "message": {
                     "type": "string"
                 },
-                "mot_de_passe": {
+                "password": {
                     "type": "string"
-                }
-            }
-        },
-        "controllers.EmpruntRequest": {
-            "type": "object",
-            "required": [
-                "code_barre",
-                "utilisateur_id"
-            ],
-            "properties": {
-                "code_barre": {
-                    "type": "string"
-                },
-                "utilisateur_id": {
-                    "type": "integer"
                 }
             }
         },
         "controllers.ErrorResponse": {
             "type": "object",
             "properties": {
-                "erreur": {
+                "error": {
                     "type": "string"
                 }
             }
         },
-        "controllers.ExemplaireDetail": {
+        "controllers.HomeStats": {
             "type": "object",
             "properties": {
-                "code_barre": {
-                    "type": "string"
-                },
-                "date_fin_emprunt": {
-                    "type": "string"
-                },
-                "est_emprunte": {
-                    "type": "boolean"
-                },
-                "id": {
+                "available_copy_count": {
                     "type": "integer"
-                }
-            }
-        },
-        "controllers.ExemplaireResume": {
-            "type": "object",
-            "properties": {
-                "code_barre": {
-                    "type": "string"
                 },
-                "id": {
+                "book_count": {
+                    "type": "integer"
+                },
+                "journal_count": {
+                    "type": "integer"
+                },
+                "user_count": {
                     "type": "integer"
                 }
             }
@@ -1171,6 +1110,67 @@ const docTemplate = `{
                 }
             }
         },
+        "controllers.LoanRequest": {
+            "type": "object",
+            "required": [
+                "barcode",
+                "user_id"
+            ],
+            "properties": {
+                "barcode": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "controllers.LoginConflictResponse": {
+            "type": "object",
+            "properties": {
+                "existing_login": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "controllers.LoginRequest": {
+            "type": "object",
+            "required": [
+                "login",
+                "password"
+            ],
+            "properties": {
+                "login": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "controllers.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "first_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                }
+            }
+        },
         "controllers.MessageResponse": {
             "type": "object",
             "properties": {
@@ -1179,136 +1179,75 @@ const docTemplate = `{
                 }
             }
         },
-        "controllers.UpdateCautionRequest": {
+        "controllers.UpdateDepositRequest": {
             "type": "object",
             "properties": {
-                "caution_totale": {
+                "total_deposit": {
                     "type": "number"
                 }
             }
         },
-        "models.Auteur": {
+        "models.Author": {
+            "type": "object",
+            "properties": {
+                "first_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "last_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Department": {
             "type": "object",
             "properties": {
                 "id": {
                     "type": "integer"
                 },
-                "nom": {
-                    "type": "string"
-                },
-                "prenom": {
+                "name": {
                     "type": "string"
                 }
             }
         },
-        "models.DepartementEcole": {
+        "repositories.DepositInfo": {
             "type": "object",
             "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "nom": {
-                    "type": "string"
-                }
-            }
-        },
-        "repositories.CautionInfo": {
-            "type": "object",
-            "properties": {
-                "caution_totale": {
+                "deposit_balance": {
                     "type": "number"
                 },
-                "solde_caution": {
+                "total_deposit": {
                     "type": "number"
                 }
             }
         },
-        "repositories.EmplacementResume": {
+        "repositories.ItemLocation": {
             "type": "object",
             "properties": {
-                "categorie_nom": {
-                    "type": "string"
-                },
-                "id": {
+                "bay_number": {
                     "type": "integer"
                 },
-                "niveau": {
+                "level": {
                     "type": "integer"
                 },
-                "numero_etagere": {
-                    "type": "integer"
-                },
-                "numero_travee": {
+                "shelf_number": {
                     "type": "integer"
                 }
             }
         },
-        "repositories.EmpruntEnRetardItem": {
+        "repositories.ItemResult": {
             "type": "object",
             "properties": {
-                "code_barre": {
+                "author": {
                     "type": "string"
                 },
-                "date_fin": {
-                    "type": "string"
-                },
-                "id": {
+                "available_copies": {
                     "type": "integer"
                 },
-                "nom": {
-                    "type": "string"
-                },
-                "numero_telephone": {
-                    "type": "string"
-                },
-                "prenom": {
-                    "type": "string"
-                },
-                "titre": {
-                    "type": "string"
-                }
-            }
-        },
-        "repositories.EmpruntItem": {
-            "type": "object",
-            "properties": {
-                "code_barre": {
-                    "type": "string"
-                },
-                "date_debut": {
-                    "type": "string"
-                },
-                "date_fin": {
-                    "type": "string"
-                },
-                "en_retard": {
-                    "type": "boolean"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "titre": {
-                    "type": "string"
-                }
-            }
-        },
-        "repositories.OuvrageResultat": {
-            "type": "object",
-            "properties": {
-                "auteur": {
-                    "type": "string"
-                },
-                "caution": {
+                "deposit": {
                     "type": "number"
-                },
-                "date_parution": {
-                    "type": "string"
-                },
-                "emplacement": {
-                    "type": "string"
-                },
-                "exemplaires_disponibles": {
-                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"
@@ -1316,10 +1255,16 @@ const docTemplate = `{
                 "isbn": {
                     "type": "string"
                 },
-                "numero": {
+                "issue_number": {
                     "type": "integer"
                 },
-                "titre": {
+                "location": {
+                    "$ref": "#/definitions/repositories.ItemLocation"
+                },
+                "publication_date": {
+                    "type": "string"
+                },
+                "title": {
                     "type": "string"
                 },
                 "type": {
@@ -1327,39 +1272,108 @@ const docTemplate = `{
                 }
             }
         },
-        "repositories.PreviewEmprunt": {
+        "repositories.LoanPreview": {
             "type": "object",
             "properties": {
-                "caution": {
-                    "type": "number"
-                },
-                "code_barre": {
+                "barcode": {
                     "type": "string"
                 },
-                "nouveau_solde": {
+                "current_balance": {
                     "type": "number"
                 },
-                "solde_actuel": {
+                "deposit": {
                     "type": "number"
                 },
-                "titre": {
+                "new_balance": {
+                    "type": "number"
+                },
+                "title": {
                     "type": "string"
                 }
             }
         },
-        "repositories.UtilisateurResume": {
+        "repositories.LoanSummary": {
             "type": "object",
             "properties": {
+                "barcode": {
+                    "type": "string"
+                },
+                "due_date": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
-                "nom": {
+                "overdue": {
+                    "type": "boolean"
+                },
+                "start_date": {
                     "type": "string"
                 },
-                "numero_telephone": {
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "repositories.LocationSummary": {
+            "type": "object",
+            "properties": {
+                "bay_number": {
+                    "type": "integer"
+                },
+                "category_name": {
                     "type": "string"
                 },
-                "prenom": {
+                "id": {
+                    "type": "integer"
+                },
+                "level": {
+                    "type": "integer"
+                },
+                "shelf_number": {
+                    "type": "integer"
+                }
+            }
+        },
+        "repositories.OverdueLoan": {
+            "type": "object",
+            "properties": {
+                "barcode": {
+                    "type": "string"
+                },
+                "due_date": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "repositories.UserSummary": {
+            "type": "object",
+            "properties": {
+                "first_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "phone_number": {
                     "type": "string"
                 },
                 "role": {
@@ -1376,8 +1390,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8080",
 	BasePath:         "/api",
 	Schemes:          []string{},
-	Title:            "Bibliothèque API",
-	Description:      "API REST de gestion de bibliothèque universitaire.",
+	Title:            "Library API",
+	Description:      "REST API for managing a university library.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

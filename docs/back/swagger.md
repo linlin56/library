@@ -1,212 +1,214 @@
 # Endpoints
 
-Base URL : `http://localhost:8080/api`
+Base URL: `http://localhost:8080/api`
 
-## Accueil
+Every endpoint reads the `Accept-Language` header (`en` by default, or `fr`) to choose the language of the `message` and `error` fields.
 
-### GET /accueil
+## Home
 
-Retourne les statistiques globales de la bibliothèque.
+### GET /home
 
-- Accès : public
-- Réponse 200 : `{ nb_livres, nb_revues, nb_exemplaires_disponibles, nb_utilisateurs }`
+Returns global statistics about the library.
 
-## Authentification
+- Access: public
+- 200 response: `{ book_count, journal_count, available_copy_count, user_count }`
 
-### POST /connexion
+## Authentication
 
-Authentifie un utilisateur ou un bibliothécaire.
+### POST /login
 
-- Accès : public
-- Body : `{ login, mot_de_passe }`
-- Réponse 200 : `{ id, nom, prenom, role, message }`
-- Réponse 400 : champs manquants
-- Réponse 401 : identifiants invalides
+Authenticates a user or a librarian.
 
-## Ouvrages
+- Access: public
+- Body: `{ login, password }`
+- 200 response: `{ id, last_name, first_name, role, message }` — `role`: `user` | `librarian`
+- 400 response: missing fields
+- 401 response: invalid credentials
 
-### GET /ouvrages
+## Items
 
-Recherche d'ouvrages avec filtres optionnels.
+### GET /items
 
-- Accès : public
-- Paramètres query (tous optionnels) : `titre`, `auteur`, `isbn`, `code_barre`, `code_revue`, `disponible` (booléen)
-- Réponse 200 : tableau d'ouvrages `{ id, titre, caution, type, isbn?, auteur?, numero?, exemplaires_disponibles, emplacement? }`
-- Réponse 204 : aucun résultat
-- Réponse 400 : paramètre invalide
-- Réponse 500 : erreur serveur
+Searches items with optional filters.
 
-### GET /auteurs
+- Access: public
+- Query parameters (all optional): `title`, `author`, `isbn`, `barcode`, `issue_number`, `available` (boolean)
+- 200 response: array of items `{ id, title, deposit, type, isbn?, author?, issue_number?, publication_date?, available_copies, location? }` — `type`: `book` | `journal`, `location`: `{ bay_number, shelf_number, level }`
+- 204 response: no result
+- 400 response: invalid parameter
+- 500 response: server error
 
-Retourne la liste de tous les auteurs.
+### GET /authors
 
-- Accès : bibliothécaire
-- Réponse 200 : tableau `{ id, nom, prenom }`
-- Réponse 500 : erreur serveur
+Returns every author.
 
-### GET /emplacements
+- Access: librarian
+- 200 response: array `{ id, last_name, first_name }`
+- 500 response: server error
 
-Retourne la liste des emplacements disponibles.
+### GET /locations
 
-- Accès : bibliothécaire
-- Réponse 200 : tableau `{ id, numero_travee, numero_etagere, niveau, categorie_nom }`
-- Réponse 500 : erreur serveur
+Returns the available locations.
 
-### POST /livres
+- Access: librarian
+- 200 response: array `{ id, bay_number, shelf_number, level, category_name }`
+- 500 response: server error
 
-Crée un nouveau livre. L'auteur peut être existant (par `auteur_id`) ou nouveau (par `auteur_nom` + `auteur_prenom`).
+### POST /books
 
-- Accès : bibliothécaire
-- Body : `{ titre, isbn, caution, emplacement_id, auteur_id?, auteur_nom?, auteur_prenom? }`
-- Réponse 201 : `{ id, message }`
-- Réponse 400 : données invalides
-- Réponse 500 : erreur serveur
+Creates a new book. The author can be an existing one (`author_id`) or a new one (`author_last_name` + `author_first_name`).
 
-### POST /revues
+- Access: librarian
+- Body: `{ title, isbn, deposit, location_id, author_id?, author_last_name?, author_first_name? }`
+- 201 response: `{ id, message }`
+- 400 response: invalid data
+- 500 response: server error
 
-Crée une nouvelle revue.
+### POST /journals
 
-- Accès : bibliothécaire
-- Body : `{ titre, numero, date_parution, caution, emplacement_id }`
-- Réponse 201 : `{ id, message }`
-- Réponse 400 : données invalides
-- Réponse 500 : erreur serveur
+Creates a new journal issue.
 
-## Exemplaires
+- Access: librarian
+- Body: `{ title, issue_number, publication_date, deposit, location_id }`
+- 201 response: `{ id, message }`
+- 400 response: invalid data
+- 500 response: server error
 
-### GET /ouvrages/:id/exemplaires
+## Copies
 
-Retourne les exemplaires non empruntés d'un ouvrage.
+### GET /items/:id/copies
 
-- Accès : public
-- Paramètre path : `id` (entier, ID de l'ouvrage)
-- Réponse 200 : tableau `{ id, code_barre }`
-- Réponse 204 : aucun exemplaire disponible
-- Réponse 400 : ID invalide
-- Réponse 500 : erreur serveur
+Returns the copies of an item that are not on loan.
 
-### GET /ouvrages/:id/exemplaires/tous
+- Access: public
+- Path parameter: `id` (integer, item ID)
+- 200 response: array `{ id, barcode }`
+- 204 response: no copy available
+- 400 response: invalid ID
+- 500 response: server error
 
-Retourne tous les exemplaires d'un ouvrage (disponibles et empruntés).
+### GET /items/:id/copies/all
 
-- Accès : bibliothécaire
-- Paramètre path : `id` (entier)
-- Réponse 200 : tableau `{ id, code_barre, est_emprunte, date_fin_emprunt? }`
-- Réponse 204 : aucun exemplaire
-- Réponse 400 : ID invalide
-- Réponse 500 : erreur serveur
+Returns every copy of an item (available and on loan).
 
-### POST /ouvrages/:id/exemplaires
+- Access: librarian
+- Path parameter: `id` (integer)
+- 200 response: array `{ id, barcode, is_borrowed, loan_due_date? }`
+- 204 response: no copy
+- 400 response: invalid ID
+- 500 response: server error
 
-Crée un exemplaire pour un ouvrage donné.
+### POST /items/:id/copies
 
-- Accès : bibliothécaire
-- Paramètre path : `id` (entier)
-- Body : `{ code_barre, delai_emprunt_jours }`
-- Réponse 201 : `{ id }`
-- Réponse 400 : données invalides
+Creates a copy of a given item.
 
-## Utilisateurs
+- Access: librarian
+- Path parameter: `id` (integer)
+- Body: `{ barcode, loan_period_days }`
+- 201 response: `{ id }`
+- 400 response: invalid data
 
-### GET /departements
+## Users
 
-Retourne la liste des départements d'école.
+### GET /departments
 
-- Accès : bibliothécaire
-- Réponse 200 : tableau `{ id, nom }`
-- Réponse 500 : erreur serveur
+Returns the school departments.
 
-### POST /utilisateurs
+- Access: librarian
+- 200 response: array `{ id, name }`
+- 500 response: server error
 
-Crée un étudiant, un enseignant ou un particulier.
+### POST /users
 
-- Accès : bibliothécaire
-- Body : `{ nom, prenom, numero_telephone, date_naissance, email, statut, annee_etude?, departement_id?, numero_rue, nom_rue, code_postal, ville }`
-- `statut` : `etudiant` | `enseignant` | `particulier`
-- Réponse 201 : `{ login, mot_de_passe, message }`
-- Réponse 400 : données invalides ou format incorrect
-- Réponse 409 : `{ message, login_existant }` — un compte existe déjà avec ce login
-- Réponse 500 : erreur serveur
+Creates a student, a teacher or an individual.
 
-### GET /utilisateurs/rechercher
+- Access: librarian
+- Body: `{ last_name, first_name, phone_number, birth_date, email, status, study_year?, department_id?, street_number, street_name, postal_code, city }`
+- `status`: `student` | `teacher` | `individual`
+- 201 response: `{ login, password, message }`
+- 400 response: invalid data or wrong format
+- 409 response: `{ message, existing_login }` — an account already exists with this login
+- 500 response: server error
 
-Recherche des utilisateurs par critères.
+### GET /users/search
 
-- Accès : bibliothécaire
-- Paramètres query (tous optionnels) : `nom`, `prenom`, `code_postal`, `numero_telephone`
-- Réponse 200 : tableau `{ id, nom, prenom, numero_telephone, role }`
-- Réponse 204 : aucun résultat
-- Réponse 400 : paramètre invalide
-- Réponse 500 : erreur serveur
+Searches users by criteria.
 
-### GET /utilisateurs/:id/caution
+- Access: librarian
+- Query parameters (all optional): `last_name`, `first_name`, `postal_code`, `phone_number`
+- 200 response: array `{ id, last_name, first_name, phone_number, role }` — `role`: `student` | `teacher` | `user`
+- 204 response: no result
+- 400 response: invalid parameter
+- 500 response: server error
 
-Retourne le solde de caution d'un utilisateur.
+### GET /users/:id/deposit
 
-- Accès : bibliothécaire
-- Paramètre path : `id` (entier)
-- Réponse 200 : `{ solde_caution, caution_totale }`
-- Réponse 400 : ID invalide
-- Réponse 404 : utilisateur introuvable
+Returns a user's deposit balance.
 
-### PUT /utilisateurs/:id/caution
+- Access: librarian
+- Path parameter: `id` (integer)
+- 200 response: `{ deposit_balance, total_deposit }`
+- 400 response: invalid ID
+- 404 response: user not found
 
-Met à jour la caution totale d'un utilisateur et recalcule son solde.
+### PUT /users/:id/deposit
 
-- Accès : bibliothécaire
-- Paramètre path : `id` (entier)
-- Body : `{ caution_totale }`
-- Réponse 200 : `{ solde_caution, caution_totale }`
-- Réponse 400 : données invalides
+Updates a user's total deposit and recomputes their balance.
 
-## Emprunts
+- Access: librarian
+- Path parameter: `id` (integer)
+- Body: `{ total_deposit }`
+- 200 response: `{ deposit_balance, total_deposit }`
+- 400 response: invalid data
 
-### GET /emprunts/verifier
+## Loans
 
-Vérifie si un emprunt est possible et retourne un aperçu (impact sur la caution).
+### GET /loans/check
 
-- Accès : bibliothécaire
-- Paramètres query : `utilisateur_id` (entier), `code_barre` (string)
-- Réponse 200 : `{ titre, code_barre, caution, solde_actuel, nouveau_solde }`
-- Réponse 400 : paramètre manquant ou invalide
-- Réponse 422 : emprunt impossible (caution insuffisante, exemplaire déjà emprunté, etc.)
+Checks whether a loan is possible and returns a preview (impact on the deposit).
 
-### POST /emprunts
+- Access: librarian
+- Query parameters: `user_id` (integer), `barcode` (string)
+- 200 response: `{ title, barcode, deposit, current_balance, new_balance }`
+- 400 response: missing or invalid parameter
+- 422 response: loan not possible (insufficient deposit, copy already on loan, etc.)
 
-Enregistre un emprunt.
+### POST /loans
 
-- Accès : bibliothécaire
-- Body : `{ utilisateur_id, code_barre }`
-- Réponse 201 : `{ message }`
-- Réponse 400 : données invalides
-- Réponse 422 : emprunt impossible
+Records a loan.
 
-### DELETE /emprunts/:id
+- Access: librarian
+- Body: `{ user_id, barcode }`
+- 201 response: `{ message }`
+- 400 response: invalid data
+- 422 response: loan not possible
 
-Retourne un exemplaire et restitue la caution correspondante.
+### DELETE /loans/:id
 
-- Accès : bibliothécaire
-- Paramètre path : `id` (entier, ID de l'exemplaire)
-- Réponse 200 : `{ message }`
-- Réponse 400 : ID invalide
-- Réponse 422 : exemplaire non emprunté ou introuvable
+Returns a copy and refunds the matching deposit.
 
-### GET /emprunts
+- Access: librarian
+- Path parameter: `id` (integer, copy ID)
+- 200 response: `{ message }`
+- 400 response: invalid ID
+- 422 response: copy not on loan or not found
 
-Retourne les emprunts actifs d'un utilisateur.
+### GET /loans
 
-- Accès : utilisateur connecté
-- Paramètre query : `utilisateur_id` (entier)
-- Réponse 200 : tableau `{ id, code_barre, titre, date_debut, date_fin, en_retard }`
-- Réponse 204 : aucun emprunt actif
-- Réponse 400 : paramètre invalide
-- Réponse 500 : erreur serveur
+Returns a user's active loans.
 
-### GET /emprunts/retard
+- Access: logged-in user
+- Query parameter: `user_id` (integer)
+- 200 response: array `{ id, barcode, title, start_date, due_date, overdue }`
+- 204 response: no active loan
+- 400 response: invalid parameter
+- 500 response: server error
 
-Retourne tous les emprunts dont la date de retour est dépassée.
+### GET /loans/overdue
 
-- Accès : bibliothécaire
-- Réponse 200 : tableau `{ id, code_barre, titre, date_fin, nom, prenom, numero_telephone }`
-- Réponse 204 : aucun retard
-- Réponse 500 : erreur serveur
+Returns every loan whose due date has passed.
+
+- Access: librarian
+- 200 response: array `{ id, barcode, title, due_date, last_name, first_name, phone_number }`
+- 204 response: no overdue loan
+- 500 response: server error

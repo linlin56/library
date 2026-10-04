@@ -1,0 +1,25 @@
+@startuml
+title Overdue loans
+
+actor "Client (librarian)" as C
+participant "LoanController" as CTL
+participant "LoanRepository" as LR
+participant "PostgreSQL" as DB
+
+C -> CTL : GET /api/loans/overdue
+activate CTL
+CTL -> LR : GetOverdueLoans()
+activate LR
+LR -> DB : SELECT c.*, i.title, u.last_name, u.first_name\nFROM copies c\nJOIN items i ON i.id = c.item_id\nJOIN users u ON u.id = c.borrower_id\nWHERE c.is_borrowed = TRUE\nAND c.loan_due_date < NOW()\nORDER BY loan_due_date ASC
+activate DB
+DB --> LR : []OverdueLoan
+deactivate DB
+LR --> CTL : []OverdueLoan, nil
+deactivate LR
+alt Overdue loans found
+CTL --> C : 200 [{id, barcode, title, due_date, last_name, first_name, phone_number}]
+else No overdue loan
+CTL --> C : 204 No Content
+end
+deactivate CTL
+@enduml

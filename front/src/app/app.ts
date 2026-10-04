@@ -9,5 +9,5 @@ import { NavbarComponent } from './shared/navbar/navbar';
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
-// Composant racine : intègre la barre de navigation et le routeur.
+// Root component: hosts the navigation bar and the router.
 export class App {}

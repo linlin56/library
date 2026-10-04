@@ -1,39 +1,39 @@
 package controllers
 
-// ErrorResponse décrit une erreur API standard.
+// ErrorResponse describes a standard API error.
 type ErrorResponse struct {
-	Erreur string `json:"erreur"`
+	Error string `json:"error"`
 }
 
-// MessageResponse décrit une réponse simple avec message.
+// MessageResponse describes a simple response with a message.
 type MessageResponse struct {
 	Message string `json:"message"`
 }
 
-// IDResponse décrit une réponse qui retourne un identifiant.
+// IDResponse describes a response that returns an identifier.
 type IDResponse struct {
 	ID int `json:"id"`
 }
 
-// CreerOuvrageResponse décrit la réponse à la création d'un livre ou d'une revue.
-type CreerOuvrageResponse struct {
+// CreateItemResponse describes the response when a book or a journal is created.
+type CreateItemResponse struct {
 	ID      int    `json:"id"`
 	Message string `json:"message"`
 }
 
-// ConflictLoginResponse décrit la réponse 409 quand un login existe déjà.
-type ConflictLoginResponse struct {
+// LoginConflictResponse describes the 409 response when a login already exists.
+type LoginConflictResponse struct {
 	Message       string `json:"message"`
-	LoginExistant string `json:"login_existant"`
+	ExistingLogin string `json:"existing_login"`
 }
 
-// UpdateCautionRequest décrit la payload de mise à jour de caution.
-type UpdateCautionRequest struct {
-	CautionTotale float64 `json:"caution_totale"`
+// UpdateDepositRequest describes the deposit update payload.
+type UpdateDepositRequest struct {
+	TotalDeposit float64 `json:"total_deposit"`
 }
 
-// CreerExemplaireRequest décrit la payload de création d'exemplaire.
-type CreerExemplaireRequest struct {
-	CodeBarre         string `json:"code_barre"`
-	DelaiEmpruntJours int    `json:"delai_emprunt_jours"`
+// CreateCopyRequest describes the copy creation payload.
+type CreateCopyRequest struct {
+	Barcode        string `json:"barcode"`
+	LoanPeriodDays int    `json:"loan_period_days"`
 }
