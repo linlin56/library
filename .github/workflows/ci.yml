@@ -35,7 +35,7 @@ jobs:
       id-token: write
 
   lint:
-    needs: docs
+    needs: swagger
     uses: ./.github/workflows/lint.yml
 
   docker:
