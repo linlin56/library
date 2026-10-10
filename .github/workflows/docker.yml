@@ -8,7 +8,6 @@ jobs:
     name: Build & Push to GHCR
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    timeout-minutes: 45
 
     permissions:
       contents: read
