@@ -54,6 +54,11 @@ func (b *UserBuilder) WithBirthDate(date time.Time) *UserBuilder {
 	return b
 }
 
+func (b *UserBuilder) WithAddressId(id int) *UserBuilder {
+	b.u.AddressId = &id
+	return b
+}
+
 func (b *UserBuilder) Build() *models.User {
 	return &b.u
 }

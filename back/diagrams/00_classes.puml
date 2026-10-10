@@ -13,6 +13,7 @@ namespace builder {
         + WithPhoneNumber(phone string) *StudentBuilder
         + WithDepositBalance(balance float64) *StudentBuilder
         + WithBirthDate(date time.Time) *StudentBuilder
+        + WithAddressId(id int) *StudentBuilder
         + WithStudyYear(year string) *StudentBuilder
         + Build() *models.Student
 
@@ -28,6 +29,7 @@ namespace builder {
         + WithPhoneNumber(phone string) *TeacherBuilder
         + WithDepositBalance(balance float64) *TeacherBuilder
         + WithBirthDate(date time.Time) *TeacherBuilder
+        + WithAddressId(id int) *TeacherBuilder
         + WithDepartment(dept *models.Department) *TeacherBuilder
         + Build() *models.Teacher
 
@@ -43,6 +45,7 @@ namespace builder {
         + WithPhoneNumber(phone string) *UserBuilder
         + WithDepositBalance(balance float64) *UserBuilder
         + WithBirthDate(date time.Time) *UserBuilder
+        + WithAddressId(id int) *UserBuilder
         + Build() *models.User
 
     }
@@ -528,6 +531,10 @@ namespace repositories {
         + FirstName string
         + PhoneNumber string
         + Role string
+
+    }
+    interface "queryRower"  {
+        + QueryRow(query string, args ...any) *sql.Row
 
     }
 }

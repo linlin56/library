@@ -33,9 +33,16 @@ C -> CTL : POST /api/loans\n{barcode, user_id}
 activate CTL
 CTL -> LR : Borrow(userId, barcode)
 activate LR
-LR -> DB : UPDATE copies SET is_borrowed=true, borrower_id, dates
+LR -> DB : BEGIN (WithTx)
 activate DB
+LR -> DB : SELECT copy + business checks FOR UPDATE
+LR -> DB : UPDATE copies SET is_borrowed=true, borrower_id, dates
 LR -> DB : UPDATE users SET deposit_balance -= deposit
+alt Every step succeeds
+LR -> DB : COMMIT
+else Check or update fails
+LR -> DB : ROLLBACK
+end
 deactivate DB
 LR --> CTL : nil
 deactivate LR

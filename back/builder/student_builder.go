@@ -59,6 +59,11 @@ func (b *StudentBuilder) WithBirthDate(date time.Time) *StudentBuilder {
 	return b
 }
 
+func (b *StudentBuilder) WithAddressId(id int) *StudentBuilder {
+	b.u.AddressId = &id
+	return b
+}
+
 func (b *StudentBuilder) WithStudyYear(year string) *StudentBuilder {
 	b.studyYear = year
 	return b

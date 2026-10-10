@@ -48,7 +48,7 @@ deactivate DB
 AR --> CTL : authorId, nil
 deactivate AR
 end
-CTL -> FAC : BookFactory{}.CreateItem()
+CTL -> FAC : BookFactory{...}.CreateItem()
 activate FAC
 FAC --> CTL : *Book (id=0)
 deactivate FAC
@@ -66,8 +66,8 @@ deactivate CTL
 == Submit - Journal ==
 C -> CTL : POST /api/journals\n{title, issue_number, publication_date, deposit, location_id}
 activate CTL
-note right of CTL : Validation: title, issue_number, publication_date required\nlocation_id > 0
-CTL -> FAC : JournalFactory{}.CreateItem()
+note right of CTL : Validation: title, issue_number, publication_date (YYYY-MM-DD) required\nlocation_id > 0
+CTL -> FAC : JournalFactory{...}.CreateItem()
 activate FAC
 FAC --> CTL : *Journal (id=0)
 deactivate FAC

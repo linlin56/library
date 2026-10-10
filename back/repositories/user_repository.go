@@ -87,10 +87,10 @@ func (r *UserRepository) FindByLogin(login string) (*models.User, error) {
 func (r *UserRepository) Create(u *models.User) (int, error) {
 	var newID int
 	err := r.dbo.ExecReturning(`
-		INSERT INTO users (last_name, first_name, phone_number, deposit_balance, login, password, birth_date, email)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
+		INSERT INTO users (last_name, first_name, phone_number, deposit_balance, login, password, birth_date, email, address_id)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`,
 		u.LastName, u.FirstName, u.PhoneNumber, u.DepositBalance,
-		u.Login, u.Password, u.BirthDate, u.Email,
+		u.Login, u.Password, u.BirthDate, u.Email, u.AddressId,
 	).Scan(&newID)
 	if err != nil {
 		return 0, fmt.Errorf("Create user: %w", err)
