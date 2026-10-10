@@ -169,9 +169,16 @@ func loanDiagram() *uml.SequenceDiagram {
 		Activate("CTL").
 		Arrow("CTL", "LR", "Borrow(userId, barcode)").
 		Activate("LR").
-		Arrow("LR", "DB", "UPDATE copies SET is_borrowed=true, borrower_id, dates").
+		Arrow("LR", "DB", "BEGIN (WithTx)").
 		Activate("DB").
+		Arrow("LR", "DB", "SELECT copy + business checks FOR UPDATE").
+		Arrow("LR", "DB", "UPDATE copies SET is_borrowed=true, borrower_id, dates").
 		Arrow("LR", "DB", "UPDATE users SET deposit_balance -= deposit").
+		AltStart("Every step succeeds").
+		Arrow("LR", "DB", "COMMIT").
+		Else("Check or update fails").
+		Arrow("LR", "DB", "ROLLBACK").
+		End().
 		Deactivate("DB").
 		DashedArrow("LR", "CTL", "nil").
 		Deactivate("LR").
@@ -230,7 +237,7 @@ func createItemDiagram() *uml.SequenceDiagram {
 		DashedArrow("AR", "CTL", "authorId, nil").
 		Deactivate("AR").
 		End().
-		Arrow("CTL", "FAC", "BookFactory{}.CreateItem()").
+		Arrow("CTL", "FAC", "BookFactory{...}.CreateItem()").
 		Activate("FAC").
 		DashedArrow("FAC", "CTL", "*Book (id=0)").
 		Deactivate("FAC").
@@ -248,8 +255,8 @@ func createItemDiagram() *uml.SequenceDiagram {
 		Separator("Submit - Journal").
 		Arrow("C", "CTL", "POST /api/journals\\n{title, issue_number, publication_date, deposit, location_id}").
 		Activate("CTL").
-		Note("right of", "CTL", "Validation: title, issue_number, publication_date required\\nlocation_id > 0").
-		Arrow("CTL", "FAC", "JournalFactory{}.CreateItem()").
+		Note("right of", "CTL", "Validation: title, issue_number, publication_date (YYYY-MM-DD) required\\nlocation_id > 0").
+		Arrow("CTL", "FAC", "JournalFactory{...}.CreateItem()").
 		Activate("FAC").
 		DashedArrow("FAC", "CTL", "*Journal (id=0)").
 		Deactivate("FAC").
@@ -272,6 +279,7 @@ func createUserDiagram() *uml.SequenceDiagram {
 		Participant("CTL", "CreateUserController").
 		Participant("DR", "DepartmentRepository").
 		Participant("UR", "UserRepository").
+		Participant("BLD", "User|Student|TeacherBuilder").
 		Participant("SR", "StudentRepo | TeacherRepo").
 		Participant("DB", "PostgreSQL").
 		Blank().
@@ -310,7 +318,11 @@ func createUserDiagram() *uml.SequenceDiagram {
 		Activate("DB").
 		DashedArrow("DB", "CTL", "addressId").
 		Deactivate("DB").
-		Arrow("CTL", "SR", "Create(*Student | *Teacher | *Individual)").
+		Arrow("CTL", "BLD", "With*(...).Build()").
+		Activate("BLD").
+		DashedArrow("BLD", "CTL", "*Student | *Teacher | *User").
+		Deactivate("BLD").
+		Arrow("CTL", "SR", "Create(*Student | *Teacher | *User)").
 		Activate("SR").
 		Arrow("SR", "DB", "INSERT INTO students|teachers|users(...) RETURNING id").
 		Activate("DB").

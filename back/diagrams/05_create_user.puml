@@ -5,6 +5,7 @@ actor "Client (librarian)" as C
 participant "CreateUserController" as CTL
 participant "DepartmentRepository" as DR
 participant "UserRepository" as UR
+participant "User|Student|TeacherBuilder" as BLD
 participant "StudentRepo | TeacherRepo" as SR
 participant "PostgreSQL" as DB
 
@@ -43,7 +44,11 @@ CTL -> DB : INSERT INTO addresses(...) RETURNING id
 activate DB
 DB --> CTL : addressId
 deactivate DB
-CTL -> SR : Create(*Student | *Teacher | *Individual)
+CTL -> BLD : With*(...).Build()
+activate BLD
+BLD --> CTL : *Student | *Teacher | *User
+deactivate BLD
+CTL -> SR : Create(*Student | *Teacher | *User)
 activate SR
 SR -> DB : INSERT INTO students|teachers|users(...) RETURNING id
 activate DB

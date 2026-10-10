@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"library/builder"
 	"library/db"
 	"library/models"
 	"library/repositories"
@@ -129,22 +130,22 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
+	// Users are assembled with the builders, then persisted by the matching repository
+	const initialBalance = 20.0
 	switch req.Status {
 	case "student":
-		s := &models.Student{
-			User: models.User{
-				LastName:       req.LastName,
-				FirstName:      req.FirstName,
-				PhoneNumber:    req.PhoneNumber,
-				DepositBalance: 20.0,
-				Email:          req.Email,
-				Login:          login,
-				Password:       password,
-				BirthDate:      birthDate,
-				AddressId:      &addressId,
-			},
-			StudyYear: req.StudyYear,
-		}
+		s := builder.NewStudentBuilder().
+			WithLastName(req.LastName).
+			WithFirstName(req.FirstName).
+			WithPhoneNumber(req.PhoneNumber).
+			WithDepositBalance(initialBalance).
+			WithEmail(req.Email).
+			WithLogin(login).
+			WithPassword(password).
+			WithBirthDate(birthDate).
+			WithAddressId(addressId).
+			WithStudyYear(req.StudyYear).
+			Build()
 		studentRepo := repositories.NewStudentRepository(db.GlobalDBO)
 		if _, err := studentRepo.Create(s); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": tr(c, "users.student_create_failed")})
@@ -152,20 +153,18 @@ func CreateUser(c *gin.Context) {
 		}
 
 	case "teacher":
-		t := &models.Teacher{
-			User: models.User{
-				LastName:       req.LastName,
-				FirstName:      req.FirstName,
-				PhoneNumber:    req.PhoneNumber,
-				DepositBalance: 20.0,
-				Email:          req.Email,
-				Login:          login,
-				Password:       password,
-				BirthDate:      birthDate,
-				AddressId:      &addressId,
-			},
-			DepartmentId: req.DepartmentId,
-		}
+		t := builder.NewTeacherBuilder().
+			WithLastName(req.LastName).
+			WithFirstName(req.FirstName).
+			WithPhoneNumber(req.PhoneNumber).
+			WithDepositBalance(initialBalance).
+			WithEmail(req.Email).
+			WithLogin(login).
+			WithPassword(password).
+			WithBirthDate(birthDate).
+			WithAddressId(addressId).
+			WithDepartment(&models.Department{Id: req.DepartmentId}).
+			Build()
 		teacherRepo := repositories.NewTeacherRepository(db.GlobalDBO)
 		if _, err := teacherRepo.Create(t); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": tr(c, "users.teacher_create_failed")})
@@ -173,14 +172,18 @@ func CreateUser(c *gin.Context) {
 		}
 
 	case "individual":
-		var newID int
-		err := db.GlobalDBO.ExecReturning(`
-			INSERT INTO users (last_name, first_name, phone_number, deposit_balance, login, password, birth_date, email, address_id)
-			VALUES ($1, $2, $3, 20, $4, $5, $6, $7, $8) RETURNING id`,
-			req.LastName, req.FirstName, req.PhoneNumber,
-			login, password, birthDate, req.Email, addressId,
-		).Scan(&newID)
-		if err != nil {
+		u := builder.NewUserBuilder().
+			WithLastName(req.LastName).
+			WithFirstName(req.FirstName).
+			WithPhoneNumber(req.PhoneNumber).
+			WithDepositBalance(initialBalance).
+			WithEmail(req.Email).
+			WithLogin(login).
+			WithPassword(password).
+			WithBirthDate(birthDate).
+			WithAddressId(addressId).
+			Build()
+		if _, err := userRepo.Create(u); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": tr(c, "users.individual_create_failed")})
 			return
 		}

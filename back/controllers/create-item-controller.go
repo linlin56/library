@@ -2,10 +2,12 @@ package controllers
 
 import (
 	"library/db"
+	"library/factory"
 	"library/models"
 	"library/repositories"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -107,8 +109,17 @@ func CreateBook(c *gin.Context) {
 		authorId = id
 	}
 
+	// The abstract factory produces the book; the repository persists it
+	var itemFactory factory.ItemFactory = &factory.BookFactory{
+		Title:   req.Title,
+		Deposit: req.Deposit,
+		Isbn:    req.Isbn,
+		Author:  &models.Author{Id: authorId, LastName: req.AuthorLastName, FirstName: req.AuthorFirstName},
+	}
+	book := itemFactory.CreateItem().(*models.Book)
+
 	itemRepo := repositories.NewItemRepository(db.GlobalDBO)
-	id, err := itemRepo.CreateBook(req.Title, req.Deposit, req.Isbn, authorId, req.LocationId)
+	id, err := itemRepo.CreateBook(book.Title, book.Deposit, book.Isbn, book.Author.Id, req.LocationId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": tr(c, "books.create_failed")})
 		return
@@ -166,8 +177,23 @@ func CreateJournal(c *gin.Context) {
 		return
 	}
 
+	publicationDate, err := time.Parse("2006-01-02", req.PublicationDate)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": tr(c, "users.invalid_date")})
+		return
+	}
+
+	// The abstract factory produces the journal; the repository persists it
+	var itemFactory factory.ItemFactory = &factory.JournalFactory{
+		Title:           req.Title,
+		Deposit:         req.Deposit,
+		IssueNumber:     req.IssueNumber,
+		PublicationDate: publicationDate,
+	}
+	journal := itemFactory.CreateItem().(*models.Journal)
+
 	itemRepo := repositories.NewItemRepository(db.GlobalDBO)
-	id, err := itemRepo.CreateJournal(req.Title, req.Deposit, req.IssueNumber, req.PublicationDate, req.LocationId)
+	id, err := itemRepo.CreateJournal(journal.Title, journal.Deposit, journal.IssueNumber, journal.PublicationDate.Format("2006-01-02"), req.LocationId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": tr(c, "journals.create_failed")})
 		return

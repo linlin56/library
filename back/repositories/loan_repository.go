@@ -29,17 +29,32 @@ func NewLoanRepository(dbo *db.DBO) *LoanRepository {
 
 // Check runs the 3 business checks and returns a preview or an explicit error.
 func (r *LoanRepository) Check(userId int, barcode string) (*LoanPreview, error) {
+	return checkLoan(r.dbo, userId, barcode, false)
+}
+
+// queryRower is satisfied by both *db.DBO and *db.TxDBO.
+type queryRower interface {
+	QueryRow(query string, args ...any) *sql.Row
+}
+
+// checkLoan holds the business checks. With lock set (inside a transaction),
+// the copy row is locked so that two concurrent loans cannot both succeed.
+func checkLoan(q queryRower, userId int, barcode string, lock bool) (*LoanPreview, error) {
 	// Fetch the copy and its item
 	var copyId int
 	var itemId int
 	var deposit float64
 	var title string
 	var isBorrowed bool
-	err := r.dbo.QueryRow(`
+	forUpdate := ""
+	if lock {
+		forUpdate = " FOR UPDATE OF c"
+	}
+	err := q.QueryRow(`
 		SELECT c.id, c.item_id, c.is_borrowed, i.deposit, i.title
 		FROM copies c
 		JOIN items i ON i.id = c.item_id
-		WHERE c.barcode = $1 LIMIT 1`, barcode).
+		WHERE c.barcode = $1 LIMIT 1`+forUpdate, barcode).
 		Scan(&copyId, &itemId, &isBorrowed, &deposit, &title)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, i18n.NewError("copies.barcode_not_found")
@@ -53,7 +68,7 @@ func (r *LoanRepository) Check(userId int, barcode string) (*LoanPreview, error)
 
 	// 1.1 - Check that there is no overdue loan
 	var overdueCount int
-	err = r.dbo.QueryRow(`
+	err = q.QueryRow(`
 		SELECT COUNT(*) FROM copies
 		WHERE borrower_id = $1 AND is_borrowed = TRUE AND loan_due_date < $2`,
 		userId, time.Now()).Scan(&overdueCount)
@@ -66,7 +81,7 @@ func (r *LoanRepository) Check(userId int, barcode string) (*LoanPreview, error)
 
 	// 1.2 - Check that the user is not already borrowing a copy of the same item
 	var existing int
-	err = r.dbo.QueryRow(`
+	err = q.QueryRow(`
 		SELECT COUNT(*) FROM copies
 		WHERE borrower_id = $1 AND item_id = $2 AND is_borrowed = TRUE`,
 		userId, itemId).Scan(&existing)
@@ -79,7 +94,7 @@ func (r *LoanRepository) Check(userId int, barcode string) (*LoanPreview, error)
 
 	// 1.3 - Check that the deposit balance is sufficient
 	var balance float64
-	err = r.dbo.QueryRow(`
+	err = q.QueryRow(`
 		SELECT deposit_balance FROM users WHERE id = $1
 		UNION ALL
 		SELECT deposit_balance FROM students WHERE id = $1
@@ -186,45 +201,48 @@ func (r *LoanRepository) GetOverdueLoans() ([]*OverdueLoan, error) {
 }
 
 // Borrow records the loan once the user has confirmed it.
+// The checks, the copy update and the deposit deduction run in a single transaction.
 func (r *LoanRepository) Borrow(userId int, barcode string) error {
-	// Check again before recording
-	preview, err := r.Check(userId, barcode)
-	if err != nil {
-		return err
-	}
-
-	// Fetch the copy id and the loan period
-	var copyId, periodDays int
-	err = r.dbo.QueryRow(`SELECT id, loan_period_days FROM copies WHERE barcode = $1`, barcode).
-		Scan(&copyId, &periodDays)
-	if err != nil {
-		return fmt.Errorf("copy not found: %w", err)
-	}
-
-	now := time.Now()
-	due := now.AddDate(0, 0, periodDays)
-
-	// Mark the copy as borrowed
-	n, err := r.dbo.Exec(`
-		UPDATE copies
-		SET is_borrowed = TRUE,
-		    loan_start_date = $1,
-		    loan_due_date = $2,
-		    borrower_id = $3
-		WHERE id = $4`, now, due, userId, copyId)
-	if err != nil || n == 0 {
-		return fmt.Errorf("unable to record the loan")
-	}
-
-	// Deduct the deposit - tries the 3 tables (native PostgreSQL inheritance)
-	for _, table := range []string{"users", "students", "teachers"} {
-		q := fmt.Sprintf(`UPDATE %s SET deposit_balance = deposit_balance - $1 WHERE id = $2`, table)
-		n, err = r.dbo.Exec(q, preview.Deposit, userId)
-		if err == nil && n > 0 {
-			return nil
+	return r.dbo.WithTx(func(tx *db.TxDBO) error {
+		// Check again before recording, locking the copy row
+		preview, err := checkLoan(tx, userId, barcode, true)
+		if err != nil {
+			return err
 		}
-	}
-	return fmt.Errorf("unable to deduct the deposit from the balance")
+
+		// Fetch the copy id and the loan period
+		var copyId, periodDays int
+		err = tx.QueryRow(`SELECT id, loan_period_days FROM copies WHERE barcode = $1`, barcode).
+			Scan(&copyId, &periodDays)
+		if err != nil {
+			return fmt.Errorf("copy not found: %w", err)
+		}
+
+		now := time.Now()
+		due := now.AddDate(0, 0, periodDays)
+
+		// Mark the copy as borrowed
+		n, err := tx.Exec(`
+			UPDATE copies
+			SET is_borrowed = TRUE,
+			    loan_start_date = $1,
+			    loan_due_date = $2,
+			    borrower_id = $3
+			WHERE id = $4`, now, due, userId, copyId)
+		if err != nil || n == 0 {
+			return fmt.Errorf("unable to record the loan")
+		}
+
+		// Deduct the deposit - tries the 3 tables (native PostgreSQL inheritance)
+		for _, table := range []string{"users", "students", "teachers"} {
+			q := fmt.Sprintf(`UPDATE %s SET deposit_balance = deposit_balance - $1 WHERE id = $2`, table)
+			n, execErr := tx.Exec(q, preview.Deposit, userId)
+			if execErr == nil && n > 0 {
+				return nil
+			}
+		}
+		return fmt.Errorf("unable to deduct the deposit from the balance")
+	})
 }
 
 // ReturnCopy marks a copy as returned and refunds the deposit to the borrower.

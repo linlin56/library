@@ -56,14 +56,23 @@ func (b *TeacherBuilder) WithBirthDate(date time.Time) *TeacherBuilder {
 	return b
 }
 
+func (b *TeacherBuilder) WithAddressId(id int) *TeacherBuilder {
+	b.u.AddressId = &id
+	return b
+}
+
 func (b *TeacherBuilder) WithDepartment(dept *models.Department) *TeacherBuilder {
 	b.department = dept
 	return b
 }
 
 func (b *TeacherBuilder) Build() *models.Teacher {
-	return &models.Teacher{
+	t := &models.Teacher{
 		User:       b.u,
 		Department: b.department,
 	}
+	if b.department != nil {
+		t.DepartmentId = b.department.Id
+	}
+	return t
 }
