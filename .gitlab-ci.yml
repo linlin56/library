@@ -170,6 +170,8 @@ docker-publish:
 lint:
   stage: lint
   image: golang:1.25
+  variables:
+    GOTOOLCHAIN: auto
   needs: [pages]
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
